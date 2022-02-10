@@ -36,7 +36,7 @@ html {
 body {
     font-family: 'Inconsolata', monospace;
     font-size: 1.6rem;
-    background-color: #111717;
+    background-color: #000000;
     color: #fff;
     overflow-x: hidden;
     margin: 0px;
@@ -100,7 +100,7 @@ body {
     background: transparent;
 }
 
-
+/*
 .preloader {
     width: 100vw;
     height: 100vh;
@@ -178,10 +178,54 @@ body {
         fill: #ffffff
     }
 }
+*/
 
-svg{
-    width: 100px;
-    height: 100px;
-    margin: 20px;
-    display:inline-block;
-  }
+.preloader {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+.preloader #logo {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%)
+}
+
+.preloader #logo path:first-child {
+    stroke-width: 1;
+    stroke-dasharray: 393.5;
+    stroke-dashoffset: 393.5;
+    animation: line-anim 2s ease .2s forwards
+}
+
+.preloader #logo path:nth-child(2) {
+    stroke-width: 1;
+    stroke-dasharray: 430;
+    stroke-dashoffset: 430;
+    animation: line-anim 2.9s ease .2s forwards
+}
+
+.preloader svg {
+    animation: fill .6s ease-in 2s forwards
+}
+
+@keyframes line-anim {
+    to {
+        stroke-dashoffset: 0
+    }
+}
+
+@keyframes fill {
+    0% {
+        fill: transparent
+    }
+
+    to {
+        fill: #ffffff
+    }
+}
