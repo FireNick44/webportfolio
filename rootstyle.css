@@ -91,94 +91,14 @@ body {
     background-image: -webkit-gradient(linear,
             left bottom,
             left top,
-            color-stop(0.44, #F22F37),
-            color-stop(0.72, #F84B34),
-            color-stop(0.86, #F56147)
+            color-stop(0.44, #f22fb1),
+            color-stop(0.72, #d11281),
+            color-stop(0.86, #f547cf)
             );
 }
 ::-webkit-scrollbar-track-piece {
     background: transparent;
 }
-
-/*
-.preloader {
-    width: 100vw;
-    height: 100vh;
-    position: absolute;
-    top: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0);
-}
-
-.preloader #logo {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%)
-}
-
-.preloader #logo path:first-child {
-    stroke-width: 1;
-    stroke-dasharray: 393.5;
-    stroke-dashoffset: 393.5;
-    animation: line-anim 2s ease forwards
-}
-
-.preloader #logo path:nth-child(2) {
-    stroke-width: 1;
-    stroke-dasharray: 430;
-    stroke-dashoffset: 430;
-    animation: line-anim 2s ease .3s forwards
-}
-
-.preloader #logo path:nth-child(3) {
-    stroke-width: 1;
-    stroke-dasharray: 413;
-    stroke-dashoffset: 413;
-    animation: line-anim 2s ease .6s forwards
-}
-
-.preloader #logo path:nth-child(4) {
-    stroke-width: 1;
-    stroke-dasharray: 290;
-    stroke-dashoffset: 290;
-    animation: line-anim 2s ease .9s forwards
-}
-
-.preloader #logo path:nth-child(5) {
-    stroke-width: 1;
-    stroke-dasharray: 187;
-    stroke-dashoffset: 187;
-    animation: line-anim 2s ease .9s forwards
-}
-
-.preloader #logo path:nth-child(6) {
-    stroke-width: 1;
-    stroke-dasharray: 393;
-    stroke-dashoffset: 393;
-    animation: line-anim 2s ease 1.2s forwards
-}
-
-.preloader svg {
-    animation: fill .6s ease-in 3s forwards
-}
-
-@keyframes line-anim {
-    to {
-        stroke-dashoffset: 0
-    }
-}
-
-@keyframes fill {
-    0% {
-        fill: transparent
-    }
-
-    to {
-        fill: #ffffff
-    }
-}
-*/
 
 .preloader {
     width: 100vw;
