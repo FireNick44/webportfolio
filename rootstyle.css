@@ -131,7 +131,6 @@ body {
     height: 100%
 }
 
-
 .container{
     padding: 0px 0px !important;
     margin-left: auto;
@@ -162,7 +161,6 @@ body {
         max-width: 1220px;
     }
 }
-
 
 /*Scrollbar //////////////////////////////////////////////////*/
 ::-webkit-scrollbar {
