@@ -18,7 +18,7 @@
 .disappear {
     animation: vanish 1s forwards;
 }
-.test{
+.content{
     display: none;
 }
 .appear{
@@ -176,9 +176,9 @@ body {
     background-image: -webkit-gradient(linear,
             left bottom,
             left top,
-            color-stop(0.44, #F22F37),
-            color-stop(0.72, #F84B34),
-            color-stop(0.86, #F56147)
+            color-stop(0.14, #5f128b),
+            color-stop(0.52, #6206ad),
+            color-stop(0.86, #4c1594)
             );
 }
 ::-webkit-scrollbar-track-piece {

@@ -1,5 +1,5 @@
 var loader = document.querySelector(".loader")
-var test = document.querySelector(".test")
+var content = document.querySelector(".content")
 
 window.addEventListener("load", vanish);
 
@@ -11,5 +11,5 @@ async function vanish() {
     await Sleep(2000);
     loader.classList.add("disappear");
     await Sleep(100);
-    test.classList.add("appear");
+    content.classList.add("appear");
 }
