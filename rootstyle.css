@@ -41,12 +41,16 @@ html {
 .disappear {
     animation: vanish 1s forwards;
 }
+
+
 .content{
     display: none;
 }
-.appear{
+
+.appear {
     display: block;
 }
+
 @keyframes vanish {
     100% {
         opacity: 0;
