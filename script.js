@@ -9,7 +9,7 @@ function Sleep(milliseconds) {
 
 async function sessionLoadPage() {
     if(!sessionStorage.getItem("pageWasLoaded")) {
-        await Sleep(3000);
+        await Sleep(4000);
         loader.classList.add("disappear");
         await Sleep(100);
         content.classList.add("appear");
