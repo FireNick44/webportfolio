@@ -42,6 +42,9 @@ html {
     animation: vanish 1s forwards;
 }
 
+.disappearNull{
+    display: none;
+}
 
 .content{
     display: none;

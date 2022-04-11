@@ -8,17 +8,15 @@ function Sleep(milliseconds) {
 }
 
 async function sessionLoadPage() {
-    if(!sessionStorage.getItem('shown')) {
-        await Sleep(2000);
+    if(!sessionStorage.getItem("pageWasLoaded")) {
+        await Sleep(3000);
         loader.classList.add("disappear");
         await Sleep(100);
         content.classList.add("appear");
-        sessionStorage.setItem('shown', true);
-        console.log("shown wurde gesetzt");
+        sessionStorage.setItem("pageWasLoaded", true);
     }
-    else if (sessionStorage.getItem('shown')) {
+    else if (sessionStorage.getItem("pageWasLoaded")) {
+        loader.classList.add("disappearNull");
         content.classList.add("appear");
-        loader.classList.add("disappear");
-
     }
 } 
