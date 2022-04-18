@@ -16,7 +16,9 @@ async function sessionLoadPage() {
         sessionStorage.setItem("pageWasLoaded", true);
     }
     else if (sessionStorage.getItem("pageWasLoaded")) {
-        loader.classList.add("disappearNull");
+        await Sleep(2000);
+        loader.classList.add("disappear");
+        await Sleep(100);
         content.classList.add("appear");
     }
 } 

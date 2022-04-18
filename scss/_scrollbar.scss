@@ -1,0 +1,24 @@
+@import "./colors";
+
+::-webkit-scrollbar {
+    width: 7px;
+}
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px transparent;
+    border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-image: -webkit-gradient(linear,
+            left bottom,
+            left top,
+            color-stop(0.14, $dark_purple),
+            color-stop(0.52, $purple),
+            color-stop(0.86, $indigo)
+            );
+}
+
+::-webkit-scrollbar-track-piece {
+    background: transparent;
+}
