@@ -1,4 +1,52 @@
+$font: "Inconsolata";
+$cond: 75;
+
+
 @font-face {
-    font-family: "Inconsolata";
-    src: url(../fonts/Inconsolata-VariableFont_wdth\,wght.ttf) format("truetype");
+    font-family: $font;
+    src: url(../font/Inconsolata-VariableFont_wdth\,wght.ttf) format("truetype");
+    font-weight: 200 100;
+    font-style: normal;
+}
+
+
+p{
+    font-family: $font;
+    
+    //standard
+    .extra_light{
+        font-variation-settings: "wght" 200, "wdth" 100;
+    }
+    .light{
+        font-variation-settings: "wght" 300, "wdth" 100;
+    }
+    .regular{
+        font-variation-settings: "wght" 400, "wdth" 100;
+    }
+    .medium{
+        font-variation-settings: "wght" 500, "wdth" 100;
+    }
+    .semi_bold{
+        font-variation-settings: "wght" 600, "wdth" 100;
+    }
+    .bold{
+        font-variation-settings: "wght" 700, "wdth" 100;
+    }
+    .extra_bold{
+        font-variation-settings: "wght" 800, "wdth" 100;
+    }
+    .black{
+        font-variation-settings: "wght" 900, "wdth" 100;
+    }
+
+    //Condensed
+    .cond_extra_light{
+        font-variation-settings: "wght" 200, "wdth" $cond;
+    }
+    .cond_light{
+        font-variation-settings: "wght" 300, "wdth" $cond;
+    }
+    .cond_regular{
+        font-variation-settings: "wght" 400, "wdth" $cond;
+    }
 }

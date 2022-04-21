@@ -12,6 +12,7 @@ body {
     background-color: $black;
     color: $white;
     overflow-x: hidden;
+    overflow: overlay;
     margin: 0px;
     padding: 0px;
     width: 100%;
@@ -59,7 +60,6 @@ html {
 .appear {
     display: block;
 }
-
 
 .ys {
     display: flex;
@@ -116,12 +116,79 @@ html {
     }
 }
 
-.test2{
-    border-radius: 10% 10% 30% 30% / 10% 10% 45% 45%;
-    height: 200px;
-    width: 100px;
-    background-color: aquamarine;
-} 
+@import "./header";
+
+.intro-title{
+    height: calc(100vh - 400px);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    p{
+        font-variation-settings: "wght" 900, "wdth" 100;
+        &.text{
+            font-size: clamp(3.5rem, 5vw, 11rem);
+                }
+        &.name{
+            font-size: clamp(7rem, 10vw, 22rem);
+        }
+    }
+}
+.intro{
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    flex-direction: column;
+
+    .test{
+        transform: scaleX(-1);
+    }
+    
+    .test2{
+        height: 1000px;
+        background-color: aqua;
+    }
+    .tdadw{
+        transform: translateY(-5px);
+    }
+    svg, g, path{
+        background: transparent;
+        display: block;
+        position: relative;
+        width: 100%;
+        fill: aqua;
+        z-index: -1;
+    }
+}
+
+.test3{
+    width: 100%;
+    height: auto;
+    svg{
+    width: 100%;
+    height: 100%;
+    }
+}
+
+.test5{
+    height: 800px;
+    background-color: aqua;
+}
+
+.sect5, .sect3{
+    margin-bottom: -2px;
+    svg{
+        width: 100%;
+        height: 100%;
+        }
+}
+
+footer, header{
+    display: flex;
+    height: 100%;
+    width: 100%;
+}
 
 @import "./scrollbar";
 @import "./responsive";
