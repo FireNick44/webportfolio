@@ -165,29 +165,25 @@ html {
 .test3{
     width: 100%;
     height: auto;
+
     svg{
-    width: 100%;
-    height: 100%;
+        width: 100%;
+        height: 100%;
     }
 }
 
 .test5{
-    height: 800px;
+    height: 2000px;
     background-color: aqua;
 }
 
 .sect5, .sect3{
     margin-bottom: -2px;
+
     svg{
         width: 100%;
         height: 100%;
         }
-}
-
-footer, header{
-    display: flex;
-    height: 100%;
-    width: 100%;
 }
 
 @import "./scrollbar";
