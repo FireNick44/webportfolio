@@ -1,0 +1,87 @@
+@import "./colors";
+
+.loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: $loader_background;
+    height: calc(100% - 8px);
+    width: calc(100% - 8px);
+    border: solid;
+    border-color: $loader_border;
+    border-width: 4px;
+}
+
+.disappear {
+    animation: vanish 1s forwards;
+}
+
+@keyframes vanish {
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.content{
+    display: none;
+}
+
+.appear {
+    display: block;
+}
+
+.ys {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100% - 60px);
+    width: 100%;
+
+    svg {
+        animation: fill .6s ease-in 2s forwards
+    }
+
+    #logo path:first-child{
+        stroke-width: 1;
+        stroke-dasharray: 500;
+        stroke-dashoffset: 500;
+        animation: line-anim 2s ease .2s forwards  
+    }
+
+    #logo path:nth-child(2){
+        stroke-width: 1;
+        stroke-dasharray: 500;
+        stroke-dashoffset: 500;
+        animation: line-anim 2.9s ease .2s forwards
+    }
+
+}
+
+@keyframes line-anim {
+    to {
+        stroke-dashoffset: 0
+    }
+}
+
+@keyframes fill {
+    0% {
+        fill: transparent
+    }
+
+    to {
+        fill: $loader_fill
+    }
+}
+
+.loading-dots {
+    display: flex;
+    align-content: flex-end;
+    justify-content: flex-start;
+    color: $loading-dots;
+
+    svg {
+        height: 60px;
+        width: 120px;
+    }
+}
