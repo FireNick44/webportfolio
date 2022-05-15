@@ -94,7 +94,7 @@ svg.wave{
     width: 100%;
     fill: $wave;
     z-index: -1;
-
+    
     .wavePath {
         animation: waveAnim 60s;
         animation-timing-function: linear;

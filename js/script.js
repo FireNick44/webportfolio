@@ -21,4 +21,4 @@ async function sessionLoadPage() {
         await Sleep(100);
         content.classList.add("appear");
     }
-} 
+}
