@@ -1,4 +1,4 @@
-<p align="right"> [ <a href="./.github/DOC.md"> DE </a> ] </p>
+<p align="right"> [ <a href="./README_DE.md"> DE </a> ] </p>
 
 # webportfolio
 
@@ -25,19 +25,19 @@ My aim is to create a simple website where you can find all the information quic
 The project was created with HTML, SCSS and JavaScript. 
 No JavaScript libraries were used. My ambition was to create a fast website, so I did not want to download unnecessary files. As an alternative to this I also planned a loader.
 
-[Design desktop loader](./github/img/webLoad.png)
+[Design desktop loader](./.github/img/webLoad.png)
 
-[Design mobile loader](./github/img/webLoadMob.png)
+[Design mobile loader](./.github/img/webLoadMob.png)
 
 
 ## Mockup
 My Mockup ideas can be viewed at the following links. You can also download my Adobe XD template in which the design was created.
 
-[Design desktop](./github/img/webMobile.png)
+[Design desktop](./.github/img/webMobile.png)
 
-[Design mobile](./github/img/webDesktop.png)
+[Design mobile](./.github/img/webDesktop.png)
 
-[XD template](./github/doc/webportfolio.xd)
+[XD template](./.github/doc/webportfolio.xd)
 
 
 ## Features
