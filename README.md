@@ -33,9 +33,9 @@ No JavaScript libraries were used. My ambition was to create a fast website, so 
 ## Mockup
 My Mockup ideas can be viewed at the following links. You can also download my Adobe XD template in which the design was created.
 
-[Design desktop](./.github/img/webMobile.png)
+[Design mobile](./.github/img/webMobile.png)
 
-[Design mobile](./.github/img/webDesktop.png)
+[Design desktop](./.github/img/webDesktop.png)
 
 [XD template](./.github/doc/webportfolio.xd)
 
