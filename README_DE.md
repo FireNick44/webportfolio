@@ -1,4 +1,4 @@
-<p align="right"> [ <a href="./README.md"> DE </a> ] </p>
+<p align="right"> [ <a href="./README.md"> EN </a> ] </p>
 
 # webportfolio
 
