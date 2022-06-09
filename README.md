@@ -23,7 +23,7 @@ My aim is to create a simple website where you can find all the information quic
 
 ## How it's made
 The project was created with HTML, SCSS and JavaScript. 
-No JavaScript libraries were used. My ambition was to create a fast website, so I did not want to download unnecessary files. As an alternative to this I also planned a loader.
+No JavaScript libraries were used. My ambition was to create a fast website, so I did not want to download unnecessary files. As an alternative to this, I also planned a loader.
 
 [Design desktop loader](./.github/img/webLoad.png)
 
@@ -41,7 +41,7 @@ My Mockup ideas can be viewed at the following links. You can also download my A
 
 
 ## Features
-- Responsiv
+- Responsive
 - Page loader
 - A few Secrets ;)
 - [Bottle animation](https://github.com/FireNick44/IPT5-BottleAnimation)
