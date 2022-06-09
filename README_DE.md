@@ -24,7 +24,7 @@ Mein Ziel ist es, eine einfache Website zu erstellen, auf der man alle Informati
 ## Wie es gemacht ist
 
 Das Projekt wurde mit HTML, SCSS und JavaScript erstellt.
-Keine externen JavaScript-Bibliotheken wurden benutzt. Mein Ziel war es eine schnelle Website zu erstellen, weswegen ich nicht unnötige Dateien herunterladen wollte. Als alternative dazu habe ich auch einen Loader eingeplant.
+Keine externen JavaScript-Bibliotheken wurden benutzt. Mein Ziel war es, eine schnelle Website zu erstellen, weswegen ich nicht unnötige Dateien herunterladen wollte. Als alternative dazu habe ich auch einen Loader eingeplant.
 
 [Design desktop loader](./.github/img/webLoad.png)
 
@@ -32,7 +32,7 @@ Keine externen JavaScript-Bibliotheken wurden benutzt. Mein Ziel war es eine sch
 
 
 ## Mockup
-Meine Mockup Ideen können Sie unter folgenden Links ansehen. Sie können ausserdem meine Adobe XD Vorlage herunterladen, in der das Design erstellt wurde.
+Meine Mockup-Ideen können Sie unter folgenden Links ansehen. Sie können zudem meine Adobe XD Vorlage herunterladen, in der das Design erstellt wurde.
 
 [Design desktop](./.github/img/webMobile.png)
 
