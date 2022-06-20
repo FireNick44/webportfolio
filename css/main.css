@@ -542,4 +542,130 @@ svg.wave .wavePath {
     max-width: 1220px;
   }
 }
+
+@font-face {
+  font-family: "Inconsolata";
+  src: url(../font/Inconsolata-VariableFont_wdth\,wght.ttf) format("truetype");
+  font-weight: 200 100;
+  font-style: normal;
+}
+
+p {
+  font-family: "Inconsolata";
+}
+
+p .extra_light {
+  font-variation-settings: "wght" 200, "wdth" 100;
+}
+
+p .light {
+  font-variation-settings: "wght" 300, "wdth" 100;
+}
+
+p .regular {
+  font-variation-settings: "wght" 400, "wdth" 100;
+}
+
+p .medium {
+  font-variation-settings: "wght" 500, "wdth" 100;
+}
+
+p .semi_bold {
+  font-variation-settings: "wght" 600, "wdth" 100;
+}
+
+p .bold {
+  font-variation-settings: "wght" 700, "wdth" 100;
+}
+
+p .extra_bold {
+  font-variation-settings: "wght" 800, "wdth" 100;
+}
+
+p .black {
+  font-variation-settings: "wght" 900, "wdth" 100;
+}
+
+p .cond_extra_light {
+  font-variation-settings: "wght" 200, "wdth" 75;
+}
+
+p .cond_light {
+  font-variation-settings: "wght" 300, "wdth" 75;
+}
+
+p .cond_regular {
+  font-variation-settings: "wght" 400, "wdth" 75;
+}
+
+.pBox_wrapper {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -ms-flex-wrap: wrap;
+      flex-wrap: wrap;
+}
+
+.test5 {
+  height: 100vh;
+  background-color: grey;
+}
+
+.pBox {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  height: 260px;
+  width: 260px;
+  padding: 20px;
+  color: black;
+  background: linear-gradient(170deg, #ffb37a, #f0c0fc);
+}
+
+.pBox:nth-child(1) {
+  background: linear-gradient(170deg, #ffb37a, #f0c0fc);
+}
+
+.pBox:nth-child(2) {
+  background: linear-gradient(223deg, #A1F2FF, #DFA3EE);
+}
+
+.pBox_links {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+      -ms-flex-pack: end;
+          justify-content: flex-end;
+}
+
+.pBox_img {
+  height: 38px;
+  width: 38px;
+}
+
+.pBox_content {
+  margin-left: 40px;
+}
+
+.pBox_Name {
+  margin-bottom: 20px;
+}
 /*# sourceMappingURL=main.css.map */

@@ -1,0 +1,53 @@
+@import "./colors";
+@import "./fonts";
+
+.pBox_wrapper{
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.test5{
+    height: 100vh;
+    background-color: grey;
+}
+
+.pBox{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 260px;
+    width: 260px;
+    padding: 20px;
+    color: rgb(0, 0, 0);
+    background: linear-gradient(170deg, #ffb37a, #f0c0fc);
+
+}
+
+.pBox:nth-child(1){
+    background: linear-gradient(170deg, #ffb37a, #f0c0fc);
+}
+
+.pBox:nth-child(2){
+    background: linear-gradient(223deg, #A1F2FF, #DFA3EE);
+}
+
+.pBox_links{
+    display: flex;
+    justify-content: flex-end;
+}
+
+.pBox_img{
+    height: 38px;
+    width: 38px;
+}
+
+.pBox_content{
+    margin-left: 40px;
+}
+
+.pBox_Name{
+    margin-bottom: 20px;
+}
