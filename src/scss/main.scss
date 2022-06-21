@@ -1,0 +1,17 @@
+@use './abstracts/colors';
+@use './abstracts/fonts';
+@use './abstracts/mixin';
+
+@use './components/global';
+@use './components/loader';
+@use './layout/header';
+
+@use './components/styles';
+
+@use './components/projects';
+
+@use './components/responsive';
+@use './layout/scrollbar';
+
+@use './layout/footer';
+

@@ -1,4 +1,4 @@
-@import "./colors";
+@use "../abstracts" as *;
 
 .loader {
     position: fixed;

@@ -1,37 +1,4 @@
-@import "./colors";
-@import "./fonts";
-
-* {
-    margin: 0px;
-    padding: 0px;
-}
-
-body {
-    font-family: "Inconsolata", monospace;
-    font-size: 1.6rem;
-    background-color: $black;
-    color: $white;
-    overflow-x: hidden;
-    overflow: overlay;
-    margin: 0px;
-    padding: 0px;
-    width: 100%;
-    height: 100%;
-}
-
-html {
-    font-size: 62.5%;
-    box-sizing: border-box;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
-    width: 100%;
-    height: 100%;
-}
-
-@import "./loader";
-@import "./header";
+@use "../abstracts" as *;
 
 .intro-title{
     height: calc(100vh - 400px);
@@ -124,10 +91,3 @@ svg.wave{
     }
 }
 
-
-
-
-
-@import "./scrollbar";
-@import "./responsive";
-@import "./projects";

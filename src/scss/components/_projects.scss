@@ -1,5 +1,4 @@
-@import "./colors";
-@import "./fonts";
+@use "../abstracts" as *;
 
 .pBox_wrapper{
     display: flex;
