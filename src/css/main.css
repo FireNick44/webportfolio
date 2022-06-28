@@ -70,6 +70,26 @@ html {
   height: 100%;
 }
 
+h1 {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
+}
+
+h2 {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
+}
+
+h3 {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
+}
+
+h4 {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
+}
+
 .loader {
   position: fixed;
   top: 0;
