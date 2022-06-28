@@ -29,15 +29,16 @@ html {
     height: 100%;
 }
 
-
 h1{
     font-family: "Inconsolata", monospace;
     font-variation-settings:  "wght" 400, "wdth" 100;
+    font-size: 48px;
 }
 
 h2{
     font-family: "Inconsolata", monospace;
     font-variation-settings:  "wght" 400, "wdth" 100;
+    font-size: 40px;
 }
 
 h3{
@@ -49,6 +50,13 @@ h3{
 h4{
     font-family: "Inconsolata", monospace;
     font-variation-settings:  "wght" 400, "wdth" 100;
+    
+}
+
+h5{
+    font-family: "Inconsolata", monospace;
+    font-variation-settings:  "wght" 400, "wdth" 100;
+    font-size: 13px;
 }
 
 $font: "Inconsolata";
