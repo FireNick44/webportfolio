@@ -11,7 +11,7 @@
         font-variation-settings: "wght" 900, "wdth" 100;
         &.text{
             font-size: clamp(3.5rem, 5vw, 11rem);
-                }
+        }
         &.name{
             font-size: clamp(7rem, 10vw, 22rem);
         }
@@ -45,7 +45,10 @@
     background-color: $container;
 }
 
-
+svg.intro-svg{
+    width: 100%;
+    z-index: -1;
+}
 
 svg.wave.down{
     transform: scaleY(-1) scaleX(-1);
@@ -61,7 +64,7 @@ svg.wave{
     width: 100%;
     fill: $wave;
     z-index: -1;
-    
+
     .wavePath {
         animation: waveAnim 60s;
         animation-timing-function: linear;

@@ -73,21 +73,31 @@ html {
 h1 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 40px;
 }
 
 h2 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 32px;
 }
 
 h3 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 20px;
 }
 
 h4 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 16px;
+}
+
+h5 {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 13px;
 }
 
 .loader {
@@ -292,6 +302,11 @@ header .location {
 .test5 {
   height: 2000px;
   background-color: #883131;
+}
+
+svg.intro-svg {
+  width: 100%;
+  z-index: -1;
 }
 
 svg.wave.down {
