@@ -207,6 +207,7 @@ h5 {
 }
 
 header {
+  z-index: 10;
   position: fixed;
   top: 0px;
   left: 0px;
@@ -261,22 +262,35 @@ header .location {
   margin-right: 8px;
 }
 
-.intro-title {
-  height: calc(100vh - 400px);
+section#sect1 {
+  height: 98vh;
+  overflow: hidden;
+  position: relative;
+}
+section#sect1 .intro-title {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  height: calc(100vh - 100px);
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
-.intro-title p {
+section#sect1 .intro-title p {
   font-variation-settings: "wght" 900, "wdth" 100;
 }
-.intro-title p.text {
+section#sect1 .intro-title p.text {
   font-size: clamp(3.5rem, 5vw, 11rem);
 }
-.intro-title p.name {
+section#sect1 .intro-title p.name {
   font-size: clamp(7rem, 10vw, 22rem);
+}
+section#sect1 .intro-svg {
+  width: 100%;
+  transform: translateY(-290px);
+  z-index: -1 !important;
 }
 
 .intro {
@@ -288,6 +302,28 @@ header .location {
 .intro .test2 {
   height: 1000px;
   background-color: #883131;
+}
+
+.intro-wave {
+  z-index: 2;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.intro-scroll {
+  z-index: 2;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  -webkit-animation: scrollHop 3s infinite;
+          animation: scrollHop 3s infinite;
 }
 
 .test3 {
@@ -302,15 +338,6 @@ header .location {
 .test5 {
   height: 2000px;
   background-color: #883131;
-}
-
-svg.intro-svg {
-  width: 100%;
-  z-index: -1;
-}
-
-svg.wave.down {
-  transform: scaleY(-1) scaleX(-1);
 }
 
 svg.wave {
@@ -330,6 +357,34 @@ svg.wave .wavePath {
           animation-timing-function: linear;
   -webkit-animation-iteration-count: infinite;
           animation-iteration-count: infinite;
+}
+
+svg.wave.down {
+  transform: scaleY(-1) scaleX(-1);
+}
+
+@-webkit-keyframes scrollHop {
+  0% {
+    bottom: 0px;
+  }
+  50% {
+    bottom: 10px;
+  }
+  100% {
+    bottom: 0px;
+  }
+}
+
+@keyframes scrollHop {
+  0% {
+    bottom: 0px;
+  }
+  50% {
+    bottom: 10px;
+  }
+  100% {
+    bottom: 0px;
+  }
 }
 @-webkit-keyframes waveAnim {
   0% {
@@ -365,7 +420,6 @@ svg.wave .wavePath {
     d: path("M 0,400 C 0,400 0,200 0,200 C 113.14285714285714,195.28571428571428 226.28571428571428,190.57142857142858 345,176 C 463.7142857142857,161.42857142857142 587.9999999999999,136.99999999999997 722,140 C 856.0000000000001,143.00000000000003 999.7142857142858,173.42857142857144 1121,188 C 1242.2857142857142,202.57142857142856 1341.142857142857,201.28571428571428 1440,200 C 1440,200 1440,400 1440,400 Z");
   }
 }
-
 .pBox_wrapper {
   display: flex;
   justify-content: center;
@@ -473,16 +527,19 @@ svg.wave .wavePath {
   }
 }
 ::-webkit-scrollbar {
-  width: 7px;
+  width: 16px;
 }
 
 ::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px transparent;
-  border-radius: 8px;
+  box-shadow: inset 0 0 10px 10px rgba(0, 128, 0, 0);
+  border: solid 4px transparent;
+  border-radius: 15px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background-image: -webkit-gradient(linear, left bottom, left top, color-stop(0.14, #5f128b), color-stop(0.52, #5f128b), color-stop(0.86, #4c1594));
+  box-shadow: inset 0 0 20px 20px rgba(0, 0, 0, 0.2509803922);
+  border: solid 4px transparent;
+  border-radius: 15px;
 }
 
 ::-webkit-scrollbar-track-piece {
