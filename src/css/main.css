@@ -69,35 +69,55 @@ html {
   width: 100%;
   height: 100%;
 }
+@media only screen and (max-width: 62.5em) {
+  html {
+    font-size: 56.25%;
+  }
+}
+@media only screen and (max-width: 56.25em) {
+  html {
+    font-size: 54%;
+  }
+}
+@media only screen and (max-width: 37.5em) {
+  html {
+    font-size: 51%;
+  }
+}
+@media only screen and (min-width: 112.5em) {
+  html {
+    font-size: 75%;
+  }
+}
 
 h1 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 40px;
+  font-size: 4rem;
 }
 
 h2 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 32px;
+  font-size: 3.2rem;
 }
 
 h3 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 20px;
+  font-size: 2.5rem;
 }
 
 h4 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 16px;
+  font-size: 2rem;
 }
 
 h5 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 13px;
+  font-size: 1.5rem;
 }
 
 .loader {
@@ -426,6 +446,9 @@ svg.wave.down {
   flex-direction: column;
   align-items: center;
   flex-wrap: wrap;
+}
+.pBox_wrapper h2 {
+  font-variation-settings: "wght" 700, "wdth" 105;
 }
 
 .test5 {
