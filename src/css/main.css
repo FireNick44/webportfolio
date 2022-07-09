@@ -118,6 +118,7 @@ h5 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
   font-size: 1.5rem;
+  visibility: hidden;
 }
 
 .loader {
