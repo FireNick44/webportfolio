@@ -20,6 +20,5 @@ async function sessionLoadPage() {
         loader.classList.add("disappear");
         await Sleep(100);
         content.classList.add("appear");
-        trim()
     }
 }
