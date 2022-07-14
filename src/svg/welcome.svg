@@ -1,4 +1,4 @@
-        <svg class="intro-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="margin:auto;background:#ffffff00;position:relative" width="2560" height="1440" viewBox="0 0 2560 1440">
+        <svg class="intro-svg" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" >
             <g xmlns="http://www.w3.org/2000/svg">
                     <linearGradient id="ldbk-git0pbnxxcs" x1="-0.1" y1="0" x2="1.1" y2="1">
                         <animate attributeName="y2" repeatCount="indefinite" dur="20s" keyTimes="0;0.5;1"
