@@ -49,7 +49,7 @@ p .cond_regular {
 body {
   font-family: "Inconsolata", monospace;
   font-size: 1.6rem;
-  background-color: #373737;
+  background-color: #000000;
   color: #ffffff;
   overflow-x: hidden;
   overflow: overlay;
@@ -325,7 +325,7 @@ section#sect1 .intro-svg {
 }
 .intro .test2 {
   height: 1000px;
-  background-color: #883131;
+  background-color: #100f0f;
 }
 
 .intro-wave {
@@ -359,9 +359,9 @@ section#sect1 .intro-svg {
   height: 100%;
 }
 
-.test5 {
+#sect4 {
   height: 2000px;
-  background-color: #883131;
+  background-color: #100f0f;
 }
 
 svg.wave {
@@ -371,7 +371,7 @@ svg.wave {
   display: block;
   position: relative;
   width: 100%;
-  fill: #883131;
+  fill: #100f0f;
   z-index: -1;
 }
 svg.wave .wavePath {
@@ -445,19 +445,15 @@ svg.wave.down {
   }
 }
 .pBox_wrapper {
-  display: flex;
+  display: grid;
+  grid-template-columns: 300px 300px 300px;
+  gap: 60px;
+  margin-top: 60px;
+  margin-bottom: 60px;
   justify-content: center;
-  flex-direction: column;
-  align-items: center;
-  flex-wrap: wrap;
 }
 .pBox_wrapper h2 {
   font-variation-settings: "wght" 700, "wdth" 105;
-}
-
-.test5 {
-  height: 100vh;
-  background-color: grey;
 }
 
 .pBox {

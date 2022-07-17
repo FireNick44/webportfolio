@@ -1,20 +1,17 @@
 @use "../abstracts" as *;
 
 .pBox_wrapper{
-    display: flex;
+    display: grid;
+    grid-template-columns: 300px 300px 300px;
+    gap: 60px;
+    margin-top: 60px;
+    margin-bottom: 60px;
     justify-content: center;
-    flex-direction: column;
-    align-items: center;
-    flex-wrap: wrap;
+    //grid-auto-rows: minmax(100px, auto);
     
     h2{
         font-variation-settings: "wght" 700, "wdth" 105;
     }
-}
-
-.test5{
-    height: 100vh;
-    background-color: grey;
 }
 
 .pBox{

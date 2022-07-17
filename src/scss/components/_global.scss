@@ -1,5 +1,8 @@
 @use "../abstracts" as *;
 
+$font: "Inconsolata";
+//font-family: $font;
+
 * {
     margin: 0px;
     padding: 0px;
@@ -75,8 +78,3 @@ h5{
     font-size: 1.5rem;
     visibility: hidden;
 }
-
-
-$font: "Inconsolata";
-
-//font-family: $font;
