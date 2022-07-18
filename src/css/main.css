@@ -121,108 +121,101 @@ h5 {
   visibility: hidden;
 }
 
+/*
+@use "../abstracts" as *;
+
 .loader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  background: #000000;
-  height: calc(100% - 8px);
-  width: calc(100% - 8px);
-  border: solid;
-  border-color: #ffffff;
-  border-width: 4px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: $loader_background;
+    height: calc(100% - 8px);
+    width: calc(100% - 8px);
+    border: solid;
+    border-color: $loader_border;
+    border-width: 4px;
 }
 
 .disappear {
-  -webkit-animation: vanish 1s forwards;
-          animation: vanish 1s forwards;
-}
-
-@-webkit-keyframes vanish {
-  100% {
-    opacity: 0;
-    visibility: hidden;
-  }
+    animation: vanish 10s forwards;
 }
 
 @keyframes vanish {
-  100% {
-    opacity: 0;
-    visibility: hidden;
-  }
+    0%{
+        transition: 200ms;
+
+    }
+    100% {
+        opacity: 0;
+        visibility: hidden;
+        top: -100vh;
+    }
 }
-.content {
-  display: none;
+
+.content{
+    display: none;
 }
 
 .appear {
-  display: block;
+    display: block;
 }
 
 .ys {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: calc(100% - 60px);
-  width: 100%;
-}
-.ys svg {
-  -webkit-animation: fill 0.6s ease-in 2s forwards;
-          animation: fill 0.6s ease-in 2s forwards;
-}
-.ys #logo path:first-child {
-  stroke-width: 1;
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  -webkit-animation: line-anim 2s ease 0.2s forwards;
-          animation: line-anim 2s ease 0.2s forwards;
-}
-.ys #logo path:nth-child(2) {
-  stroke-width: 1;
-  stroke-dasharray: 500;
-  stroke-dashoffset: 500;
-  -webkit-animation: line-anim 2.9s ease 0.2s forwards;
-          animation: line-anim 2.9s ease 0.2s forwards;
-}
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100% - 60px);
+    width: 100%;
 
-@-webkit-keyframes line-anim {
-  to {
-    stroke-dashoffset: 0;
-  }
+    svg {
+        animation: fill .6s ease-in 2s forwards
+    }
+
+    #logo path:first-child{
+        stroke-width: 1;
+        stroke-dasharray: 500;
+        stroke-dashoffset: 500;
+        animation: line-anim 2s ease .2s forwards  
+    }
+
+    #logo path:nth-child(2){
+        stroke-width: 1;
+        stroke-dasharray: 500;
+        stroke-dashoffset: 500;
+        animation: line-anim 2.9s ease .2s forwards
+    }
+
 }
 
 @keyframes line-anim {
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-@-webkit-keyframes fill {
-  0% {
-    fill: transparent;
-  }
-  to {
-    fill: #ffffff;
-  }
-}
-@keyframes fill {
-  0% {
-    fill: transparent;
-  }
-  to {
-    fill: #ffffff;
-  }
-}
-.loading-dots {
-  display: flex;
-  align-content: flex-end;
-  justify-content: flex-start;
-  color: #ffffff;
-}
-.loading-dots svg {
-  height: 60px;
-  width: 120px;
+    to {
+        stroke-dashoffset: 0
+    }
 }
 
+@keyframes fill {
+    0% {
+        fill: transparent
+    }
+
+    to {
+        fill: $loader_fill
+    }
+}
+
+.loading-dots {
+    display: flex;
+    align-content: flex-end;
+    justify-content: flex-start;
+    color: $loading-dots;
+
+    svg {
+        height: 60px;
+        width: 120px;
+    }
+}
+
+*/
 .display-Null {
   visibility: hidden;
 }

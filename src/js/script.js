@@ -1,10 +1,15 @@
 var loader = document.querySelector(".loader")
 var content = document.querySelector(".content")
 
-window.addEventListener("load", sessionLoadPage());
-
 function Sleep(milliseconds) {
     return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
+window.addEventListener("onload", sessionOnLoadPage());
+window.addEventListener("load", sessionLoadPage());
+
+async function sessionOnLoadPage() {
+
 }
 
 async function sessionLoadPage() {
