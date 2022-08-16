@@ -135,13 +135,13 @@ h5 {
 }
 
 .disappear {
-  -webkit-animation: vanish 1s forwards;
-          animation: vanish 1s forwards;
+  -webkit-animation: vanish 0.5s forwards;
+          animation: vanish 0.5s forwards;
 }
 
 @-webkit-keyframes vanish {
   0% {
-    transition: 200ms;
+    transition: 500ms ease-in-out;
   }
   100% {
     visibility: hidden;
@@ -151,7 +151,7 @@ h5 {
 
 @keyframes vanish {
   0% {
-    transition: 200ms;
+    transition: 500ms ease-in-out;
   }
   100% {
     visibility: hidden;
@@ -290,12 +290,12 @@ header .location {
   margin-right: 8px;
 }
 
-section#sect1 {
+section#intro {
   height: 100vh;
   overflow: hidden;
   position: relative;
 }
-section#sect1 .intro-title {
+section#intro .intro-title {
   z-index: 1;
   position: absolute;
   top: 0;
@@ -306,16 +306,16 @@ section#sect1 .intro-title {
   justify-content: center;
   align-items: center;
 }
-section#sect1 .intro-title p {
+section#intro .intro-title p {
   font-variation-settings: "wght" 900, "wdth" 100;
 }
-section#sect1 .intro-title p.text {
+section#intro .intro-title p.text {
   font-size: clamp(3.5rem, 5vw, 11rem);
 }
-section#sect1 .intro-title p.name {
+section#intro .intro-title p.name {
   font-size: clamp(7rem, 10vw, 22rem);
 }
-section#sect1 .intro-svg {
+section#intro .intro-svg {
   z-index: -1 !important;
 }
 
@@ -360,6 +360,7 @@ section#sect1 .intro-svg {
 .test3 {
   width: 100%;
   height: auto;
+  margin-bottom: -4px;
 }
 .test3 svg {
   width: 100%;
@@ -392,6 +393,7 @@ svg.wave .wavePath {
 
 svg.wave.down {
   transform: scaleY(-1) scaleX(-1);
+  margin-top: -1px;
 }
 
 @-webkit-keyframes scrollHop {
@@ -451,6 +453,12 @@ svg.wave.down {
     d: path("M 0,400 C 0,400 0,200 0,200 C 113.14285714285714,195.28571428571428 226.28571428571428,190.57142857142858 345,176 C 463.7142857142857,161.42857142857142 587.9999999999999,136.99999999999997 722,140 C 856.0000000000001,143.00000000000003 999.7142857142858,173.42857142857144 1121,188 C 1242.2857142857142,202.57142857142856 1341.142857142857,201.28571428571428 1440,200 C 1440,200 1440,400 1440,400 Z");
   }
 }
+.pBox_overlay {
+  height: 80px;
+  background: rgb(16, 15, 15);
+  background: linear-gradient(0deg, rgb(16, 15, 15) 44%, rgb(111, 35, 176) 100%);
+}
+
 .pBox_wrapper {
   display: grid;
   grid-template-columns: 300px 300px 300px;
@@ -500,6 +508,21 @@ svg.wave.down {
   margin-bottom: 20px;
 }
 
+@media only screen and (max-width: 1200px) {
+  .pBox_wrapper {
+    grid-template-columns: 300px 300px;
+  }
+}
+@media only screen and (max-width: 800px) {
+  .pBox_wrapper {
+    grid-template-columns: 300px;
+  }
+}
+@media only screen and (min-width: 2200px) {
+  .pBox_wrapper {
+    grid-template-columns: 300px 300px 300px 300px 300px;
+  }
+}
 /*
 @media only screen and (max-width:62.5em) {
     html {

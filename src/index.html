@@ -3,11 +3,18 @@
 
 <head>
     <meta charset='utf-8'>
+
+
+    <link 
+    as="style"
+    rel="stylesheet preload prefetch" 
+    href="./font/Inconsolata-VariableFont_wdth,wght.ttf" 
+    type="text/css" 
+    crossorigin="anonymous" />
+
+
     <link rel="stylesheet" href="css/main.css">
     <link rel="shortcut icon" href="img/favicon.png">
-    <link rel="preload" href="./css/load.css" as="style" crossorigin>
-    <link rel="preload" href="./font/Inconsolata-VariableFont_wdth,wght.ttf" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="./js/script.js " as="script" crossorigin>
     <title>Yannic Studer</title>
 </head>
 
@@ -76,8 +83,8 @@
             </div>
         </div>
     </header>
-    <section id="sect1">
-
+    <section id="intro">
+        
         <svg class="intro-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2560 1440">
             <g>
                 <linearGradient id="intro-gradient" x1="-0.1" y1="0" x2="1.1" y2="1">
@@ -286,10 +293,12 @@
                 </circle>
             </g>
         </svg>
+        
         <div class="intro-title">
             <p class="text">Hello Word, I'm</p>
             <p class="name">Yannic Studer</p>
         </div>
+        
         <div class="intro-wave">
             <svg class="wave" viewBox="0 0 1440 300" xmlns="http://www.w3.org/2000/svg">
                 <path
@@ -297,12 +306,13 @@
                     stroke="none" stroke-width="0" class="wavePath">
                 </path>
             </svg>
+            <div class="intro-scroll">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22">
+                    <path d="M12,0,24,22H0Z" transform="translate(24 22) rotate(180)" fill="#fff" />
+                </svg>
+            </div>
         </div>
-        <div class="intro-scroll">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22">
-                <path d="M12,0,24,22H0Z" transform="translate(24 22) rotate(180)" fill="#fff" />
-            </svg>
-        </div>
+        
 
     </section>
     <section id="sect2">
@@ -316,17 +326,20 @@
                 <h5>Stuff I've worked on</h5>
             </div>
 
-            <svg class="wave down" viewBox="0 0 1440 400" xmlns="http://www.w3.org/2000/svg">
-                <path
-                    d="M 0,400 C 0,400 0,200 0,200 C 107.96428571428572,207.10714285714286 215.92857142857144,214.21428571428572 336,229 C 456.07142857142856,243.78571428571428 588.2500000000001,266.25 721,243 C 853.7499999999999,219.75 987.0714285714284,150.78571428571428 1107,136 C 1226.9285714285716,121.21428571428572 1333.4642857142858,160.60714285714286 1440,200 C 1440,200 1440,400 1440,400 Z"
-                    stroke="none" stroke-width="0" class="wavePath">
-                </path>
-            </svg>
-        </div>
-        </div>
 
+
+        </div>
     </section>
     <section id="sect3">
+        <div class="intro-wave">
+
+        </div>
+        <svg class="wave down" viewBox="0 0 1440 400" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M 0,400 C 0,400 0,200 0,200 C 107.96428571428572,207.10714285714286 215.92857142857144,214.21428571428572 336,229 C 456.07142857142856,243.78571428571428 588.2500000000001,266.25 721,243 C 853.7499999999999,219.75 987.0714285714284,150.78571428571428 1107,136 C 1226.9285714285716,121.21428571428572 1333.4642857142858,160.60714285714286 1440,200 C 1440,200 1440,400 1440,400 Z"
+                stroke="none" stroke-width="0" class="wavePath">
+            </path>
+        </svg>
         <div class="test3">
             <svg id="visual" viewBox="0 0 900 450" width="900" height="450" shape-rendering="crispedges">
                 <path
@@ -353,6 +366,9 @@
         </div>
     </section>
     <section id="sect4">
+        <div class="pBox_overlay">
+
+        </div>
         <div class="pBox_wrapper">
             <div class="pBox">
                 <div class="pBox_links">

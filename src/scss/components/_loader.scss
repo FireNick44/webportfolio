@@ -14,12 +14,12 @@
 }
 
 .disappear {
-    animation: vanish 1s forwards;
+    animation: vanish 0.5s forwards;
 }
 
 @keyframes vanish {
     0%{
-        transition: 200ms;
+        transition: 500ms ease-in-out;
     }
     100% {
         visibility: hidden;
