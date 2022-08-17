@@ -2,16 +2,18 @@
 @use './abstracts/fonts';
 @use './abstracts/mixin';
 
-@use './components/global';
-@use './components/loader';
-@use './layout/header';
+@use './layout/global';
+@use './components/loader.scss';
 
-@use './components/styles';
-
+@use './components/intro';
+@use './components/me';
+@use './components/skills';
 @use './components/projects';
+@use './components/bye';
 
-@use './components/responsive';
-@use './layout/scrollbar';
-
+@use './layout/header';
 @use './layout/footer';
+@use './layout/scrollbar';
+@use './layout/responsive';
+
 

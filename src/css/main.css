@@ -121,6 +121,29 @@ h5 {
   visibility: hidden;
 }
 
+svg.wave {
+  height: 100%;
+  background: transparent;
+  display: block;
+  position: relative;
+  width: 100%;
+  fill: #100f0f;
+  z-index: -1;
+}
+svg.wave .wavePath {
+  -webkit-animation: waveAnim 60s;
+          animation: waveAnim 60s;
+  -webkit-animation-timing-function: linear;
+          animation-timing-function: linear;
+  -webkit-animation-iteration-count: infinite;
+          animation-iteration-count: infinite;
+}
+
+svg.wave.down {
+  transform: scaleY(-1) scaleX(-1);
+  margin-top: -1px;
+}
+
 .loader {
   position: fixed;
   top: 0;
@@ -230,66 +253,6 @@ h5 {
   width: 120px;
 }
 
-.display-Null {
-  visibility: hidden;
-}
-
-header {
-  z-index: 10;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100%;
-  height: 50px;
-  font-family: "Inconsolata";
-  font-size: 20px;
-  font-weight: 500;
-  font-variation-settings: "wght" 600;
-}
-header .desktop {
-  position: relative;
-  margin-left: auto;
-  margin-right: auto;
-  max-width: 1600px;
-  width: 100%;
-}
-header .desktop .header-container {
-  width: calc(100% - 40px);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 50px;
-  padding-left: 20px;
-  padding-right: 20px;
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-header .desktop .header-container nav ul {
-  display: flex;
-  align-content: center;
-  align-items: center;
-  flex-direction: row;
-  list-style-type: none;
-  height: 50px;
-}
-header .desktop .header-container li {
-  margin-left: 8px;
-  margin-right: 8px;
-}
-header a {
-  height: 30px;
-  text-decoration: none;
-  color: white;
-}
-header svg {
-  fill: white;
-}
-header .location {
-  margin-left: 8px;
-  margin-right: 8px;
-}
-
 section#intro {
   height: 100vh;
   overflow: hidden;
@@ -324,26 +287,11 @@ section#intro .intro-svg {
     height: 100vh;
   }
 }
-.intro {
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-  flex-direction: column;
-}
-.intro .test2 {
-  height: 1000px;
-  background-color: #100f0f;
-}
-
 .intro-wave {
   z-index: 2;
   position: absolute;
   bottom: 0;
   width: 100%;
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-  flex-direction: column;
 }
 
 .intro-scroll {
@@ -355,45 +303,6 @@ section#intro .intro-svg {
   justify-content: center;
   -webkit-animation: scrollHop 3s infinite;
           animation: scrollHop 3s infinite;
-}
-
-.test3 {
-  width: 100%;
-  height: auto;
-  margin-bottom: -4px;
-}
-.test3 svg {
-  width: 100%;
-  height: 100%;
-}
-
-#sect4 {
-  height: 2000px;
-  background-color: #100f0f;
-}
-
-svg.wave {
-  width: 100%;
-  height: 100%;
-  background: transparent;
-  display: block;
-  position: relative;
-  width: 100%;
-  fill: #100f0f;
-  z-index: -1;
-}
-svg.wave .wavePath {
-  -webkit-animation: waveAnim 60s;
-          animation: waveAnim 60s;
-  -webkit-animation-timing-function: linear;
-          animation-timing-function: linear;
-  -webkit-animation-iteration-count: infinite;
-          animation-iteration-count: infinite;
-}
-
-svg.wave.down {
-  transform: scaleY(-1) scaleX(-1);
-  margin-top: -1px;
 }
 
 @-webkit-keyframes scrollHop {
@@ -453,6 +362,44 @@ svg.wave.down {
     d: path("M 0,400 C 0,400 0,200 0,200 C 113.14285714285714,195.28571428571428 226.28571428571428,190.57142857142858 345,176 C 463.7142857142857,161.42857142857142 587.9999999999999,136.99999999999997 722,140 C 856.0000000000001,143.00000000000003 999.7142857142858,173.42857142857144 1121,188 C 1242.2857142857142,202.57142857142856 1341.142857142857,201.28571428571428 1440,200 C 1440,200 1440,400 1440,400 Z");
   }
 }
+.intro {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+  flex-direction: column;
+}
+.intro .test2 {
+  height: 1000px;
+  background-color: #100f0f;
+}
+
+section#skills {
+  position: relative;
+  height: 1000px;
+}
+
+.skill-wave {
+  z-index: 80;
+  width: 100%;
+}
+
+.skill-svgd {
+  position: absolute;
+  z-index: -10;
+  top: 0;
+  width: 100%;
+  margin-bottom: -4px;
+}
+.skill-svgd svg {
+  width: 100%;
+  height: 100%;
+}
+
+#projects {
+  height: 2000px;
+  background-color: #100f0f;
+}
+
 .pBox_overlay {
   height: 80px;
   background: rgb(16, 15, 15);
@@ -523,31 +470,86 @@ svg.wave.down {
     grid-template-columns: 300px 300px 300px 300px 300px;
   }
 }
-/*
-@media only screen and (max-width:62.5em) {
-    html {
-        font-size: 56.25%
-    }
+.display-Null {
+  visibility: hidden;
 }
 
-@media only screen and (max-width:56.25em) {
-    html {
-        font-size: 54%
-    }
+header {
+  z-index: 10;
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+  height: 50px;
+  font-family: "Inconsolata";
+  font-size: 20px;
+  font-weight: 500;
+  font-variation-settings: "wght" 600;
+}
+header .desktop {
+  position: relative;
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1600px;
+  width: 100%;
+}
+header .desktop .header-container {
+  width: calc(100% - 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 50px;
+  padding-left: 20px;
+  padding-right: 20px;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+header .desktop .header-container nav ul {
+  display: flex;
+  align-content: center;
+  align-items: center;
+  flex-direction: row;
+  list-style-type: none;
+  height: 50px;
+}
+header .desktop .header-container li {
+  margin-left: 8px;
+  margin-right: 8px;
+}
+header a {
+  height: 30px;
+  text-decoration: none;
+  color: white;
+}
+header svg {
+  fill: white;
+}
+header .location {
+  margin-left: 8px;
+  margin-right: 8px;
 }
 
-@media only screen and (max-width:37.5em) {
-    html {
-        font-size: 51%
-    }
+::-webkit-scrollbar {
+  width: 16px;
 }
 
-@media only screen and (min-width:112.5em) {
-    html {
-        font-size: 75%
-    }
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 10px 10px rgba(0, 128, 0, 0);
+  border: solid 4px transparent;
+  border-radius: 15px;
 }
-*/
+
+::-webkit-scrollbar-thumb {
+  box-shadow: inset 0 0 20px 20px rgba(0, 0, 0, 0.2509803922);
+  border: solid 4px transparent;
+  border-radius: 15px;
+}
+
+::-webkit-scrollbar-track-piece {
+  background: transparent;
+}
+
 .container {
   padding: 0px 0px !important;
   margin-left: auto;
@@ -578,23 +580,4 @@ svg.wave.down {
   .container {
     max-width: 1220px;
   }
-}
-::-webkit-scrollbar {
-  width: 16px;
-}
-
-::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 10px 10px rgba(0, 128, 0, 0);
-  border: solid 4px transparent;
-  border-radius: 15px;
-}
-
-::-webkit-scrollbar-thumb {
-  box-shadow: inset 0 0 20px 20px rgba(0, 0, 0, 0.2509803922);
-  border: solid 4px transparent;
-  border-radius: 15px;
-}
-
-::-webkit-scrollbar-track-piece {
-  background: transparent;
 }/*# sourceMappingURL=main.css.map */

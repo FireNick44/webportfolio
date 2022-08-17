@@ -1,91 +1,92 @@
 @use "../abstracts" as *;
 
 .loader {
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: $loader_background;
-    height: calc(100% - 8px);
-    width: calc(100% - 8px);
-    border: solid;
-    border-color: $loader_border;
-    border-width: 4px;
-    z-index: 99;
+   position: fixed;
+   top: 0;
+   left: 0;
+   background: $loader_background;
+   height: calc(100% - 8px);
+   width: calc(100% - 8px);
+   border: solid;
+   border-color: $loader_border;
+   border-width: 4px;
+   z-index: 99;
 }
 
 .disappear {
-    animation: vanish 0.5s forwards;
+   animation: vanish 0.5s forwards;
 }
 
 @keyframes vanish {
-    0%{
-        transition: 500ms ease-in-out;
-    }
-    100% {
-        visibility: hidden;
-        top: -100vh;
-    }
+   0% {
+      transition: 500ms ease-in-out;
+   }
+
+   100% {
+      visibility: hidden;
+      top: -100vh;
+   }
 }
 
-.content{
-    display: none;
+.content {
+   display: none;
 }
 
 .appear {
-    display: block;
+   display: block;
 }
 
 .ys {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: calc(100% - 60px);
-    width: 100%;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   height: calc(100% - 60px);
+   width: 100%;
 
-    svg {
-        animation: fill .6s ease-in 2s forwards
-    }
+   svg {
+      animation: fill .6s ease-in 2s forwards
+   }
 
-    #logo path:first-child{
-        stroke-width: 1;
-        stroke-dasharray: 500;
-        stroke-dashoffset: 500;
-        animation: line-anim 2s ease .2s forwards  
-    }
+   #logo path:first-child {
+      stroke-width: 1;
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: line-anim 2s ease .2s forwards
+   }
 
-    #logo path:nth-child(2){
-        stroke-width: 1;
-        stroke-dasharray: 500;
-        stroke-dashoffset: 500;
-        animation: line-anim 2.9s ease .2s forwards
-    }
+   #logo path:nth-child(2) {
+      stroke-width: 1;
+      stroke-dasharray: 500;
+      stroke-dashoffset: 500;
+      animation: line-anim 2.9s ease .2s forwards
+   }
 
 }
 
 @keyframes line-anim {
-    to {
-        stroke-dashoffset: 0
-    }
+   to {
+      stroke-dashoffset: 0
+   }
 }
 
 @keyframes fill {
-    0% {
-        fill: transparent
-    }
+   0% {
+      fill: transparent
+   }
 
-    to {
-        fill: $loader_fill
-    }
+   to {
+      fill: $loader_fill
+   }
 }
 
 .loading-dots {
-    display: flex;
-    align-content: flex-end;
-    justify-content: flex-start;
-    color: $loading-dots;
+   display: flex;
+   align-content: flex-end;
+   justify-content: flex-start;
+   color: $loading-dots;
 
-    svg {
-        height: 60px;
-        width: 120px;
-    }
+   svg {
+      height: 60px;
+      width: 120px;
+   }
 }
