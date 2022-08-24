@@ -282,7 +282,7 @@ section#intro .intro-svg {
   z-index: -1 !important;
 }
 
-@media only screen and (max-width: 1600px) {
+@media only screen and (max-width: 1200px) {
   .intro-svg {
     height: 100vh;
   }
