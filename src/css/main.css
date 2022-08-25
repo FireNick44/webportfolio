@@ -280,9 +280,10 @@ section#intro .intro-title p.name {
 }
 section#intro .intro-svg {
   z-index: -1 !important;
+  transform: scale(1.1);
 }
 
-@media only screen and (max-width: 1200px) {
+@media only screen and (max-width: 3000px) {
   .intro-svg {
     height: 100vh;
   }
@@ -292,6 +293,10 @@ section#intro .intro-svg {
   position: absolute;
   bottom: 0;
   width: 100%;
+}
+.intro-wave .intro-brick {
+  height: 50px;
+  background-color: #100f0f;
 }
 
 .intro-scroll {
