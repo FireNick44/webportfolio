@@ -40,6 +40,12 @@ section#intro {
    }
 }
 
+@media only screen and (min-height: 930px) {
+   .intro-svg {
+      height: 100vh;
+   }
+}
+
 .intro-wave {
    z-index: 2;
    position: absolute;
