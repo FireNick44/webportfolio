@@ -103,3 +103,14 @@ svg.wave.down {
    transform: scaleY(-1) scaleX(-1);
    margin-top: -1px;
 }
+
+#b{
+   height: 20px !important;
+}
+
+.b{
+   height: 200px !important;
+   #b{
+      fill: aquamarine;
+   }
+}

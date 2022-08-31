@@ -144,6 +144,17 @@ svg.wave.down {
   margin-top: -1px;
 }
 
+#b {
+  height: 20px !important;
+}
+
+.b {
+  height: 200px !important;
+}
+.b #b {
+  fill: aquamarine;
+}
+
 .loader {
   position: fixed;
   top: 0;
@@ -257,6 +268,17 @@ section#intro {
   height: 100vh;
   overflow: hidden;
   position: relative;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  z-index: -1;
+  right: 0px;
+  display: block;
+  opacity: var(--bg-opacity);
+  transition: opacity 0.5s ease-in-out 0s;
+  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0) 80%, rgba(0, 0, 0, 0.6) 100%) center center/cover no-repeat fixed, url(chrome://background-wallpaper/corwin-prescott_canyon-min.webp);
+  background-repeat: no-repeat;
+  background-position: center center;
 }
 section#intro .intro-title {
   z-index: 1;
