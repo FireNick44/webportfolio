@@ -122,7 +122,6 @@ h5 {
 }
 
 svg.wave {
-  height: 100%;
   background: transparent;
   display: block;
   position: relative;
@@ -140,8 +139,9 @@ svg.wave .wavePath {
 }
 
 svg.wave.down {
-  transform: scaleY(-1) scaleX(-1);
+  transform: scaleY(-1) scaleX(-1) translateY(5px);
   margin-top: -1px;
+  z-index: 1;
 }
 
 #b {
@@ -268,20 +268,10 @@ section#intro {
   height: 100vh;
   overflow: hidden;
   position: relative;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  z-index: -1;
-  right: 0px;
-  display: block;
-  opacity: var(--bg-opacity);
-  transition: opacity 0.5s ease-in-out 0s;
-  background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0) 80%, rgba(0, 0, 0, 0.6) 100%) center center/cover no-repeat fixed, url(chrome://background-wallpaper/corwin-prescott_canyon-min.webp);
-  background-repeat: no-repeat;
-  background-position: center center;
+  background: url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 }
 section#intro .intro-title {
-  z-index: 1;
+  z-index: 10;
   position: absolute;
   top: 0;
   height: calc(100vh - 100px);
@@ -401,18 +391,15 @@ section#intro .intro-svg {
   flex-direction: column;
 }
 .intro .test2 {
+  z-index: 10;
   height: 1000px;
   background-color: #100f0f;
 }
 
 section#skills {
   position: relative;
-  height: 1000px;
-}
-
-.skill-wave {
-  z-index: 80;
-  width: 100%;
+  height: 110vh;
+  background: url(/src/svg/skill-bg.svg) no-repeat fixed center/cover;
 }
 
 .skill-svg {
@@ -427,23 +414,25 @@ section#skills {
   height: 100%;
 }
 
+.skill-blend {
+  position: absolute;
+  bottom: 0;
+  height: 80px;
+  width: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16, 15, 15) 20%);
+}
+
 #projects {
   height: 2000px;
   background-color: #100f0f;
-}
-
-.pBox_overlay {
-  height: 80px;
-  background: rgb(16, 15, 15);
-  background: linear-gradient(0deg, rgb(16, 15, 15) 44%, rgb(111, 35, 176) 100%);
 }
 
 .pBox_wrapper {
   display: grid;
   grid-template-columns: 300px 300px 300px;
   gap: 60px;
-  margin-top: 60px;
-  margin-bottom: 60px;
+  padding-top: 60px;
+  padding-bottom: 60px;
   justify-content: center;
 }
 .pBox_wrapper h2 {
@@ -487,14 +476,14 @@ section#skills {
   margin-bottom: 20px;
 }
 
+@media only screen and (max-width: 720px) {
+  .pBox_wrapper {
+    grid-template-columns: 300px !important;
+  }
+}
 @media only screen and (max-width: 1200px) {
   .pBox_wrapper {
     grid-template-columns: 300px 300px;
-  }
-}
-@media only screen and (max-width: 800px) {
-  .pBox_wrapper {
-    grid-template-columns: 300px;
   }
 }
 @media only screen and (min-width: 2200px) {
@@ -507,7 +496,7 @@ section#skills {
 }
 
 header {
-  z-index: 10;
+  z-index: 100;
   position: fixed;
   top: 0px;
   left: 0px;

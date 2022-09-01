@@ -84,7 +84,6 @@ h5 {
 }
 
 svg.wave {
-   height: 100%;
    background: transparent;
    display: block;
    position: relative;
@@ -100,8 +99,9 @@ svg.wave {
 }
 
 svg.wave.down {
-   transform: scaleY(-1) scaleX(-1);
+   transform: scaleY(-1) scaleX(-1) translateY(5px);
    margin-top: -1px;
+   z-index: 1;
 }
 
 #b{

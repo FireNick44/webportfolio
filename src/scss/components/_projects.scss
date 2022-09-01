@@ -5,18 +5,12 @@
    background-color: $container;
 }
 
-.pBox_overlay {
-   height: 80px;
-   background: rgb(16, 15, 15);
-   background: linear-gradient(0deg, rgb(16, 15, 15) 44%, rgb(111, 35, 176) 100%);
-}
-
 .pBox_wrapper {
    display: grid;
    grid-template-columns: 300px 300px 300px;
    gap: 60px;
-   margin-top: 60px;
-   margin-bottom: 60px;
+   padding-top: 60px;
+   padding-bottom: 60px;
    justify-content: center;
    //grid-auto-rows: minmax(100px, auto);
 
@@ -62,15 +56,15 @@
    margin-bottom: 20px;
 }
 
-@media only screen and (max-width: 1200px) {
+@media only screen and (max-width: 720px) {
    .pBox_wrapper {
-      grid-template-columns: 300px 300px;
+      grid-template-columns: 300px !important;
    }
 }
 
-@media only screen and (max-width: 800px) {
+@media only screen and (max-width: 1200px) {
    .pBox_wrapper {
-      grid-template-columns: 300px;
+      grid-template-columns: 300px 300px;
    }
 }
 

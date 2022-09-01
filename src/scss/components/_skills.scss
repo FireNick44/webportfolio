@@ -2,12 +2,9 @@
 
 section#skills {
    position: relative;
-   height: 1000px;
-}
+   height: 110vh;
+   background: url(/src/svg/skill-bg.svg) no-repeat fixed center/cover;
 
-.skill-wave {
-   z-index: 80;
-   width: 100%;
 }
 
 .skill-svg {
@@ -24,6 +21,13 @@ section#skills {
    }
 }
 
+.skill-blend{
+   position: absolute;
+   bottom: 0;
+   height: 80px;
+   width: 100%;
+   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16 15 15) 20%);
+}
 
 @media only screen and (max-width: 1600px) {
 

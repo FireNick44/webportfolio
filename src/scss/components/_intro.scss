@@ -4,24 +4,10 @@ section#intro {
    height: 100vh;
    overflow: hidden;
    position: relative;
-    top: 0px;
-    bottom: 0px;
-    left: 0px;
-    z-index: -1;
-    right: 0px;
-    display: block;
-    opacity: var(--bg-opacity);
-    transition: opacity 0.5s ease-in-out 0s;
-    background: linear-gradient(rgba(0, 0, 0, 0.8), rgba(0, 0, 0, 0) 35%, rgba(0, 0, 0, 0) 80%, rgba(0, 0, 0, 0.6) 100%) center center / cover no-repeat fixed, url(chrome://background-wallpaper/corwin-prescott_canyon-min.webp);
-    background-repeat: no-repeat;
-    background-position: center center;
-    
-   //background: center center / cover no-repeat fixed, url(/src/svg/intro-bg.svg);
-   //background-position: center center;
-   //background-repeat: no-repeat;
+   background: url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 
    .intro-title {
-      z-index: 1;
+      z-index: 10;
       position: absolute;
       top: 0;
       height: calc(100vh - 100px);
@@ -67,6 +53,7 @@ section#intro {
    position: absolute;
    bottom: 0;
    width: 100%;
+   
    .intro-brick{
       height: 50px;
       background-color: $wave;
