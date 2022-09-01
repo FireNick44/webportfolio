@@ -544,6 +544,7 @@ header a {
   color: white;
 }
 header svg {
+  margin-top: 5px;
   fill: white;
 }
 header .location {
