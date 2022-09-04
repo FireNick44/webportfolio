@@ -2,8 +2,12 @@
 
 section#bye {
    height: 150vh;
-   background-color: blueviolet;
+   position: relative;
+   background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%);
    .bye-wave{
+      z-index: 0;
+      position: absolute;
+      top: 0;
 
       .p-1{
          opacity: 0.9;
@@ -12,21 +16,84 @@ section#bye {
          fill: #111010 ;
          opacity: 1;
       }
+
+      stop:nth-child(1) {
+         stop-color: #dd4ad6;
+      }
+
+      stop:nth-child(2) {
+         stop-color: #d16f1f;
+      }
    }
 }
 
-.bye-wave stop:nth-child(1) {
-   stop-color: #dd4ad6;
+.bye-sand{
+   position: absolute;
+   bottom: 0;
+   width: 100%;
 }
 
-.bye-wave stop:nth-child(2) {
-   stop-color: #d16f1f;
+.bStats_wrapper{
+   display: grid;
+   grid-template-columns: 150px 150px 150px;
+   gap: 30px;
+   padding-top: 60px;
+   padding-bottom: 60px;
+   justify-content: center;
+   ul{
+      li:nth-child(1){
+         font-variation-settings: "wght" 700, "wdth" 100;
+         margin-bottom: 8px;
+      }
+      
+      li:nth-child(4){
+         margin-bottom: 8px;
+      }
+   }
 }
 
-.dawdad{
-   font-family: "Inconsolata", monospace;
-   font-variation-settings: "wght" 400, "wdth" 100;
-   font-size: 5.5rem;
-   transform: skew(0deg, 340deg) scaleY(1.33333);
-   margin-left: 400px;
+@media only screen and (max-width: 720px) {
+   .bStats_wrapper{
+      grid-auto-flow: row;
+      grid-template-rows: 200px 200px 200px;
+      grid-template-columns: auto;
+   }
 }
+
+@media only screen and (max-width: 1200px) {
+
+}
+
+
+.bContact{
+   position: absolute;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+   width: 100%;
+
+   p{
+      color: grey;
+      font-size: 2rem;
+   }
+}
+
+.bTxt{
+   position: absolute;
+   margin-top: 60vw;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+
+   p{
+      padding: 5px;
+      font-family: "Inconsolata", monospace;
+      font-variation-settings: "wght" 400, "wdth" 100;
+      font-size: 2.5rem;
+      transform: skew(0deg, 340deg) scaleY(1.33333);
+   }
+   p:nth-child(2){
+      font-size: 1.5rem;
+   }
+}
+

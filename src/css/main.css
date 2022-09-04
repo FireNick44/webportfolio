@@ -48,7 +48,8 @@ p .cond_regular {
 
 body {
   font-family: "Inconsolata", monospace;
-  font-size: 1.6rem;
+  font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 1.1rem;
   background-color: #000000;
   color: #ffffff;
   overflow-x: hidden;
@@ -60,7 +61,6 @@ body {
 }
 
 html {
-  font-size: 62.5%;
   box-sizing: border-box;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -69,55 +69,30 @@ html {
   width: 100%;
   height: 100%;
 }
-@media only screen and (max-width: 62.5em) {
-  html {
-    font-size: 56.25%;
-  }
-}
-@media only screen and (max-width: 56.25em) {
-  html {
-    font-size: 54%;
-  }
-}
-@media only screen and (max-width: 37.5em) {
-  html {
-    font-size: 51%;
-  }
-}
-@media only screen and (min-width: 112.5em) {
-  html {
-    font-size: 75%;
-  }
+
+h1, h2, h3, h4, h5 {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
 }
 
 h1 {
-  font-family: "Inconsolata", monospace;
-  font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 4rem;
+  font-size: 3rem;
 }
 
 h2 {
-  font-family: "Inconsolata", monospace;
-  font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 3.2rem;
+  font-size: 2.6rem;
 }
 
 h3 {
-  font-family: "Inconsolata", monospace;
-  font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 2.5rem;
-}
-
-h4 {
-  font-family: "Inconsolata", monospace;
-  font-variation-settings: "wght" 400, "wdth" 100;
   font-size: 2rem;
 }
 
-h5 {
-  font-family: "Inconsolata", monospace;
-  font-variation-settings: "wght" 400, "wdth" 100;
+h4 {
   font-size: 1.5rem;
+}
+
+h5 {
+  font-size: 1.2rem;
 }
 
 svg.wave {
@@ -125,7 +100,7 @@ svg.wave {
   display: block;
   position: relative;
   width: 100%;
-  fill: #100f0f;
+  fill: #100f0f !important;
   z-index: -1;
 }
 svg.wave .wavePath {
@@ -143,15 +118,17 @@ svg.wave.down {
   z-index: 1;
 }
 
-#b {
-  height: 20px !important;
+.comment {
+  text-transform: uppercase;
+  color: grey;
 }
 
-.b {
-  height: 200px !important;
+.title {
+  color: aliceblue;
 }
-.b #b {
-  fill: aquamarine;
+
+li {
+  list-style: none;
 }
 
 .loader {
@@ -318,7 +295,7 @@ section#intro .intro-svg {
 .intro-scroll {
   z-index: 2;
   position: absolute;
-  bottom: 5;
+  bottom: 5px;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -421,8 +398,7 @@ section#skills {
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16, 15, 15) 20%);
 }
 
-#projects {
-  height: 2000px;
+section#projects {
   background-color: #100f0f;
 }
 
@@ -492,7 +468,13 @@ section#skills {
 }
 section#bye {
   height: 150vh;
-  background-color: blueviolet;
+  position: relative;
+  background: linear-gradient(0deg, rgb(31, 209, 120) 0%, rgb(74, 134, 221) 85%);
+}
+section#bye .bye-wave {
+  z-index: 0;
+  position: absolute;
+  top: 0;
 }
 section#bye .bye-wave .p-1 {
   opacity: 0.9;
@@ -501,21 +483,70 @@ section#bye .bye-wave .p-2 {
   fill: #111010;
   opacity: 1;
 }
-
-.bye-wave stop:nth-child(1) {
+section#bye .bye-wave stop:nth-child(1) {
   stop-color: #dd4ad6;
 }
-
-.bye-wave stop:nth-child(2) {
+section#bye .bye-wave stop:nth-child(2) {
   stop-color: #d16f1f;
 }
 
-.dawdad {
+.bye-sand {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+
+.bStats_wrapper {
+  display: grid;
+  grid-template-columns: 150px 150px 150px;
+  gap: 30px;
+  padding-top: 60px;
+  padding-bottom: 60px;
+  justify-content: center;
+}
+.bStats_wrapper ul li:nth-child(1) {
+  font-variation-settings: "wght" 700, "wdth" 100;
+  margin-bottom: 8px;
+}
+.bStats_wrapper ul li:nth-child(4) {
+  margin-bottom: 8px;
+}
+
+@media only screen and (max-width: 720px) {
+  .bStats_wrapper {
+    grid-auto-flow: row;
+    grid-template-rows: 200px 200px 200px;
+    grid-template-columns: auto;
+  }
+}
+.bContact {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+.bContact p {
+  color: grey;
+  font-size: 2rem;
+}
+
+.bTxt {
+  position: absolute;
+  margin-top: 60vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.bTxt p {
+  padding: 5px;
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 5.5rem;
+  font-size: 2.5rem;
   transform: skew(0deg, 340deg) scaleY(1.33333);
-  margin-left: 400px;
+}
+.bTxt p:nth-child(2) {
+  font-size: 1.5rem;
 }
 
 .display-Null {
