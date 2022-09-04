@@ -118,7 +118,6 @@ h5 {
   font-family: "Inconsolata", monospace;
   font-variation-settings: "wght" 400, "wdth" 100;
   font-size: 1.5rem;
-  visibility: hidden;
 }
 
 svg.wave {
@@ -491,6 +490,34 @@ section#skills {
     grid-template-columns: 300px 300px 300px 300px 300px;
   }
 }
+section#bye {
+  height: 150vh;
+  background-color: blueviolet;
+}
+section#bye .bye-wave .p-1 {
+  opacity: 0.9;
+}
+section#bye .bye-wave .p-2 {
+  fill: #111010;
+  opacity: 1;
+}
+
+.bye-wave stop:nth-child(1) {
+  stop-color: #dd4ad6;
+}
+
+.bye-wave stop:nth-child(2) {
+  stop-color: #d16f1f;
+}
+
+.dawdad {
+  font-family: "Inconsolata", monospace;
+  font-variation-settings: "wght" 400, "wdth" 100;
+  font-size: 5.5rem;
+  transform: skew(0deg, 340deg) scaleY(1.33333);
+  margin-left: 400px;
+}
+
 .display-Null {
   visibility: hidden;
 }
