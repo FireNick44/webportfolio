@@ -121,6 +121,16 @@ svg.wave.down {
 .comment {
   text-transform: uppercase;
   color: grey;
+  margin-bottom: 40px;
+}
+
+.tBox {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1560px;
+  width: calc(100% - 40px);
+  padding-left: 20px;
+  padding-right: 20px;
 }
 
 .title {
@@ -129,6 +139,10 @@ svg.wave.down {
 
 li {
   list-style: none;
+}
+
+.abso {
+  position: absolute;
 }
 
 .loader {
@@ -399,16 +413,17 @@ section#skills {
 }
 
 section#projects {
+  z-index: 10;
   background-color: #100f0f;
 }
 
 .pBox_wrapper {
   display: grid;
+  justify-content: center;
   grid-template-columns: 300px 300px 300px;
   gap: 60px;
   padding-top: 60px;
-  padding-bottom: 60px;
-  justify-content: center;
+  padding-bottom: 100px;
 }
 .pBox_wrapper h2 {
   font-variation-settings: "wght" 700, "wdth" 105;
@@ -471,10 +486,14 @@ section#bye {
   position: relative;
   background: linear-gradient(0deg, rgb(31, 209, 120) 0%, rgb(74, 134, 221) 85%);
 }
+section#bye .bye-wave-fix {
+  z-index: 10;
+  background-color: #302e2e;
+  width: 100%;
+  height: calc(400px - 15vw);
+}
 section#bye .bye-wave {
   z-index: 0;
-  position: absolute;
-  top: 0;
 }
 section#bye .bye-wave .p-1 {
   opacity: 0.9;
@@ -501,7 +520,7 @@ section#bye .bye-wave stop:nth-child(2) {
   grid-template-columns: 150px 150px 150px;
   gap: 30px;
   padding-top: 60px;
-  padding-bottom: 60px;
+  padding-bottom: 360px;
   justify-content: center;
 }
 .bStats_wrapper ul li:nth-child(1) {
@@ -521,6 +540,7 @@ section#bye .bye-wave stop:nth-child(2) {
 }
 .bContact {
   position: absolute;
+  top: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -531,12 +551,25 @@ section#bye .bye-wave stop:nth-child(2) {
   font-size: 2rem;
 }
 
-.bTxt {
+.bCom {
   position: absolute;
-  margin-top: 60vw;
+  top: 0;
+  width: 100%;
+}
+
+@media only screen and (min-width: 800px) {
+  .bContact {
+    top: 13vw;
+  }
+  .bCom {
+    top: 3vw;
+  }
+}
+.bTxt {
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
 }
 .bTxt p {
   padding: 5px;
@@ -573,13 +606,16 @@ header .desktop {
   width: 100%;
 }
 header .desktop .header-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1600px;
   width: calc(100% - 40px);
+  padding-left: 20px;
+  padding-right: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 50px;
-  padding-left: 20px;
-  padding-right: 20px;
   position: absolute;
   top: 0;
   left: 0;

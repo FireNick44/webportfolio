@@ -79,13 +79,26 @@ svg.wave.down {
 }
 
 
+//viewBox="0 120 1440 150" for smaller wave
+
 .comment{
       //? REM for comment of topic (see XD)
    text-transform: uppercase;
    color: grey;
+   margin-bottom: 40px;
 
 }
 
+
+.tBox{
+   margin-left: auto;
+   margin-right: auto;
+   max-width: 1560px;
+   width: calc(100% - 40px);
+   padding-left: 20px;
+   padding-right: 20px;
+
+}
 
 .title{
    color: aliceblue; //just 4 no err
@@ -94,4 +107,8 @@ svg.wave.down {
 
 li{
    list-style: none;
+}
+
+.abso{
+   position: absolute;
 }

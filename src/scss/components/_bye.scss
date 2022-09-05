@@ -4,10 +4,16 @@ section#bye {
    height: 150vh;
    position: relative;
    background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%);
+
+   .bye-wave-fix{
+      z-index: 10;
+      background-color: #302e2e;
+      width: 100%;
+      height: calc(400px - 15vw);
+   }
+
    .bye-wave{
       z-index: 0;
-      position: absolute;
-      top: 0;
 
       .p-1{
          opacity: 0.9;
@@ -38,7 +44,7 @@ section#bye {
    grid-template-columns: 150px 150px 150px;
    gap: 30px;
    padding-top: 60px;
-   padding-bottom: 60px;
+   padding-bottom: 360px;
    justify-content: center;
    ul{
       li:nth-child(1){
@@ -60,13 +66,9 @@ section#bye {
    }
 }
 
-@media only screen and (max-width: 1200px) {
-
-}
-
-
 .bContact{
    position: absolute;
+   top: 100px;
    display: flex;
    flex-direction: column;
    align-items: center;
@@ -78,13 +80,26 @@ section#bye {
    }
 }
 
-.bTxt{
+.bCom{
    position: absolute;
-   margin-top: 60vw;
+   top: 0;
+   width: 100%;
+}
+
+@media only screen and (min-width: 800px) {
+   .bContact{
+      top: 13vw;
+   }
+   .bCom{
+      top: 3vw;
+   }
+}
+
+.bTxt{
    display: flex;
    flex-direction: column;
    align-items: center;
-
+   width: 100%;
    p{
       padding: 5px;
       font-family: "Inconsolata", monospace;
@@ -96,4 +111,3 @@ section#bye {
       font-size: 1.5rem;
    }
 }
-
