@@ -1,6 +1,10 @@
 $font: "Inconsolata";
 $cond: 75;
 
+@font-face {
+   font-family: "BerlinType";
+   src: url(./../src/font/BerlinTypeWeb-Regular.woff2) format("truetype");
+}
 
 @font-face {
    font-family: $font;
