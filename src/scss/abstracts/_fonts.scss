@@ -2,15 +2,17 @@ $font: "Inconsolata";
 $cond: 75;
 
 @font-face {
-   font-family: "BerlinType";
-   src: url(./../src/font/BerlinTypeWeb-Regular.woff2) format("truetype");
-}
-
-@font-face {
    font-family: $font;
    src: url(./../font/Inconsolata-VariableFont_wdth\,wght.ttf) format("truetype");
    font-weight: 200 100;
    font-style: normal;
+   font-display: swap;
+}
+
+@font-face {
+   font-family: "BerlinType";
+   src: url(./../font/BerlinTypeWeb-Regular.woff2) format("woff2");
+   font-display: swap;
 }
 
 p {

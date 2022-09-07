@@ -1,6 +1,6 @@
 @use "../abstracts" as *;
 
-$font: "Inconsolata";
+$font: "BerlinType";
 //font-family: $font;
 
 * {
@@ -9,13 +9,13 @@ $font: "Inconsolata";
 }
 
 body {
-   font-family: "Inconsolata", monospace;
+   font-family: "BerlinType", sans-serif;
    font-variation-settings: "wght" 400, "wdth" 100;
    font-size: 1.1rem;
    background-color: $black;
    color: $white;
-   overflow-x: hidden;
    overflow: overlay;
+   overflow-x: hidden;
    margin: 0px;
    padding: 0px;
    width: 100%;
@@ -33,7 +33,7 @@ html {
 }
 
 h1,h2,h3,h4,h5{
-   font-family: "Inconsolata", monospace;
+   font-family: "BerlinType", sans-serif;
    font-variation-settings: "wght" 400, "wdth" 100;
 }
 
@@ -90,13 +90,7 @@ svg.wave.down {
 }
 
 .tBox{
-   margin-left: auto;
-   margin-right: auto;
-   max-width: 1560px;
-   width: calc(100% - 40px);
-   padding-left: 20px;
-   padding-right: 20px;
-
+   @include Box1600;
 }
 
 .title{

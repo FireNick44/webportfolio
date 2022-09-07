@@ -1,9 +1,9 @@
 @use "../abstracts" as *;
 
 section#bye {
-   height: 150vh;
    position: relative;
-   background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%);
+   background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
+   //background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 
    .bye-wave-fix{
       z-index: 10;
@@ -23,12 +23,22 @@ section#bye {
          opacity: 1;
       }
 
+      /*
       stop:nth-child(1) {
          stop-color: #dd4ad6;
       }
 
       stop:nth-child(2) {
          stop-color: #d16f1f;
+      }
+      */
+
+      stop:nth-child(1) {
+         stop-color: #4932cc;
+      }
+
+      stop:nth-child(2) {
+         stop-color: #69e9e9;
       }
    }
 }
@@ -39,30 +49,38 @@ section#bye {
    width: 100%;
 }
 
-.bStats_wrapper{
-   display: grid;
-   grid-template-columns: 150px 150px 150px;
-   gap: 30px;
-   padding-top: 60px;
-   padding-bottom: 360px;
-   justify-content: center;
-   ul{
-      li:nth-child(1){
-         font-variation-settings: "wght" 700, "wdth" 100;
-         margin-bottom: 8px;
-      }
-      
-      li:nth-child(4){
-         margin-bottom: 8px;
+@media only screen and (max-width: 1300px) {
+   .bye-sand{
+      width: auto;
+      height: 150px;
+   }
+}
+
+.bMade{
+   @include Box1600;
+
+   .bStats_wrapper{
+      display: flex;
+      gap: 30px;
+      padding-top: 60px;
+      padding-bottom: 360px;
+      flex-direction: row;
+      ul{
+         li:nth-child(1){
+            font-variation-settings: "wght" 700, "wdth" 100;
+            margin-bottom: 8px;
+         }
+         
+         li:nth-child(4){
+            margin-bottom: 8px;
+         }
       }
    }
 }
 
-@media only screen and (max-width: 720px) {
+@media only screen and (max-width: 490px) {
    .bStats_wrapper{
-      grid-auto-flow: row;
-      grid-template-rows: 200px 200px 200px;
-      grid-template-columns: auto;
+      flex-direction: column !important;
    }
 }
 
@@ -80,19 +98,31 @@ section#bye {
    }
 }
 
-.bCom{
+.bComFix{
    position: absolute;
    top: 0;
    width: 100%;
+}
+
+.bTitFix{
+   position: relative;
+   top: -30vw;
 }
 
 @media only screen and (min-width: 800px) {
    .bContact{
       top: 13vw;
    }
-   .bCom{
+
+   .bTitFix {
+      top: -18vh;
+  }
+
+   /*
+   .bComFix{
       top: 3vw;
    }
+   */
 }
 
 .bTxt{
@@ -102,7 +132,7 @@ section#bye {
    width: 100%;
    p{
       padding: 5px;
-      font-family: "Inconsolata", monospace;
+      font-family: "BerlinType", sans-serif;
       font-variation-settings: "wght" 400, "wdth" 100;
       font-size: 2.5rem;
       transform: skew(0deg, 340deg) scaleY(1.33333);
