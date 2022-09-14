@@ -680,6 +680,16 @@ header .location {
   margin-right: 8px;
 }
 
+footer {
+  height: auto;
+  width: auto;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 30px;
+  background-color: #f6f2d4;
+  color: black;
+}
+
 ::-webkit-scrollbar {
   width: 16px;
 }
