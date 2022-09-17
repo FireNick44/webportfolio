@@ -1,52 +1,13 @@
 @font-face {
-  font-family: "Inconsolata";
-  src: url(./../font/Inconsolata-VariableFont_wdth\,wght.ttf) format("truetype");
-  font-weight: 200 100;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
   font-family: "BerlinType";
   src: url(./../font/BerlinTypeWeb-Regular.woff2) format("woff2");
   font-display: swap;
 }
-p {
-  font-family: "Inconsolata";
+@font-face {
+  font-family: "BerlinTypeBold";
+  src: url(./../font/BerlinTypeWeb-Bold.woff2) format("woff2");
+  font-display: swap;
 }
-p .extra_light {
-  font-variation-settings: "wght" 200, "wdth" 100;
-}
-p .light {
-  font-variation-settings: "wght" 300, "wdth" 100;
-}
-p .regular {
-  font-variation-settings: "wght" 400, "wdth" 100;
-}
-p .medium {
-  font-variation-settings: "wght" 500, "wdth" 100;
-}
-p .semi_bold {
-  font-variation-settings: "wght" 600, "wdth" 100;
-}
-p .bold {
-  font-variation-settings: "wght" 700, "wdth" 100;
-}
-p .extra_bold {
-  font-variation-settings: "wght" 800, "wdth" 100;
-}
-p .black {
-  font-variation-settings: "wght" 900, "wdth" 100;
-}
-p .cond_extra_light {
-  font-variation-settings: "wght" 200, "wdth" 75;
-}
-p .cond_light {
-  font-variation-settings: "wght" 300, "wdth" 75;
-}
-p .cond_regular {
-  font-variation-settings: "wght" 400, "wdth" 75;
-}
-
 * {
   margin: 0px;
   padding: 0px;
@@ -54,7 +15,6 @@ p .cond_regular {
 
 body {
   font-family: "BerlinType", sans-serif;
-  font-variation-settings: "wght" 400, "wdth" 100;
   font-size: 1.1rem;
   background-color: #000000;
   color: #ffffff;
@@ -76,29 +36,20 @@ html {
   height: 100%;
 }
 
-h1, h2, h3, h4, h5 {
-  font-family: "BerlinType", sans-serif;
-  font-variation-settings: "wght" 400, "wdth" 100;
-}
-
 h1 {
-  font-size: 3rem;
+  font-size: 2.3rem;
 }
 
 h2 {
-  font-size: 2.6rem;
+  font-size: 1.8rem;
 }
 
 h3 {
-  font-size: 2rem;
+  font-size: 1.4rem;
 }
 
 h4 {
-  font-size: 1.5rem;
-}
-
-h5 {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 svg.wave {
@@ -124,6 +75,14 @@ svg.wave.down {
   z-index: 1;
 }
 
+li {
+  list-style: none;
+}
+
+p {
+  font-family: "BerlinType", sans-serif;
+}
+
 .comment {
   text-transform: uppercase;
   color: grey;
@@ -137,14 +96,13 @@ svg.wave.down {
   width: calc(100% - 40px);
   padding-left: 20px;
   padding-right: 20px;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 20px;
 }
 
 .title {
   color: aliceblue;
-}
-
-li {
-  list-style: none;
 }
 
 .abso {
@@ -262,29 +220,26 @@ li {
 
 section#intro {
   height: 100vh;
-  overflow: hidden;
   position: relative;
   background: url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 }
 section#intro .intro-title {
-  z-index: 10;
-  position: absolute;
-  top: 0;
-  height: calc(100vh - 100px);
+  height: 80vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
 }
-section#intro .intro-title p {
-  font-variation-settings: "wght" 900, "wdth" 100;
+section#intro .intro-title h1 {
+  font-size: larger;
+  font-family: "BerlinTypeBold", sans-serif;
 }
-section#intro .intro-title p.text {
-  font-size: clamp(3.5rem, 5vw, 11rem);
+section#intro .intro-title h1.text {
+  font-size: clamp(1rem, 4vw, 6rem);
 }
-section#intro .intro-title p.name {
-  font-size: clamp(7rem, 10vw, 22rem);
+section#intro .intro-title h1.name {
+  font-size: clamp(3rem, 9vw, 20rem);
 }
 section#intro .intro-svg {
   z-index: -1 !important;
@@ -482,11 +437,6 @@ section#projects {
     grid-template-columns: 300px 300px;
   }
 }
-@media only screen and (min-width: 2200px) {
-  .pBox_wrapper {
-    grid-template-columns: 300px 300px 300px 300px 300px;
-  }
-}
 section#bye {
   position: relative;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
@@ -547,11 +497,11 @@ section#bye .bye-wave stop:nth-child(2) {
   display: flex;
   gap: 30px;
   padding-top: 60px;
-  padding-bottom: 360px;
+  padding-bottom: 300px;
   flex-direction: row;
 }
 .bMade .bStats_wrapper ul li:nth-child(1) {
-  font-variation-settings: "wght" 700, "wdth" 100;
+  font-weight: 600;
   margin-bottom: 8px;
 }
 .bMade .bStats_wrapper ul li:nth-child(4) {
@@ -584,15 +534,15 @@ section#bye .bye-wave stop:nth-child(2) {
 
 .bTitFix {
   position: relative;
-  top: -30vw;
+  top: -15vw;
 }
 
-@media only screen and (min-width: 800px) {
+@media only screen and (min-width: 900px) {
   .bContact {
     top: 13vw;
   }
   .bTitFix {
-    top: -18vh;
+    top: -12vh;
   }
   /*
   .bComFix{
@@ -609,12 +559,11 @@ section#bye .bye-wave stop:nth-child(2) {
 .bTxt p {
   padding: 5px;
   font-family: "BerlinType", sans-serif;
-  font-variation-settings: "wght" 400, "wdth" 100;
-  font-size: 2.5rem;
+  font-size: clamp(1rem, 5vw, 3rem);
   transform: skew(0deg, 340deg) scaleY(1.33333);
 }
 .bTxt p:nth-child(2) {
-  font-size: 1.5rem;
+  font-size: clamp(1rem, 4vw, 2.5rem);
 }
 
 .display-Null {
@@ -628,9 +577,8 @@ header {
   left: 0px;
   width: 100%;
   height: 50px;
-  font-size: 20px;
-  font-weight: 500;
-  font-variation-settings: "wght" 600;
+  font-size: 22px;
+  font-weight: normal;
 }
 header .desktop {
   position: relative;
@@ -639,7 +587,7 @@ header .desktop {
   max-width: 1600px;
   width: 100%;
 }
-header .desktop .header-container {
+header .desktop nav {
   margin-left: auto;
   margin-right: auto;
   max-width: 1600px;
@@ -648,13 +596,10 @@ header .desktop .header-container {
   padding-right: 20px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   height: 50px;
-  position: absolute;
-  top: 0;
-  left: 0;
 }
-header .desktop .header-container nav ul {
+header .desktop nav ul {
   display: flex;
   align-content: center;
   align-items: center;
@@ -662,7 +607,7 @@ header .desktop .header-container nav ul {
   list-style-type: none;
   height: 50px;
 }
-header .desktop .header-container li {
+header .desktop nav li {
   margin-left: 8px;
   margin-right: 8px;
 }
@@ -675,10 +620,6 @@ header svg {
   margin-top: 5px;
   fill: white;
 }
-header .location {
-  margin-left: 8px;
-  margin-right: 8px;
-}
 
 footer {
   height: auto;
@@ -687,7 +628,7 @@ footer {
   justify-content: center;
   padding-bottom: 30px;
   background-color: #f6f2d4;
-  color: black;
+  color: #774a2d;
 }
 
 ::-webkit-scrollbar {

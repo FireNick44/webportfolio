@@ -63,11 +63,11 @@ section#bye {
       display: flex;
       gap: 30px;
       padding-top: 60px;
-      padding-bottom: 360px;
+      padding-bottom: 300px;
       flex-direction: row;
       ul{
          li:nth-child(1){
-            font-variation-settings: "wght" 700, "wdth" 100;
+            font-weight: 600;
             margin-bottom: 8px;
          }
          
@@ -106,16 +106,16 @@ section#bye {
 
 .bTitFix{
    position: relative;
-   top: -30vw;
+   top: -15vw;
 }
 
-@media only screen and (min-width: 800px) {
+@media only screen and (min-width: 900px) {
    .bContact{
       top: 13vw;
    }
 
    .bTitFix {
-      top: -18vh;
+      top: -12vh;
   }
 
    /*
@@ -130,14 +130,14 @@ section#bye {
    flex-direction: column;
    align-items: center;
    width: 100%;
+
    p{
       padding: 5px;
       font-family: "BerlinType", sans-serif;
-      font-variation-settings: "wght" 400, "wdth" 100;
-      font-size: 2.5rem;
+      font-size: clamp(1rem, 5vw, 3rem);
       transform: skew(0deg, 340deg) scaleY(1.33333);
    }
    p:nth-child(2){
-      font-size: 1.5rem;
+      font-size: clamp(1rem, 4vw, 2.5rem);
    }
 }

@@ -10,7 +10,6 @@ $font: "BerlinType";
 
 body {
    font-family: "BerlinType", sans-serif;
-   font-variation-settings: "wght" 400, "wdth" 100;
    font-size: 1.1rem;
    background-color: $black;
    color: $white;
@@ -32,29 +31,22 @@ html {
    height: 100%;
 }
 
-h1,h2,h3,h4,h5{
-   font-family: "BerlinType", sans-serif;
-   font-variation-settings: "wght" 400, "wdth" 100;
-}
+//font-family: "BerlinTypeBold", sans-serif;
 
 h1 {
-   font-size: 3rem;
+   font-size: 2.3rem;
 }
 
 h2 {
-   font-size: 2.6rem;
+   font-size: 1.8rem;
 }
 
 h3 {
-   font-size: 2rem;
+   font-size: 1.4rem;
 }
 
 h4 {
-   font-size: 1.5rem;
-}
-
-h5 {
-   font-size: 1.2rem;
+   font-size: 1.1rem;
 }
 
 svg.wave {
@@ -78,6 +70,13 @@ svg.wave.down {
    z-index: 1;
 }
 
+li{
+   list-style: none;
+}
+
+p {
+   font-family: "BerlinType", sans-serif;
+}
 
 //viewBox="0 120 1440 150" for smaller wave
 
@@ -91,15 +90,13 @@ svg.wave.down {
 
 .tBox{
    @include Box1600;
+   position: sticky;
+   top: 20px;
 }
 
 .title{
    color: aliceblue; //just 4 no err
    //? REM for titels of sections
-}
-
-li{
-   list-style: none;
 }
 
 .abso{
