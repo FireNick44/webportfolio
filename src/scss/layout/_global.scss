@@ -83,7 +83,7 @@ p {
 .comment{
       //? REM for comment of topic (see XD)
    text-transform: uppercase;
-   color: grey;
+   color: rgb(184, 184, 184);
    margin-bottom: 40px;
 
 }
@@ -91,7 +91,7 @@ p {
 .tBox{
    @include Box1600;
    position: sticky;
-   top: 20px;
+   top: 8px;
 }
 
 .title{
@@ -101,4 +101,8 @@ p {
 
 .abso{
    position: absolute;
+}
+
+.bb{
+   background-color: $background;
 }

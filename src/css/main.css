@@ -85,7 +85,7 @@ p {
 
 .comment {
   text-transform: uppercase;
-  color: grey;
+  color: rgb(184, 184, 184);
   margin-bottom: 40px;
 }
 
@@ -98,7 +98,7 @@ p {
   padding-right: 20px;
   position: -webkit-sticky;
   position: sticky;
-  top: 20px;
+  top: 8px;
 }
 
 .title {
@@ -107,6 +107,10 @@ p {
 
 .abso {
   position: absolute;
+}
+
+.bb {
+  background-color: #100f0f;
 }
 
 .loader {
@@ -443,7 +447,7 @@ section#bye {
 }
 section#bye .bye-wave-fix {
   z-index: 10;
-  background-color: #302e2e;
+  background-color: #100f0f;
   width: 100%;
   height: calc(400px - 15vw);
 }
@@ -463,7 +467,7 @@ section#bye .bye-wave .p-1 {
   opacity: 0.9;
 }
 section#bye .bye-wave .p-2 {
-  fill: #111010;
+  fill: #100f0f;
   opacity: 1;
 }
 section#bye .bye-wave stop:nth-child(1) {
@@ -526,10 +530,11 @@ section#bye .bye-wave stop:nth-child(2) {
   font-size: 2rem;
 }
 
-.bComFix {
+.bBoxFix {
   position: absolute;
   top: 0;
   width: 100%;
+  height: 80px;
 }
 
 .bTitFix {
