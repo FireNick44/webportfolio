@@ -443,7 +443,8 @@ section#projects {
 }
 section#bye {
   position: relative;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
+  overflow-x: hidden;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(svg/intro-bg.svg) no-repeat fixed center/cover;
 }
 section#bye .bye-wave-fix {
   z-index: 10;

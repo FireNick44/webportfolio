@@ -2,7 +2,8 @@
 
 section#bye {
    position: relative;
-   background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
+   overflow-x: hidden;
+   background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(svg/intro-bg.svg) no-repeat fixed center/cover;
    //background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 
    .bye-wave-fix{
