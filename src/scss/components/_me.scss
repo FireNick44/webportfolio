@@ -1,14 +1,108 @@
 @use "../abstracts" as *;
 
-.intro {
-   display: flex;
-   justify-content: center;
-   overflow: hidden;
-   flex-direction: column;
+section#me {
+   background-color: $container;
 
-   .test2 {
-      z-index: 10;
-      height: 1000px;
-      background-color: $container;
+   .intro {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+   }
+
+   .aboutContainer{
+      max-width: 2000px;
+      padding: 20px;
+      margin: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      
+   }
+}
+
+.fluidContainer{
+   display: flex;
+   justify-content: space-between;
+   align-items: center;
+   width: 100%;
+   margin-bottom: 120px;
+
+   .pictureContainer{
+      margin-left: 3vw;
+      width: 500px;
+      height: 500px;
+
+      .picture{
+         height: 100%;
+         width: 100%;
+         border-radius: 100%;
+         background-image: url(/src/img/pic.png);
+         background-size: contain;
+         rotate: -8deg;
+      }
+   }
+
+   .skillContainer div.columns {
+      margin-bottom: 30px;
+   }
+
+   .columns ul{
+      display: grid;
+      grid-template-columns: 15vw 15vw 15vw;
+      grid-column-gap: 1vw;
+   }
+
+   .columns h3{
+      border-bottom: 1px solid $comment;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+   }
+}
+
+.slashC{
+   color: $comment;
+   font-family: "BerlinTypeBold";
+   margin-bottom: 5px;
+   margin-top: 5px;
+}
+
+
+@media only screen and (max-width: 1300px) {
+   .aboutContainer{
+      margin-top: 50px !important;
+      align-items: center !important;
+   }
+
+   .fluidContainer{
+      flex-direction: column;
+      align-items: center;
+
+      .pictureContainer{
+         margin-left: 0;
+         margin-top: 50px;
+         margin-bottom: 100px;
+      }
+   }
+
+   .columns ul{
+      grid-template-columns: 28vw 28vw 28vw !important;
+   }
+}
+
+@media only screen and (max-width: 720px) {
+   .columns ul{
+      grid-template: auto auto auto/ 85vw !important;
+      grid-row-gap: 30px;
+   }
+   .pictureContainer{
+      width: 300px !important;
+      height: 300px !important;
+   }
+}
+
+
+@media only screen and (min-width: 2200px) {
+   .columns ul{
+      grid-template-columns: 340px 340px 340px !important;
    }
 }

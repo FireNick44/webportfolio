@@ -3,7 +3,7 @@
 section#bye {
    position: relative;
    overflow-x: hidden;
-   background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(svg/intro-bg.svg) no-repeat fixed center/cover;
+   background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
    //background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 
    .bye-wave-fix{
@@ -23,16 +23,6 @@ section#bye {
          fill: $background;
          opacity: 1;
       }
-
-      /*
-      stop:nth-child(1) {
-         stop-color: #dd4ad6;
-      }
-
-      stop:nth-child(2) {
-         stop-color: #d16f1f;
-      }
-      */
 
       stop:nth-child(1) {
          stop-color: #4932cc;
@@ -94,8 +84,16 @@ section#bye {
    width: 100%;
 
    p{
-      color: grey;
-      font-size: 2rem;
+      color: $gray;
+      font-size: clamp(1.6rem, 4vw, 2rem);
+
+      a{
+         color: $gray;
+         transition: all 0.2s;
+      }
+      a:hover{
+         color: #8cc6d2;
+      }
    }
 }
 

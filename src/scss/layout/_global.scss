@@ -106,3 +106,6 @@ p {
 .bb{
    background-color: $background;
 }
+
+
+::selection { background: rgba(55, 135, 255, 0.534); color: rgba(255, 255, 255, 0.89); }

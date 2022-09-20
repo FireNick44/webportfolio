@@ -2,7 +2,7 @@
 
 section#skills {
    position: relative;
-   height: 110vh;
+   height: 120vh;
    background: url(/src/svg/skill-bg.svg) no-repeat fixed center/cover;
 
 }
@@ -31,4 +31,15 @@ section#skills {
 
 @media only screen and (max-width: 1600px) {
 
+}
+
+.skillFlasks{
+   position: absolute;
+   top: 0;
+   left: 0;
+   right: 0;
+   bottom: 0;
+   background: url(/src/svg/flasks.svg) no-repeat center top; 
+   background-size: cover; 
+   height:120vh;
 }

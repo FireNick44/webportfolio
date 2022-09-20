@@ -113,6 +113,16 @@ p {
   background-color: #100f0f;
 }
 
+::-moz-selection {
+  background: rgba(55, 135, 255, 0.534);
+  color: rgba(255, 255, 255, 0.89);
+}
+
+::selection {
+  background: rgba(55, 135, 255, 0.534);
+  color: rgba(255, 255, 255, 0.89);
+}
+
 .loader {
   position: fixed;
   top: 0;
@@ -236,7 +246,6 @@ section#intro .intro-title {
   align-items: center;
 }
 section#intro .intro-title h1 {
-  font-size: larger;
   font-family: "BerlinTypeBold", sans-serif;
 }
 section#intro .intro-title h1.text {
@@ -339,21 +348,100 @@ section#intro .intro-svg {
     d: path("M 0,400 C 0,400 0,200 0,200 C 113.14285714285714,195.28571428571428 226.28571428571428,190.57142857142858 345,176 C 463.7142857142857,161.42857142857142 587.9999999999999,136.99999999999997 722,140 C 856.0000000000001,143.00000000000003 999.7142857142858,173.42857142857144 1121,188 C 1242.2857142857142,202.57142857142856 1341.142857142857,201.28571428571428 1440,200 C 1440,200 1440,400 1440,400 Z");
   }
 }
-.intro {
-  display: flex;
-  justify-content: center;
-  overflow: hidden;
-  flex-direction: column;
-}
-.intro .test2 {
-  z-index: 10;
-  height: 1000px;
+section#me {
   background-color: #100f0f;
 }
+section#me .intro {
+  max-width: 1200px;
+  margin: auto;
+  padding: 20px;
+}
+section#me .aboutContainer {
+  max-width: 2000px;
+  padding: 20px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
 
+.fluidContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 120px;
+}
+.fluidContainer .pictureContainer {
+  margin-left: 3vw;
+  width: 500px;
+  height: 500px;
+}
+.fluidContainer .pictureContainer .picture {
+  height: 100%;
+  width: 100%;
+  border-radius: 100%;
+  background-image: url(/src/img/pic.png);
+  background-size: contain;
+  rotate: -8deg;
+}
+.fluidContainer .skillContainer div.columns {
+  margin-bottom: 30px;
+}
+.fluidContainer .columns ul {
+  display: grid;
+  grid-template-columns: 15vw 15vw 15vw;
+  grid-column-gap: 1vw;
+}
+.fluidContainer .columns h3 {
+  border-bottom: 1px solid #5f5f5f;
+  padding-bottom: 5px;
+  margin-bottom: 10px;
+}
+
+.slashC {
+  color: #5f5f5f;
+  font-family: "BerlinTypeBold";
+  margin-bottom: 5px;
+  margin-top: 5px;
+}
+
+@media only screen and (max-width: 1300px) {
+  .aboutContainer {
+    margin-top: 50px !important;
+    align-items: center !important;
+  }
+  .fluidContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+  .fluidContainer .pictureContainer {
+    margin-left: 0;
+    margin-top: 50px;
+    margin-bottom: 100px;
+  }
+  .columns ul {
+    grid-template-columns: 28vw 28vw 28vw !important;
+  }
+}
+@media only screen and (max-width: 720px) {
+  .columns ul {
+    grid-template: auto auto auto/85vw !important;
+    grid-row-gap: 30px;
+  }
+  .pictureContainer {
+    width: 300px !important;
+    height: 300px !important;
+  }
+}
+@media only screen and (min-width: 2200px) {
+  .columns ul {
+    grid-template-columns: 340px 340px 340px !important;
+  }
+}
 section#skills {
   position: relative;
-  height: 110vh;
+  height: 120vh;
   background: url(/src/svg/skill-bg.svg) no-repeat fixed center/cover;
 }
 
@@ -377,6 +465,17 @@ section#skills {
   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16, 15, 15) 20%);
 }
 
+.skillFlasks {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url(/src/svg/flasks.svg) no-repeat center top;
+  background-size: cover;
+  height: 120vh;
+}
+
 section#projects {
   z-index: 10;
   background-color: #100f0f;
@@ -391,31 +490,50 @@ section#projects {
   padding-bottom: 100px;
 }
 .pBox_wrapper h2 {
-  font-variation-settings: "wght" 700, "wdth" 105;
+  font-family: "BerlinTypeBold", sans-serif;
+  font-size: 2.2rem;
 }
 
 .pBox {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
   height: 260px;
   width: 260px;
   padding: 20px;
   color: rgb(0, 0, 0);
-  background: linear-gradient(170deg, #ffb37a, #f0c0fc);
-}
-
-.pBox:nth-child(1) {
-  background: linear-gradient(170deg, #ffb37a, #f0c0fc);
+  background: linear-gradient(170deg, #7afff8, #8174f7);
 }
 
 .pBox:nth-child(2) {
-  background: linear-gradient(223deg, #A1F2FF, #DFA3EE);
+  background: linear-gradient(123deg, #95bef5, #5ad698);
+}
+
+.pBox:nth-child(3) {
+  background: linear-gradient(23deg, #A1F2FF, #DFA3EE);
+}
+
+.pBox:nth-child(4) {
+  background: linear-gradient(170deg, #e1a1ff, #e46565);
+}
+
+.pBox:nth-child(5) {
+  background: linear-gradient(210deg, #b1e9f3, #855ad6);
+}
+
+.pBox:nth-child(6) {
+  background: linear-gradient(150deg, #9eebcb, #d2e69c);
+}
+
+.pBox:nth-child(7) {
+  background: linear-gradient(233deg, #855ad6, #DFA3EE);
+}
+
+.pBox:nth-child(8) {
+  background: linear-gradient(70deg, #1e4eee, #A1F2FF);
 }
 
 .pBox_links {
   display: flex;
   justify-content: flex-end;
+  margin-bottom: 60px;
 }
 
 .pBox_img {
@@ -424,11 +542,12 @@ section#projects {
 }
 
 .pBox_content {
-  margin-left: 40px;
+  margin-left: 30px;
 }
 
 .pBox_Name {
   margin-bottom: 20px;
+  height: 100px;
 }
 
 @media only screen and (max-width: 720px) {
@@ -444,7 +563,7 @@ section#projects {
 section#bye {
   position: relative;
   overflow-x: hidden;
-  background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(svg/intro-bg.svg) no-repeat fixed center/cover;
+  background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 }
 section#bye .bye-wave-fix {
   z-index: 10;
@@ -454,15 +573,6 @@ section#bye .bye-wave-fix {
 }
 section#bye .bye-wave {
   z-index: 0;
-  /*
-  stop:nth-child(1) {
-     stop-color: #dd4ad6;
-  }
-
-  stop:nth-child(2) {
-     stop-color: #d16f1f;
-  }
-  */
 }
 section#bye .bye-wave .p-1 {
   opacity: 0.9;
@@ -527,8 +637,15 @@ section#bye .bye-wave stop:nth-child(2) {
   width: 100%;
 }
 .bContact p {
-  color: grey;
-  font-size: 2rem;
+  color: #A7A2A2;
+  font-size: clamp(1.6rem, 4vw, 2rem);
+}
+.bContact p a {
+  color: #A7A2A2;
+  transition: all 0.2s;
+}
+.bContact p a:hover {
+  color: #8cc6d2;
 }
 
 .bBoxFix {
