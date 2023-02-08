@@ -12,7 +12,7 @@ async function sessionOnLoadPage() { }
 
 async function sessionLoadPage() {
    if (!sessionStorage.getItem("pageWasLoaded")) {
-      await Sleep(4000);
+      await Sleep(5000);
       loader.classList.add("disappear");
       await Sleep(100);
       content.classList.add("appear");

@@ -2,13 +2,14 @@
 
 section#skills {
    position: relative;
-   height: 120vh;
+   height: 0;
+   padding-top: 56.25%; /* (img-height / img-width * container-width) */
    background: url(/src/svg/skill-bg.svg) no-repeat fixed center/cover;
 
 }
 
 .skill-svg {
-   position: absolute;
+   position: absolute !important;
    z-index: -10;
 
    top: 0;
@@ -29,17 +30,36 @@ section#skills {
    background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16 15 15) 20%);
 }
 
-@media only screen and (max-width: 1600px) {
-
-}
-
 .skillFlasks{
    position: absolute;
    top: 0;
    left: 0;
    right: 0;
    bottom: 0;
-   background: url(/src/svg/flasks.svg) no-repeat center top; 
-   background-size: cover; 
-   height:120vh;
+   background: url(/src/img/pc-tra.webp) no-repeat center top; 
+   background-size: contain;
+   width: 90%;
+   margin-left: 5%;
+   margin-right: 5%;
+   height:auto;
+}
+
+@media only screen and (max-width: 1300px) {
+   section#skills {
+      padding-top: 178.49%; /* (img-height / img-width * container-width) */
+   }
+   .skillFlasks{
+      background: url(/src/img/tablet-tra.webp) no-repeat center top;
+      background-size: contain;
+   }
+}
+
+@media only screen and (max-width: 800px) {
+   section#skills {
+      padding-top: 378.4%; /* (img-height / img-width * container-width) */
+   }
+   .skillFlasks{
+      background: url(/src/img/mobile-tra.webp) no-repeat center top;
+      background-size: contain;
+   }
 }
