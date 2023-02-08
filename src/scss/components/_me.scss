@@ -7,6 +7,10 @@ section#me {
       max-width: 1200px;
       margin: auto;
       padding: 20px;
+
+      p{
+         text-align: center;
+      }
    }
 
    .aboutContainer{
@@ -36,7 +40,7 @@ section#me {
          height: 100%;
          width: 100%;
          border-radius: 100%;
-         background-image: url(/src/img/pic.png);
+         background-image: url(/src/img/pic.webp);
          background-size: contain;
          rotate: -8deg;
       }
