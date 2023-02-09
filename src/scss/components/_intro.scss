@@ -53,7 +53,7 @@ section#intro {
    .intro-brick{
       height: 50px;
       background-color: $wave;
-      
+      transition: 0.4s ease;
    }
 }
 
@@ -65,6 +65,10 @@ section#intro {
    display: flex;
    justify-content: center;
    animation: scrollHop 3s infinite;
+   svg{
+      fill: $white;
+      transition: 0.4s ease;
+   }
 }
 
 

@@ -53,11 +53,12 @@ h4 {
 }
 
 svg.wave {
+  transition: 0.4s ease;
   background: transparent;
   display: block;
   position: relative;
   width: 100%;
-  fill: #100f0f !important;
+  fill: #100f0f;
   z-index: -1;
 }
 svg.wave .wavePath {
@@ -67,6 +68,7 @@ svg.wave .wavePath {
 }
 
 svg.wave.down {
+  transition: 0.4s ease;
   transform: scaleY(-1) scaleX(-1) translateY(5px);
   margin-top: -1px;
   z-index: 1;
@@ -107,6 +109,31 @@ p {
 
 .bb {
   background-color: #100f0f;
+}
+
+.colorDark {
+  color: #100f0f;
+  transition: 0.4s ease;
+}
+
+.colorDarkBG {
+  color: black;
+  background-color: #ffffff !important;
+  transition: 0.4s ease;
+}
+
+.colorBlack {
+  color: black;
+}
+
+.colorDarkFill {
+  fill: #100f0f !important;
+  transition: 0.4s ease;
+}
+
+.colorLightFill {
+  fill: #ffffff !important;
+  transition: 0.4s ease;
 }
 
 ::-moz-selection {
@@ -247,6 +274,7 @@ section#intro .intro-svg {
 .intro-wave .intro-brick {
   height: 50px;
   background-color: #100f0f;
+  transition: 0.4s ease;
 }
 
 .intro-scroll {
@@ -257,6 +285,10 @@ section#intro .intro-svg {
   display: flex;
   justify-content: center;
   animation: scrollHop 3s infinite;
+}
+.intro-scroll svg {
+  fill: #ffffff;
+  transition: 0.4s ease;
 }
 
 @keyframes scrollHop {
@@ -288,6 +320,7 @@ section#intro .intro-svg {
   }
 }
 section#me {
+  transition: 0.4s ease;
   background-color: #100f0f;
 }
 section#me .intro {
@@ -401,11 +434,11 @@ section#skills {
 }
 
 .skill-blend {
+  fill: #100f0f;
   position: absolute;
   bottom: 0;
-  height: 80px;
   width: 100%;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16, 15, 15) 20%);
+  transition: 0.4s ease !important;
 }
 
 .skillFlasks {
@@ -424,7 +457,7 @@ section#skills {
 
 @media only screen and (max-width: 1300px) {
   section#skills {
-    padding-top: 178.49%; /* (img-height / img-width * container-width) */
+    padding-top: 171.59%; /* (img-height / img-width * container-width) */
   }
   .skillFlasks {
     background: url(/src/img/tablet-tra.webp) no-repeat center top;
@@ -441,8 +474,8 @@ section#skills {
   }
 }
 section#projects {
-  z-index: 10;
   background-color: #100f0f;
+  transition: 0.4s ease;
 }
 
 .pBox_wrapper {
@@ -526,10 +559,11 @@ section#projects {
 }
 section#bye {
   position: relative;
-  overflow-x: hidden;
+  overflow: hidden;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 }
 section#bye .bye-wave-fix {
+  transition: 0.4s ease;
   z-index: 10;
   background-color: #100f0f;
   width: 100%;
@@ -542,6 +576,7 @@ section#bye .bye-wave .p-1 {
   opacity: 0.9;
 }
 section#bye .bye-wave .p-2 {
+  transition: 0.4s ease;
   fill: #100f0f;
   opacity: 1;
 }
@@ -551,6 +586,10 @@ section#bye .bye-wave stop:nth-child(1) {
 section#bye .bye-wave stop:nth-child(2) {
   stop-color: #69e9e9;
 }
+section#bye .bye-waveLight .p-2 {
+  fill: #ffffff !important;
+  transition: 0.4s ease;
+}
 
 .bye-sand {
   position: absolute;
@@ -558,7 +597,19 @@ section#bye .bye-wave stop:nth-child(2) {
   width: 100%;
 }
 
-@media only screen and (max-width: 1300px) {
+@media only screen and (min-width: 1750px) {
+  .bye-sand {
+    width: auto;
+    transform: translateY(5vw);
+  }
+}
+@media only screen and (min-width: 2800px) {
+  .bye-sand {
+    width: auto;
+    transform: translateY(7vw);
+  }
+}
+@media only screen and (max-width: 780px) {
   .bye-sand {
     width: auto;
     height: 150px;
@@ -593,6 +644,8 @@ section#bye .bye-wave stop:nth-child(2) {
   }
 }
 .bContact {
+  transition: 0.4s ease;
+  background: transparent;
   position: absolute;
   top: 100px;
   display: flex;
@@ -613,6 +666,7 @@ section#bye .bye-wave stop:nth-child(2) {
 }
 
 .bBoxFix {
+  transition: 0.4s ease;
   position: absolute;
   top: 0;
   width: 100%;
@@ -698,55 +752,73 @@ header .desktop nav li {
   margin-right: 6px;
 }
 header a {
+  transition: 0.4s ease;
   height: 30px;
   text-decoration: none;
   color: white;
 }
 header svg {
+  transition: 0.4s ease;
   margin-top: 5px;
   fill: white;
 }
-header div.checkbox-wrapper {
+header div.toggle-wrapper {
   background: white;
   border-radius: 30px;
   padding: 5px;
   height: 18px;
-  width: 40px;
+  width: 42px;
   transform: translateY(-1px);
-  transition: all 0.4s ease;
+  transition: 0.4s ease;
   outline: 0;
   display: block;
   position: relative;
   cursor: pointer;
 }
-header div.checkbox-wrapper .icon {
+header div.toggle-wrapper .icon {
   position: absolute;
   top: 50%;
   transform: translateY(-14px);
 }
-header div.checkbox-wrapper .icon_sun {
+header div.toggle-wrapper .icon_sun {
   left: 12%;
-  fill: black;
+  fill: #100f0f;
 }
-header div.checkbox-wrapper .icon_moon {
+header div.toggle-wrapper .icon_moon {
   right: 10%;
-  fill: black;
+  fill: #ffffff;
 }
-header div.checkbox-wrapper .cover {
-  background-color: rgba(128, 128, 128, 0.226);
+header div.toggle-wrapper .icon_sun-open {
+  fill: #ffffff;
+}
+header div.toggle-wrapper .icon_moon-open {
+  fill: #100f0f;
+}
+header div.toggle-wrapper .cover {
+  transition: 0.4s ease;
+  background-color: #100f0f;
   height: 20px;
   width: 20px;
   border-radius: 30px;
-  transform: translate(20px, -1px);
+  transform: translate(22px, -1px);
+}
+header div.toggle-wrapper .cover-open {
+  transition: 0.4s ease;
+  background-color: #ffffff;
+  transform: translate(0px, -1px);
+}
+header div.toggle-wrapper-open {
+  background: #100f0f;
 }
 
 footer {
-  height: auto;
-  width: auto;
-  display: flex;
-  justify-content: center;
-  padding-bottom: 30px;
-  background-color: #f6f2d4;
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
+  width: 150px;
+  transform: translateY(-50px);
   color: #774a2d;
 }
 

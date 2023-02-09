@@ -50,11 +50,12 @@ h4 {
 }
 
 svg.wave {
+   transition: 0.4s ease;
    background: transparent;
    display: block;
    position: relative;
    width: 100%;
-   fill: $wave !important;
+   fill: $wave;
    z-index: -1;
 
    .wavePath {
@@ -65,6 +66,7 @@ svg.wave {
 }
 
 svg.wave.down {
+   transition: 0.4s ease;
    transform: scaleY(-1) scaleX(-1) translateY(5px);
    margin-top: -1px;
    z-index: 1;
@@ -96,7 +98,6 @@ p {
 
 .title{
    color: aliceblue; //just 4 no err
-   //? REM for titels of sections
 }
 
 .abso{
@@ -106,6 +107,32 @@ p {
 .bb{
    background-color: $background;
 }
+
+.colorDark{
+   color: $wave;
+   transition: 0.4s ease;
+}
+
+.colorDarkBG{
+   color: black;
+   background-color: $white !important;
+   transition: 0.4s ease;
+}
+
+.colorBlack{
+   color: black;
+}
+
+.colorDarkFill{
+   fill: $wave !important;
+   transition: 0.4s ease;
+}
+
+.colorLightFill{
+   fill: $white !important;
+   transition: 0.4s ease;
+}
+
 
 
 ::selection { background: rgba(55, 135, 255, 0.534); color: rgba(255, 255, 255, 0.89); }

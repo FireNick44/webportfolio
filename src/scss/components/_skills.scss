@@ -23,11 +23,11 @@ section#skills {
 }
 
 .skill-blend{
+   fill: $wave;
    position: absolute;
    bottom: 0;
-   height: 80px;
    width: 100%;
-   background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgb(16 15 15) 20%);
+   transition: 0.4s ease !important;
 }
 
 .skillFlasks{
@@ -46,7 +46,7 @@ section#skills {
 
 @media only screen and (max-width: 1300px) {
    section#skills {
-      padding-top: 178.49%; /* (img-height / img-width * container-width) */
+      padding-top: 171.59%; /* (img-height / img-width * container-width) */
    }
    .skillFlasks{
       background: url(/src/img/tablet-tra.webp) no-repeat center top;

@@ -49,24 +49,26 @@ header{
     }
 
     a{
+        transition: 0.4s ease;
         height: 30px;
         text-decoration: none;
         color: white;
     }
 
     svg{
+        transition: 0.4s ease;
         margin-top: 5px;
         fill: white;
     }
 
-    div.checkbox-wrapper {
+    div.toggle-wrapper {
         background: white;
         border-radius: 30px;
         padding: 5px;
         height: 18px;
-        width: 40px;
+        width: 42px;
         transform: translateY(-1px);
-        transition: all 0.4s ease;
+        transition: 0.4s ease;
         outline: 0;
         display: block;
         position: relative;
@@ -78,20 +80,36 @@ header{
             transform: translateY(-14px);
             &_sun {
                 left: 12%;
-                fill: black;
+                fill: $wave;
             }
             &_moon {
                 right: 10%;
-                fill: black;
+                fill: $white;
+            }
+            &_sun-open {
+                fill: $white;
+            }
+            &_moon-open {
+                fill: $wave;
             }
         }
 
         .cover{
-            background-color: rgba(128, 128, 128, 0.226);
+            transition: 0.4s ease;
+            background-color: $wave;
             height: 20px;
             width: 20px;
             border-radius: 30px;
-            transform: translate(20px, -1px);
+            transform: translate(22px, -1px);
         }
+
+        .cover-open{
+            transition: 0.4s ease;
+            background-color: $white;
+            transform: translate(0px, -1px);
+        }
+    }
+    div.toggle-wrapper-open {
+        background: $wave;
     }
 }

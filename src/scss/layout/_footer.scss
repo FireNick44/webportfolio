@@ -1,9 +1,10 @@
 footer{
-   height: auto;
-   width: auto;
-   display: flex;
-   justify-content: center;
-   padding-bottom: 30px;
-   background-color: #f6f2d4;
+   position: absolute;
+   left: 0; 
+   right: 0; 
+   margin-left: auto; 
+   margin-right: auto; 
+   width: 150px;
+   transform:translateY(-50px);
    color: #774a2d;
 }
