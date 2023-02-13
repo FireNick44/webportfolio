@@ -79,6 +79,8 @@ section#bye {
       padding-bottom: 300px;
       flex-direction: row;
       ul{
+         min-width: 120px;
+
          li:nth-child(1){
             font-weight: 600;
             margin-bottom: 8px;

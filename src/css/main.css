@@ -634,6 +634,9 @@ section#bye .byeWaveLight .path2 {
   padding-bottom: 300px;
   flex-direction: row;
 }
+.byeMade .byeStatsWrapper ul {
+  min-width: 120px;
+}
 .byeMade .byeStatsWrapper ul li:nth-child(1) {
   font-weight: 600;
   margin-bottom: 8px;
