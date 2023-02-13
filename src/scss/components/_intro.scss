@@ -6,7 +6,7 @@ section#intro {
    position: relative;
    background: url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 
-   .intro-title {
+   .introTitle {
       height: 80vh;
       width: 100%;
       display: flex;
@@ -26,38 +26,38 @@ section#intro {
       }
    }
 
-   .intro-svg {
+   .introSVG {
       z-index: -1 !important;
       transform:scale(1.1);
    }
 }
 
 @media only screen and (max-width: 3000px) {
-   .intro-svg {
+   .introSVG {
       height: 100vh;
    }
 }
 
 @media only screen and (min-height: 930px) {
-   .intro-svg {
+   .introSVG {
       height: 100vh;
    }
 }
 
-.intro-wave {
+.introWave {
    z-index: 2;
    position: absolute;
    bottom: 0;
    width: 100%;
    
-   .intro-brick{
+   .introBrick{
       height: 50px;
       background-color: $wave;
       transition: 0.4s ease;
    }
 }
 
-.intro-scroll {
+.introScroll {
    z-index: 2;
    position: absolute;
    bottom: 5px;
@@ -65,6 +65,7 @@ section#intro {
    display: flex;
    justify-content: center;
    animation: scrollHop 3s infinite;
+   
    svg{
       fill: $white;
       transition: 0.4s ease;

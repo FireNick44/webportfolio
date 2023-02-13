@@ -51,19 +51,19 @@
       stroke-width: 1;
       stroke-dasharray: 500;
       stroke-dashoffset: 500;
-      animation: line-anim 2s ease .2s forwards
+      animation: lineAnimation 2s ease .2s forwards
    }
 
    #logo path:nth-child(2) {
       stroke-width: 1;
       stroke-dasharray: 500;
       stroke-dashoffset: 500;
-      animation: line-anim 2.9s ease .2s forwards
+      animation: lineAnimation 2.9s ease .2s forwards
    }
 
 }
 
-@keyframes line-anim {
+@keyframes lineAnimation {
    to {
       stroke-dashoffset: 0
    }
@@ -79,11 +79,11 @@
    }
 }
 
-.loading-dots {
+.loadingDots {
    display: flex;
    align-content: flex-end;
    justify-content: flex-start;
-   color: $loading-dots;
+   color: $loadingDots;
 
    svg {
       height: 60px;

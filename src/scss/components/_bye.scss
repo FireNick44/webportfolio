@@ -4,9 +4,8 @@ section#bye {
    position: relative;
    overflow: hidden;
    background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
-   //background: linear-gradient(0deg, rgba(31,209,120,1) 0%, rgba(74,134,221,1) 85%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
 
-   .bye-wave-fix{
+   .byeWaveFix{
       transition: 0.4s ease;
       z-index: 10;
       background-color: $background;
@@ -14,13 +13,13 @@ section#bye {
       height: calc(400px - 15vw);
    }
 
-   .bye-wave{
-      z-index: 0;
-      
-      .p-1{
+   .byeWave{
+      transform: translateZ(0px);
+
+      .path1{
          opacity: 0.9;
       }
-      .p-2{
+      .path2{
          transition: 0.4s ease;
          fill: $background;
          opacity: 1;
@@ -35,45 +34,45 @@ section#bye {
       }
    }
 
-   .bye-waveLight{
-      .p-2{
+   .byeWaveLight{
+      .path2{
          fill: $white !important;
          transition: 0.4s ease;
       }
    }
 }
 
-.bye-sand{
+.byeSand{
    position: absolute;
    bottom: 0;
    width: 100%;
 }
 
 @media only screen and (min-width: 1750px) {
-   .bye-sand{
+   .byeSand{
       width: auto;
       transform: translateY(+5vw);
    }
 }
 
 @media only screen and (min-width: 2800px) {
-   .bye-sand{
+   .byeSand{
       width: auto;
       transform: translateY(+7vw);
    }
 }
 
 @media only screen and (max-width: 780px) {
-   .bye-sand{
+   .byeSand{
       width: auto;
       height: 150px;
    }
 }
 
-.bMade{
-   @include Box1600;
+.byeMade{
+   @include boxCon1600;
 
-   .bStats_wrapper{
+   .byeStatsWrapper{
       display: flex;
       gap: 30px;
       padding-top: 60px;
@@ -93,12 +92,12 @@ section#bye {
 }
 
 @media only screen and (max-width: 490px) {
-   .bStats_wrapper{
+   .byeStatsWrapper{
       flex-direction: column !important;
    }
 }
 
-.bContact{
+.byeContact{
    transition: 0.4s ease;
    background: transparent;
    position: absolute;
@@ -122,7 +121,7 @@ section#bye {
    }
 }
 
-.bBoxFix{
+.byeBoxFix{
    transition: 0.4s ease;
    position: absolute;
    top: 0;
@@ -130,17 +129,17 @@ section#bye {
    height: 80px;
 }
 
-.bTitFix{
+.byeTitelFix{
    position: relative;
    top: -15vw;
 }
 
 @media only screen and (min-width: 900px) {
-   .bContact{
+   .byeContact{
       top: 13vw;
    }
 
-   .bTitFix {
+   .byeTitelFix {
       top: -12vh;
   }
 
@@ -151,7 +150,7 @@ section#bye {
    */
 }
 
-.bTxt{
+.byeText{
    display: flex;
    flex-direction: column;
    align-items: center;

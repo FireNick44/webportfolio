@@ -1,6 +1,6 @@
 @use "../abstracts" as *;
 
-.display-Null{
+.displayNull{
     visibility: hidden;
 }
 
@@ -61,7 +61,7 @@ header{
         fill: white;
     }
 
-    div.toggle-wrapper {
+    div.toggleWrapper {
         background: white;
         border-radius: 30px;
         padding: 5px;
@@ -103,13 +103,14 @@ header{
             transform: translate(22px, -1px);
         }
 
-        .cover-open{
+        .coverOpen{
             transition: 0.4s ease;
             background-color: $white;
             transform: translate(0px, -1px);
         }
     }
-    div.toggle-wrapper-open {
+
+    div.toggleWrapperOpen {
         background: $wave;
     }
 }

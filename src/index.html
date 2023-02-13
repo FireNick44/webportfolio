@@ -23,7 +23,7 @@
             </g>
          </svg>
       </div>
-      <div class="loading-dots">
+      <div class="loadingDots">
          <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="0 0 100 100">
             <circle fill="#fff" stroke="none" cx="6" cy="50" r="6">
                <animate attributeName="opacity" dur="1s" values="0;1;0" repeatCount="indefinite" begin="0.1" />
@@ -44,13 +44,14 @@
             <nav>
                <ul>
                   <li>
-                     <a id="head-contact" href="mailto:yannic.studer@protonmail.com">
+                     <a id="headContact" href="mailto:yannic.studer@protonmail.com">
                         .contact
                      </a>
                   </li>
                   <li>
-                     <div id="toggle" class="toggle-wrapper" onclick="themeToggle()">
-                        <svg id="sun" class="icon icon_sun" width="18px" height="18px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                     <div id="toggle" class="toggleWrapper" onclick="themeKlick()">
+                        <svg id="sun" class="icon icon_sun" width="18px" height="18px" viewBox="0 0 24 24" fill="none"
+                           xmlns="http://www.w3.org/2000/svg">
                            <circle cx="11.9998" cy="11.9998" r="5.75375" />
                            <g>
                               <circle cx="3.08982" cy="6.85502" r="1.71143" transform="rotate(-60 3.08982 6.85502)" />
@@ -62,7 +63,8 @@
                            </g>
                            </circle>
                         </svg>
-                        <svg id="moon" class="icon icon_moon" width="18px" height="18px" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                        <svg id="moon" class="icon icon_moon" width="18px" height="18px" viewBox="0 0 50 50"
+                           xmlns="http://www.w3.org/2000/svg">
                            <path
                               d="M 43.81 29.354 C 43.688 28.958 43.413 28.626 43.046 28.432 C 42.679 28.238 42.251 28.198 41.854 28.321 C 36.161 29.886 30.067 28.272 25.894 24.096 C 21.722 19.92 20.113 13.824 21.683 8.133 C 21.848 7.582 21.697 6.985 21.29 6.578 C 20.884 6.172 20.287 6.022 19.736 6.187 C 10.659 8.728 4.691 17.389 5.55 26.776 C 6.408 36.163 13.847 43.598 23.235 44.451 C 32.622 45.304 41.28 39.332 43.816 30.253 C 43.902 29.96 43.9 29.647 43.81 29.354 Z" />
                         </svg>
@@ -81,10 +83,8 @@
             </nav>
 
          </div>
-         <div class="mobile display-Null">
-            <div class="header-container">
-               <!-- mobile things here! (for my dear future me)-->
-            </div>
+         <div class="mobile displayNull">
+
          </div>
       </header>
       <section id="intro">
@@ -93,23 +93,23 @@
                - Init
             </h3>
          </div>
-         <div class="intro-title">
+         <div class="introTitle">
             <h1 class="text">Hello World, I'm</p>
                <h1 class="name">Yannic Studer</p>
          </div>
-         <div class="intro-wave">
+         <div class="introWave">
             <svg id="wave1" class="wave" viewBox="0 0 1440 300" xmlns="http://www.w3.org/2000/svg">
                <path
                   d="M0,224L80,234.7C160,245,320,267,480,245.3C640,224,800,160,960,154.7C1120,149,1280,203,1360,229.3L1440,256L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"
                   stroke="none" stroke-width="0" class="wavePath">
                </path>
             </svg>
-            <div id="intro-brick" class="intro-brick">
+            <div id="introBrick" class="introBrick">
             </div>
-            <div class="intro-scroll">
+            <div class="introScroll">
                <a href="#me">
-                  <svg id="intro-scroll" xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22">
-                     <path d="M12,0,24,22H0Z" transform="translate(24 22) rotate(180)"/>
+                  <svg id="introScroll" xmlns="http://www.w3.org/2000/svg" width="24" height="22" viewBox="0 0 24 22">
+                     <path d="M12,0,24,22H0Z" transform="translate(24 22) rotate(180)" />
                   </svg>
                </a>
             </div>
@@ -224,15 +224,16 @@
       </section>
       <section id="skills">
          <div class="skillFlasks"></div>
-         <svg id="wave2" class="skill-svg wave down" viewBox="0 120 1440 180" xmlns="http://www.w3.org/2000/svg">
+         <svg id="wave2" class="skillSVG wave down" viewBox="0 120 1440 180" xmlns="http://www.w3.org/2000/svg">
             <path
                d="M 0,400 C 0,400 0,200 0,200 C 107.96428571428572,207.10714285714286 215.92857142857144,214.21428571428572 336,229 C 456.07142857142856,243.78571428571428 588.2500000000001,266.25 721,243 C 853.7499999999999,219.75 987.0714285714284,150.78571428571428 1107,136 C 1226.9285714285716,121.21428571428572 1333.4642857142858,160.60714285714286 1440,200 C 1440,200 1440,400 1440,400 Z"
                stroke="none" stroke-width="0" class="wavePath">
             </path>
          </svg>
 
-         <svg id="wave3" class="skill-blend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 702 101">
-            <path d="M0,583.89s62.218,29.142,346.112,30.529S702.751,583.89,702.751,583.89v64.971H0Z" transform="translate(0 -547.116)"/>
+         <svg id="wave3" class="skillBlend" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 702 101">
+            <path d="M0,583.89s62.218,29.142,346.112,30.529S702.751,583.89,702.751,583.89v64.971H0Z"
+               transform="translate(0 -547.116)" />
          </svg>
 
       </section>
@@ -242,15 +243,15 @@
                - projects
             </h3>
          </div>
-         <div class="pBox_wrapper">
-            <div class="pBox">
-               <div class="pBox_links">
+         <div class="projectBoxWrapper">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/webportfolio">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Personal
                      <br>
                      Webportfolio
@@ -260,14 +261,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/LoginSystem">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Login
                      <br>
                      System
@@ -277,14 +278,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/LoginFrontend">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Login
                      <br>
                      Frontend
@@ -294,14 +295,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/YS-SwissTransport">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Swiss
                      <br>
                      Transport
@@ -311,14 +312,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/PointerQuartet">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Pointer
                      <br>
                      Quartet
@@ -328,14 +329,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/WebTicTacToe">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Web
                      <br>
                      TicTacToe
@@ -345,14 +346,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/TicTacToe">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      C++
                      <br>
                      TicTacToe
@@ -362,14 +363,14 @@
                   </h4>
                </div>
             </div>
-            <div class="pBox">
-               <div class="pBox_links">
+            <div class="projectBox">
+               <div class="projectBoxLink">
                   <a href="https://github.com/FireNick44/GuessTheNumber">
-                     <img class="pBox_img" src="./svg/github.svg" alt="linkSVG">
+                     <img class="projectBoxIMG" src="./svg/github.svg" alt="linkSVG">
                   </a>
                </div>
-               <div class="pBox_content">
-                  <h2 class="pBox_Name">
+               <div class="projectBoxContent">
+                  <h2 class="projectBoxName">
                      Guess
                      <br>
                      The Number
@@ -382,7 +383,7 @@
          </div>
       </section>
       <section id="bye">
-         <div id="fix1" class="bBoxFix bb"></div>
+         <div id="fix1" class="byeBoxFix bb"></div>
 
          <div class="tBox">
             <h3 class="comment">
@@ -390,21 +391,21 @@
             </h3>
          </div>
 
-         <div id="fix2" class="bye-wave-fix"></div>
+         <div id="fix2" class="byeWaveFix"></div>
 
-         <svg id="bye-wave" class="bye-wave" xmlns="http://www.w3.org/2000/svg" viewBox="0 370 1920 710" min-x="200">
+         <svg id="byeWave" class="byeWave" xmlns="http://www.w3.org/2000/svg" viewBox="0 370 1920 710" min-x="200">
             <g transform="translate(960,540) scale(1,1) translate(-960,-540)">
                <linearGradient id="lg-wave" x1="0" x2="1" y1="0" y2="0">
-                  <stop offset="0" />
-                  <stop offset="1" />
+                  <stop offset="0"/>
+                  <stop offset="1"/>
                </linearGradient>
-               <path class="p-1" fill="url(#lg-wave)">
+               <path class="path1" fill="url(#lg-wave)">
                   <animate attributeName="d" dur="60s" repeatCount="indefinite" keyTimes="0;0.333;0.667;1"
                      calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1;0.5 0 0.5 1" begin="0s"
                      values="M0 0L 0 1024.3062154208205Q 240 849.2631247708464 480 831.8728805809167T 960 806.904266660552T 1440 608.8753220573385T 1920 523.9926721810148L 1920 0 Z;M0 0L 0 1071.147029221081Q 240 885.9504901766377  480 852.2515805325152T 960 828.6081237922577T 1440 535.5376727127214T 1920 526.920061982205L 1920 0 Z;M0 0L 0 1001.165449980779Q 240 989.0867003106257  480 952.2031981609252T 960 739.3511348874704T 1440 589.1143198474468T 1920 414.9713369557636L 1920 0 Z;M0 0L 0 1024.3062154208205Q 240 849.2631247708464  480 831.8728805809167T 960 806.904266660552T 1440 608.8753220573385T 1920 523.9926721810148L 1920 0 Z">
                   </animate>
                </path>
-               <path class="p-2">
+               <path class="path2">
                   <animate attributeName="d" dur="60s" repeatCount="indefinite" keyTimes="0;0.333;0.667;1"
                      calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1;0.5 0 0.5 1" begin="-16.666666666666668s"
                      values="M0 0L 0 939.0302026174455Q 240 975.6745089910545 480 939.9473103649682T 960 829.0921477222957T 1440 552.1635896978419T 1920 488.2484095663247L 1920 0 Z;M0 0L 0 906.8004575703418Q 240 848.1664919529406  480 808.715996143076T 960 762.0230502535369T 1440 502.1543539186217T 1920 513.1169456614645L 1920 0 Z;M0 0L 0 940.3110883128529Q 240 810.9554032221988  480 766.3815786836368T 960 766.440466589527T 1440 640.4736723770358T 1920 487.3952406765227L 1920 0 Z;M0 0L 0 939.0302026174455Q 240 975.6745089910545  480 939.9473103649682T 960 829.0921477222957T 1440 552.1635896978419T 1920 488.2484095663247L 1920 0 Z">
@@ -415,24 +416,24 @@
 
          <div class="bComFix">
          </div>
-         <div id="fix3" class="bContact">
+         <div id="fix3" class="byeContact">
             <h1>Contact me?</h1>
             <p><a href="mailto:yannic.studer@protonmail.com">yannic.studer@protonmail.com</a></p>
             <p><a href="tel:+41 78 775 39 78">+41 78 775 39 78</a></p>
          </div>
 
 
-         <div class="bTitFix">
-            <div class="bTxt">
+         <div class="byeTitelFix">
+            <div class="byeText">
                <p>Thanks for visiting my web portfolio! </p>
                <p> // Website is still a work in progress</p>
                <p> ;)</p>
             </div>
          </div>
 
-         <div class="bMade">
+         <div class="byeMade">
             //Made with
-            <div class="bStats_wrapper">
+            <div class="byeStatsWrapper">
                <ul>
                   <li>&lt;code&gt;</li>
                   <li>HTML5</li>
@@ -459,15 +460,23 @@
                </ul>
             </div>
          </div>
-         <svg class="bye-sand" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 170">
+         <svg class="byeSand" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 170">
             <g transform="translate(0 -0.161)">
-              <rect transform="translate(0 0.161)"/>
-              <path d="M0,474l15,5.543c15,5.472,45,16.559,75,16.919s60-10.007,90-12.888,60,1.728,90,6.84c30,5.185,60,10.946,90,9.359,30-1.512,60-10.439,90-10.8s60,7.848,90,13.32c30,5.543,60,8.424,90,6.624s60-8.28,90-14.615c30-6.407,60-12.6,90-12.6s60,6.192,75,9.359l15,3.1v71.275H0Z" transform="translate(0 -450.051)" fill="#388a8f"/>
-              <path d="M0,509.335l15,.417c15,.417,45,1.251,75,4.42,30,3.253,60,8.757,90,13.261,30,4.42,60,7.757,90,4s60-14.6,90-20.6c30-5.921,60-7.09,90,.334,30,7.34,60,23.185,90,23.769,30,.5,60-14.178,90-16.431s60,8.09,90,13.6a319.7,319.7,0,0,0,90,3.5c30-2.919,60-9.591,75-12.927l15-3.342v65.887H0Z" transform="translate(0 -469.847)" fill="#55acac"/>
-              <path d="M0,557.636l15-2.881c15-2.966,45-8.723,75-13a694.915,694.915,0,0,1,90-7.067c30-.346,60,1.744,90,2.443s60,.174,90,2.181,60,6.718,90,12.214,60,11.951,90,15.44,60,4.013,90,.261,60-11.951,90-16.75a389.346,389.346,0,0,1,90-4.013c30,2.181,60,7.939,75,10.9l15,2.88v32.277H0Z" transform="translate(0 -477.148)" fill="#95d1cc"/>
-              <path d="M0,581.032l15-3.724c15-3.724,45-11.171,75-14.746,30-3.649,60-3.351,90-3.276,30,.149,60,.149,90,2.978,30,2.9,60,8.564,90,7.82s60-7.894,90-10.8c30-2.83,60-1.341,90,1.862,30,3.276,60,8.192,90,7.6s60-6.851,90-8.936,60-.149,90,1.489,60,2.83,75,3.5l15,.6v83.468H0Z" transform="translate(0 -476.359)" fill="#f6f2d4"/>
+               <rect transform="translate(0 0.161)" />
+               <path
+                  d="M0,474l15,5.543c15,5.472,45,16.559,75,16.919s60-10.007,90-12.888,60,1.728,90,6.84c30,5.185,60,10.946,90,9.359,30-1.512,60-10.439,90-10.8s60,7.848,90,13.32c30,5.543,60,8.424,90,6.624s60-8.28,90-14.615c30-6.407,60-12.6,90-12.6s60,6.192,75,9.359l15,3.1v71.275H0Z"
+                  transform="translate(0 -450.051)" fill="#388a8f" />
+               <path
+                  d="M0,509.335l15,.417c15,.417,45,1.251,75,4.42,30,3.253,60,8.757,90,13.261,30,4.42,60,7.757,90,4s60-14.6,90-20.6c30-5.921,60-7.09,90,.334,30,7.34,60,23.185,90,23.769,30,.5,60-14.178,90-16.431s60,8.09,90,13.6a319.7,319.7,0,0,0,90,3.5c30-2.919,60-9.591,75-12.927l15-3.342v65.887H0Z"
+                  transform="translate(0 -469.847)" fill="#55acac" />
+               <path
+                  d="M0,557.636l15-2.881c15-2.966,45-8.723,75-13a694.915,694.915,0,0,1,90-7.067c30-.346,60,1.744,90,2.443s60,.174,90,2.181,60,6.718,90,12.214,60,11.951,90,15.44,60,4.013,90,.261,60-11.951,90-16.75a389.346,389.346,0,0,1,90-4.013c30,2.181,60,7.939,75,10.9l15,2.88v32.277H0Z"
+                  transform="translate(0 -477.148)" fill="#95d1cc" />
+               <path
+                  d="M0,581.032l15-3.724c15-3.724,45-11.171,75-14.746,30-3.649,60-3.351,90-3.276,30,.149,60,.149,90,2.978,30,2.9,60,8.564,90,7.82s60-7.894,90-10.8c30-2.83,60-1.341,90,1.862,30,3.276,60,8.192,90,7.6s60-6.851,90-8.936,60-.149,90,1.489,60,2.83,75,3.5l15,.6v83.468H0Z"
+                  transform="translate(0 -476.359)" fill="#f6f2d4" />
             </g>
-          </svg>
+         </svg>
       </section>
       <footer>
 

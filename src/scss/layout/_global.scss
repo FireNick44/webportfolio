@@ -95,7 +95,7 @@ svg{
 }
 
 .tBox{
-   @include Box1600;
+   @include boxCon1600;
    position: sticky;
    top: 8px;
 }

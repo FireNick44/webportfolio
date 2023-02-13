@@ -56,41 +56,41 @@
    stroke-width: 1;
    stroke-dasharray: 500;
    stroke-dashoffset: 500;
-   -webkit-animation: line-anim 2s ease 0.2s forwards;
-   animation: line-anim 2s ease 0.2s forwards;
+   -webkit-animation: lineAnimation 2s ease 0.2s forwards;
+   animation: lineAnimation 2s ease 0.2s forwards;
 }
 
 .ys #logo path:nth-child(2) {
    stroke-width: 1;
    stroke-dasharray: 500;
    stroke-dashoffset: 500;
-   -webkit-animation: line-anim 2.9s ease 0.2s forwards;
-   animation: line-anim 2.9s ease 0.2s forwards;
+   -webkit-animation: lineAnimation 2.9s ease 0.2s forwards;
+   animation: lineAnimation 2.9s ease 0.2s forwards;
 }
 
-.loading-dots {
+.loadingDots {
    display: flex;
    align-content: flex-end;
    justify-content: flex-start;
    color: #ffffff;
 }
 
-.loading-dots svg {
+.loadingDots svg {
    height: 60px;
    width: 120px;
 }
 
-.display-Null {
+.displayNull {
    visibility: hidden;
 }
 
-@-webkit-keyframes line-anim {
+@-webkit-keyframes lineAnimation {
    to {
       stroke-dashoffset: 0;
    }
 }
 
-@keyframes line-anim {
+@keyframes lineAnimation {
    to {
       stroke-dashoffset: 0;
    }
