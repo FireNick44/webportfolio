@@ -4,6 +4,7 @@ section#bye {
    position: relative;
    overflow: hidden;
    background: linear-gradient(0deg, rgb(0 0 0 / 65%) 0%, rgb(37 90 80 / 0%) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
+   transform: translateY(-3px);
 
    .byeWaveFix{
       transition: 0.4s ease;

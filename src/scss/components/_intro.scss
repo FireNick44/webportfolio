@@ -51,6 +51,7 @@ section#intro {
    width: 100%;
    
    .introBrick{
+      transform: scale(1.02);
       height: 50px;
       background-color: $wave;
       transition: 0.4s ease;

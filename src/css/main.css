@@ -276,6 +276,7 @@ section#intro .introSVG {
   width: 100%;
 }
 .introWave .introBrick {
+  transform: scale(1.02);
   height: 50px;
   background-color: #100f0f;
   transition: 0.4s ease;
@@ -566,6 +567,7 @@ section#bye {
   position: relative;
   overflow: hidden;
   background: linear-gradient(0deg, rgba(0, 0, 0, 0.65) 0%, rgba(37, 90, 80, 0) 80%), url(/src/svg/intro-bg.svg) no-repeat fixed center/cover;
+  transform: translateY(-3px);
 }
 section#bye .byeWaveFix {
   transition: 0.4s ease;
