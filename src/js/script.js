@@ -11,7 +11,10 @@ async function Sleep(milliseconds) {
 
 async function sessionLoadPage() {
    if(sessionStorage.getItem("pageHasLightmode", true)) loadedDOM = 1;
+}
 
+async function sessionPageReady(){
+   await Sleep(1000);
    if (!sessionStorage.getItem("pageWasLoaded")) {
       await Sleep(5000);
       loader.classList.add("disappear");
@@ -26,7 +29,8 @@ async function sessionLoadPage() {
    }
 }
 
-document.addEventListener('DOMContentLoaded', (event) => {
+window.addEventListener('load', (event) => {
+   sessionPageReady();
    if(loadedDOM == 1) themeKlick();
 })
 
