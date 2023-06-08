@@ -1,38 +1,39 @@
-window.addEventListener("onload", sessionLoadPage());
+document.addEventListener("DOMContentLoaded", sessionLoadPage);
 
 var loader = document.querySelector(".loader");
 var content = document.querySelector(".content");
 var loadedDOM = 0;
 var toggle = document.getElementById("toggle");
 
-async function Sleep(milliseconds) {
+function sleep(milliseconds) {
    return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 async function sessionLoadPage() {
-   if(sessionStorage.getItem("pageHasLightmode", true)) loadedDOM = 1;
-}
-
-async function sessionPageReady(){
-   await Sleep(1000);
-   if (!sessionStorage.getItem("pageWasLoaded")) {
-      await Sleep(5000);
-      loader.classList.add("disappear");
-      await Sleep(100);
-      content.classList.add("appear");
-      sessionStorage.setItem("pageWasLoaded", true);
-   } else if (sessionStorage.getItem("pageWasLoaded")) {
-      await Sleep(2000);
-      loader.classList.add("disappear");
-      await Sleep(100);
-      content.classList.add("appear");
+   if (sessionStorage.getItem("pageHasLightmode") === "true") {
+      loadedDOM = 1;
    }
+   await sessionPageReady();
 }
 
-window.addEventListener('load', (event) => {
-   sessionPageReady();
-   if(loadedDOM == 1) themeKlick();
-})
+async function sessionPageReady() {
+   await sleep(1000);
+   if (!sessionStorage.getItem("pageWasLoaded")) {
+      await sleep(5000);
+   } else {
+      await sleep(2000);
+   }
+   loader.classList.add("disappear");
+   await sleep(100);
+   content.classList.add("appear");
+   sessionStorage.setItem("pageWasLoaded", true);
+}
+
+window.addEventListener('load', () => {
+   if (loadedDOM === 1) {
+      themeKlick();
+   }
+});
 
 function themeKlick(){
    if(!toggle.classList.contains("toggleWrapperOpen")) sessionStorage.setItem("pageHasLightmode", true);  //lightmode

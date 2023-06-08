@@ -670,6 +670,7 @@ section#bye .byeWaveLight .path2 {
 .byeContact p a {
   color: #A7A2A2;
   transition: all 0.2s;
+  text-decoration: none;
 }
 .byeContact p a:hover {
   color: #8cc6d2;
@@ -830,10 +831,6 @@ footer {
   width: 150px;
   transform: translateY(-50px);
   color: #774a2d;
-}
-
-::-webkit-scrollbar {
-  width: 16px;
 }
 
 ::-webkit-scrollbar-track {
