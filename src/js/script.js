@@ -77,4 +77,7 @@ function themeKlick(){
 
 function show(){
    alert("Hi :)")
+   var element = document.getElementById("9712qgd");
+   element.classList.toggle("content");
 }
+

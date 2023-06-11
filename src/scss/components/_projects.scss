@@ -56,6 +56,11 @@ section#projects {
    background: linear-gradient(70deg, #1e4eee, #A1F2FF);
 }
 
+.projectBox.secret{
+   background: url(./../img/secret.webp);
+   background-size: 300px;
+}
+
 .projectBoxLink {
    display: flex;
    justify-content: flex-end;
