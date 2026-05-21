@@ -40,6 +40,13 @@
 
 ## Phase 0 — Test infrastructure
 
+### Task 0.0: Feature branch
+
+- [ ] **Step 1: Branch off main before any code edits**
+
+Run: `cd /Users/yannic/dev/webportfolio && git checkout -b feature/flask-field-redesign`
+Expected: switched to a new branch. (Harness rule: never commit implementation to the default branch. The spec/plan docs already on `main` are fine.)
+
 ### Task 0.1: Add Vitest
 
 **Files:**
@@ -456,6 +463,13 @@ interface Args {
   skills: SkillEntry[]; seed: number; config: LayoutConfig;
 }
 
+// Single source of truth for the width-driven flask count.
+// Used both here and as the PhysicsScene memo key so the two never drift.
+export function computeTargetCount(width: number, config: LayoutConfig): number {
+  const perBand = Math.max(1, Math.floor(width / config.flaskSpacingX));
+  return Math.max(config.minFlasks, Math.min(config.maxFlasks, config.columnCount * perBand));
+}
+
 // Map a 0..1 "rank" (0 = highest priority) to a segment count.
 // Higher priority => fewer segments => shorter chain => hangs higher.
 function segmentsForRank(rank: number, rng: () => number): number {
@@ -472,11 +486,11 @@ export function generateFlaskField(args: Args): FlaskConfig[] {
   if (isMobile) return generateMobileField(args);
 
   const rng = mulberry32(seed);
-  const { columnCount, skeletonBands, flaskSpacingX, minFlasks, maxFlasks, maxPhysicsFlasks } = config;
+  const { columnCount, skeletonBands, flaskSpacingX, maxPhysicsFlasks } = config;
 
-  // 1. Width-driven count.
+  // 1. Width-driven count (shared helper — single source of truth).
   const perBand = Math.max(1, Math.floor(width / flaskSpacingX));
-  const targetCount = Math.max(minFlasks, Math.min(maxFlasks, columnCount * perBand));
+  const targetCount = computeTargetCount(width, config);
 
   // 2. Sorted skills (priority desc). Missing priority => mid (5).
   const sorted = [...skills].sort((a, b) => (b.priority ?? 5) - (a.priority ?? 5));
@@ -685,7 +699,7 @@ Expected: error in PhysicsScene only if it doesn't pass the prop yet — that's 
 
 Remove `mulberry32`, `generateFlasks`, the `FLASK_COLORS` array, `FLASK_COUNT`, `MOBILE_FLASK_COUNT`, `MIN_SEGMENTS`, `MAX_SEGMENTS`, and the `FlaskConfig` interface from `PhysicsScene.tsx`. Replace with imports:
 ```ts
-import { generateFlaskField } from "../layout/generateFlaskField";
+import { generateFlaskField, computeTargetCount } from "../layout/generateFlaskField";
 import { getSessionSeed } from "../layout/rng";
 import {
   COLUMN_COUNT, SKELETON_BANDS, FLASK_SPACING_X,
@@ -707,9 +721,8 @@ const layoutConfig: LayoutConfig = useMemo(() => ({
 const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
 
 // Recompute only when the derived count (or mobile/seed) changes — not every resize px.
-const targetCount = isMobile
-  ? COLUMN_COUNT * Math.max(1, Math.floor(dims.width / FLASK_SPACING_X))
-  : Math.max(MIN_FLASKS, Math.min(MAX_FLASKS, COLUMN_COUNT * Math.max(1, Math.floor(dims.width / FLASK_SPACING_X))));
+// computeTargetCount is the same helper the layout module uses, so the key can't drift.
+const targetCount = dims.width > 0 ? computeTargetCount(dims.width, layoutConfig) : 0;
 
 const flasks = useMemo(
   () => dims.width > 0
@@ -996,26 +1009,26 @@ git commit -m "feat(physics): sensor cursor body"
 
 - [ ] **Step 1: Accept the loop + add cursor/shake logic**
 
-Change the signature to also take the loop:
+Change the signature to also take the loop + `isMobile`:
 ```ts
 import { createCursorBody } from "../physics/cursorBody";
-import { SHAKE_IMPULSE, SHAKE_COOLDOWN_MS, MOBILE_BREAKPOINT } from "../physics/constants";
+import { SHAKE_IMPULSE, SHAKE_COOLDOWN_MS } from "../physics/constants";
 import type { FlaskFieldLoop } from "./useFlaskFieldLoop";
 
 export function useMousePhysics(
   engine: Matter.Engine,
   containerRef: React.RefObject<HTMLDivElement | null>,
-  loop: FlaskFieldLoop
+  loop: FlaskFieldLoop,
+  isMobile: boolean
 ) { /* ... */ }
 ```
 
+> **Do NOT** gate on `"ontouchstart" in window` — it is `true` on most touchscreen laptops/hybrids and would wrongly strip the cursor bump from desktop users who need it most. Gate purely on `isMobile` (width-based, matching the layout), and add `isMobile` to the effect deps so a wide→narrow resize tears down the cursor body and a narrow→wide resize creates it.
+
 Inside the effect, after `getWorldPos` is defined:
 ```ts
-const isTouch = window.innerWidth < MOBILE_BREAKPOINT
-  || ("ontouchstart" in window);
-
 // Desktop only: a sensor body follows the cursor for bump detection.
-const cursor = isTouch ? null : createCursorBody();
+const cursor = isMobile ? null : createCursorBody();
 if (cursor) Matter.Composite.add(engine.world, cursor);
 
 const lastShake = new Map<number, number>();
@@ -1055,29 +1068,34 @@ if (cursor) {
 ```
 Keep the existing cursor-style hover logic and the existing drag code paths.
 
-- [ ] **Step 3: Cleanup in the effect's return**
+- [ ] **Step 3: Wake on drag start (critical for touch)**
+
+Add `loop.wake();` as the **first line** of `startDrag`. On touch there is no `mousemove` before `touchstart`, so without this a tap on a flask after the field has gone idle adds the drag constraint but the suspended engine never ticks to integrate it — the flask sits frozen. (`onTouchStart` already routes through `startDrag`, so this covers touch too.)
+
+- [ ] **Step 4: Cleanup in the effect's return**
 
 Add to the cleanup:
 ```ts
 Matter.Events.off(engine, "collisionStart", onCollision);
 if (cursor) Matter.Composite.remove(engine.world, cursor);
 ```
+And change the effect dependency array to `[engine, containerRef, loop, isMobile]`.
 
-- [ ] **Step 4: Update the call site**
+- [ ] **Step 5: Update the call site**
 
-In `PhysicsScene.tsx`: `useMousePhysics(engine, containerRef, loop);`
+In `PhysicsScene.tsx`: `useMousePhysics(engine, containerRef, loop, isMobile);`
 
-- [ ] **Step 5: Typecheck, lint, build**
+- [ ] **Step 6: Typecheck, lint, build**
 
 Run: `npx tsc -b && npm run lint && npm run build` → pass.
 
-- [ ] **Step 6: Manual verification**
+- [ ] **Step 7: Manual verification**
 
 Run `npm run dev`.
 - Desktop: moving the cursor *into* a flask makes it shake left↔right and settle; flasks resist sliding (friction); click-drag still works; sweeping the cursor through repeatedly does not pin CPU (cooldown), and the field re-suspends after settling (DebugPanel "Updates").
 - Confirm the smaller hit feel: you must actually touch a flask, not just get near it.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add flask-physics-poc/src/hooks/useMousePhysics.ts flask-physics-poc/src/components/PhysicsScene.tsx
@@ -1096,6 +1114,8 @@ Run `npm run dev`, DebugPanel "Updates". Drag several flasks, let go, wait. Conf
 - [ ] **Step 2: If they never sleep, tune**
 
 If "Awake" stays > 0 indefinitely (the historical runaway bug): raise `frictionAir` (e.g. 0.025 → 0.04) and/or raise `sleepThreshold` (30 → 45) on the flask body, and ensure `SHAKE_IMPULSE` isn't so large that flasks bounce off walls forever. Re-test until idle reliably suspends. Document the final values in a one-line comment.
+
+**Worst case — flask-on-flask contact at the bottom of the dome.** This is exactly the scenario the user warned about. If after ~15–20 min of tuning the above, bodies still won't sleep, the fallback is to keep friction **only against walls**, not between flasks: lower the flask body's `friction`/`frictionStatic` (e.g. `friction: 0.1, frictionStatic: 0`) so flask-to-flask contact doesn't generate the persistent micro-jitter, while the dome walls (which carry `FLASK_FRICTION`) still provide the "grip, don't slide" feel. Try this **before** removing friction entirely — it preserves the requested behavior where it matters (resting against the dome) and kills it only where it causes the runaway (flasks grinding on each other).
 
 - [ ] **Step 3: Commit (only if values changed)**
 
