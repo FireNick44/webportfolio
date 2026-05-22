@@ -1,20 +1,28 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { generateBubbles, type Bubble } from "@/lib/outro/bubbles";
+import { repel, advanceRipple, type Ripple } from "@/lib/outro/cursorPhysics";
+import type { PointerField } from "@/hooks/usePointerField";
 
 export function WaterCanvas({
   active,
   bubbleCount,
   seed = 7,
+  pointer,
+  enableCursor = false,
 }: {
   active: boolean;
   bubbleCount: number;
   seed?: number;
+  pointer?: RefObject<PointerField | null>;
+  enableCursor?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const bubblesRef = useRef<Bubble[]>([]);
+  const ripplesRef = useRef<Ripple[]>([]);
+  const trailAccum = useRef(0);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -44,13 +52,44 @@ export function WaterCanvas({
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
       ctx.clearRect(0, 0, w, h);
+
+      const p = enableCursor ? pointer?.current : null;
+      const cursorOn = !!p && p.active;
+
+      if (cursorOn) {
+        const speed = Math.hypot(p.vx, p.vy);
+        trailAccum.current += dt;
+        if (trailAccum.current > 0.04 && speed > 1.5) {
+          trailAccum.current = 0;
+          bubblesRef.current.push({
+            id: -1,
+            baseX: p.x / w,
+            y: p.y,
+            r: 1.5 + Math.random() * 2,
+            speed: 30 + Math.random() * 30,
+            wobbleAmp: 4,
+            wobbleFreq: 2,
+            wobblePhase: Math.random() * Math.PI * 2,
+          });
+          if (bubblesRef.current.length > bubbleCount + 40) bubblesRef.current.shift();
+        }
+        if (speed > 6 && ripplesRef.current.length < 14) {
+          ripplesRef.current.push({ x: p.x, y: p.y, r: 4, alpha: 0.32 });
+        }
+      }
+
       for (const b of bubblesRef.current) {
         b.y -= b.speed * dt;
         if (b.y < -b.r) {
           b.y = h + b.r;
           b.baseX = Math.random();
         }
-        const x = b.baseX * w + Math.sin((now / 1000) * b.wobbleFreq + b.wobblePhase) * b.wobbleAmp;
+        let x = b.baseX * w + Math.sin((now / 1000) * b.wobbleFreq + b.wobblePhase) * b.wobbleAmp;
+        if (cursorOn) {
+          const { dx, dy } = repel(x, b.y, p.x, p.y, 90, 14);
+          x += dx;
+          b.y += dy;
+        }
         ctx.beginPath();
         ctx.arc(x, b.y, b.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(180, 220, 235, ${0.08 + Math.min(b.r, 6) * 0.03})`;
@@ -59,6 +98,23 @@ export function WaterCanvas({
         ctx.lineWidth = 1;
         ctx.stroke();
       }
+
+      if (ripplesRef.current.length) {
+        for (const r of ripplesRef.current) {
+          const n = advanceRipple(r, dt, 70, 0.7);
+          r.r = n.r;
+          r.alpha = n.alpha;
+          if (r.alpha > 0) {
+            ctx.beginPath();
+            ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(200, 235, 245, ${r.alpha})`;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+          }
+        }
+        ripplesRef.current = ripplesRef.current.filter((r) => r.alpha > 0);
+      }
+
       rafRef.current = requestAnimationFrame(frame);
     };
     rafRef.current = requestAnimationFrame(frame);
@@ -67,7 +123,7 @@ export function WaterCanvas({
       cancelAnimationFrame(rafRef.current);
       ro.disconnect();
     };
-  }, [active, bubbleCount, seed]);
+  }, [active, bubbleCount, seed, pointer, enableCursor]);
 
   return <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 z-[1] h-full w-full" />;
 }
