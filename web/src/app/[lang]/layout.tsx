@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
 import AppStateProvider from "@/components/AppStateProvider";
 import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
+import OutroSection from "@/components/outro/OutroSection";
 import LoadingScreen from "@/components/layout/LoadingScreen";
 import ScrollTimeline from "@/components/layout/ScrollTimeline";
 import { PageTransitionProvider } from "@/components/layout/PageTransitionProvider";
@@ -71,7 +71,7 @@ export default async function LangLayout({
         <div className="flex min-h-screen flex-col">
           <Header dict={dict} lang={lang} />
           <main className="grow">{children}</main>
-          <Footer dict={dict} lang={lang} />
+          <OutroSection dict={dict} lang={lang} />
         </div>
       </PageTransitionProvider>
     </AppStateProvider>
