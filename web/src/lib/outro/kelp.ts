@@ -17,6 +17,8 @@ export interface KelpStrand {
   swayDeg: number;
   /** Sway period in seconds. */
   swayDurS: number;
+  /** Per-strand size multiplier — varies height/width for a denser, layered bed. */
+  scale: number;
   /** Bottom→top list of segments; each segment is a rows × cols hex grid. */
   segments: string[][][];
 }
@@ -48,6 +50,7 @@ export function generateKelp(seed: number, count: number): KelpStrand[] {
       cols,
       swayDeg: 3 + rng() * 4,
       swayDurS: 4 + rng() * 3,
+      scale: 0.6 + rng() * 0.9,
       segments,
     });
   }

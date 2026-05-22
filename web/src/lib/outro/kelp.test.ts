@@ -35,4 +35,13 @@ describe("generateKelp", () => {
       expect(s.leftPct).toBeLessThanOrEqual(100);
     }
   });
+
+  it("varies strand scale within range for a denser, layered look", () => {
+    const strands = generateKelp(11, 12);
+    for (const s of strands) {
+      expect(s.scale).toBeGreaterThanOrEqual(0.6);
+      expect(s.scale).toBeLessThanOrEqual(1.5);
+    }
+    expect(new Set(strands.map((s) => s.scale)).size).toBeGreaterThan(1);
+  });
 });

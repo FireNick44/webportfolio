@@ -3,7 +3,7 @@
 import type { CSSProperties } from "react";
 import { generateKelp } from "@/lib/outro/kelp";
 
-const STRANDS = generateKelp(11, 6);
+const STRANDS = generateKelp(11, 12);
 
 export function Kelp({ animated }: { animated: boolean }) {
   return (
@@ -12,12 +12,15 @@ export function Kelp({ animated }: { animated: boolean }) {
         <div
           key={s.id}
           className="absolute bottom-0 flex flex-col-reverse items-center"
-          style={{ left: `${s.leftPct}%`, width: s.widthPx }}
+          style={{ left: `${s.leftPct}%`, width: s.widthPx * s.scale }}
         >
           {s.segments.map((grid, i) => {
             const style: CSSProperties = {
               transformOrigin: "bottom center",
               display: "grid",
+              // Without a definite width the 1fr tracks + %-sized empty cells
+              // collapse to 0; the strand wrapper supplies the px width.
+              width: "100%",
               gridTemplateColumns: `repeat(${s.cols}, 1fr)`,
               imageRendering: "pixelated",
               animation: animated
