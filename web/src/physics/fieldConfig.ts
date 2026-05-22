@@ -34,3 +34,34 @@ export const MOBILE_CONFIG: FieldConfig = {
   segmentRange: [4, 5],
   layout: "column",
 };
+
+export type Quality = "low" | "medium" | "high";
+
+export const QUALITY_PRESETS: Record<Quality, FieldConfig> = {
+  low: { flaskCount: 26, maxPhysicsFlasks: 8, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 7], layout: "field" },
+  medium: { ...DESKTOP_DEFAULT, maxPhysicsFlasks: 18, skeletonBands: 2 },
+  // high's flaskCount is sized so the 3 physics tiers hold >22 slots → a few
+  // empty-but-interactive flasks appear once the 22 skills run out.
+  high: { flaskCount: 44, maxPhysicsFlasks: 26, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 11], layout: "field" },
+};
+
+export interface DeviceSignals {
+  cores: number;
+  memory: number; // GB; use 8 when unknown
+  prefersReducedMotion: boolean;
+  isMobile: boolean;
+}
+
+export function resolveQuality(s: DeviceSignals): Quality {
+  if (s.prefersReducedMotion) return "low";
+  let q: Quality = s.cores < 4 ? "low" : s.cores <= 8 ? "medium" : "high";
+  if (q === "high" && s.memory < 4) q = "medium"; // low RAM caps it
+  return q;
+}
+
+const ORDER: Quality[] = ["low", "medium", "high"];
+export function applyFpsDowngrade(q: Quality, fps: number, threshold = 45): Quality {
+  if (fps >= threshold) return q;
+  const i = ORDER.indexOf(q);
+  return ORDER[Math.max(0, i - 1)];
+}
