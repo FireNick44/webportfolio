@@ -273,7 +273,14 @@ function UpdatesOverlay({ engine }: { engine: Matter.Engine }) {
   return (
     <div style={panelStyle}>
       <div>Awake: {stats.awakeBodies} | Sleeping: {stats.sleepingBodies}</div>
-      <div>Engine ticks/s: {stats.totalUpdatesPerSec}</div>
+      <div>
+        Engine:{" "}
+        {stats.totalUpdatesPerSec === 0 ? (
+          <span style={{ color: "#0ff" }}>SUSPENDED (idle = 0 CPU)</span>
+        ) : (
+          `${stats.totalUpdatesPerSec} ticks/s`
+        )}
+      </div>
       <div>
         DOM elements synced/frame: ~
         {stats.awakeBodies > 0

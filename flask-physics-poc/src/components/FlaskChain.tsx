@@ -14,6 +14,7 @@ import {
   MAX_LIQUID_TILT_DEG,
   getSegmentHeight,
 } from "../physics/constants";
+import { useFlaskFieldLoopContext } from "../hooks/useFlaskFieldLoop";
 
 interface Props {
   engine: Matter.Engine;
@@ -48,7 +49,6 @@ export default function FlaskChain({
     chain: ChainResult;
     flask: FlaskResult;
   } | null>(null);
-  const rafRef = useRef<number>(0);
   const anchorRef = useRef({ x: anchorX, y: anchorY });
 
   // Spring state for icon rotation (delayed overshoot)
@@ -58,6 +58,7 @@ export default function FlaskChain({
   const scale = DEPTH_SCALE[layer];
   const opacity = DEPTH_OPACITY[layer];
   const isStatic = isSkeleton ?? layer === 2;
+  const loop = useFlaskFieldLoopContext();
 
   // Static positioning for layer 2 (no physics)
   useEffect(() => {
@@ -138,8 +139,8 @@ export default function FlaskChain({
         ]);
       }
     };
-    // anchorX/anchorY intentionally excluded — resize handled separately
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // anchorX/anchorY intentionally excluded — resize handled separately via
+    // anchorRef (a ref, so exhaustive-deps doesn't require them as deps).
   }, [engine, segmentCount, layer, instanceId, isStatic]);
 
   // Handle resize: translate bodies proportionally instead of recreating
@@ -173,17 +174,20 @@ export default function FlaskChain({
     });
     Matter.Body.setVelocity(flask.body, { x: 0, y: 0 });
     Matter.Body.setAngularVelocity(flask.body, 0);
-  }, [anchorX, anchorY, isStatic]);
+
+    // Wake briefly so the central loop re-syncs the new positions to the DOM
+    // (a sleeping body is skipped by syncDom); they re-sleep right after.
+    for (const seg of chain.segments) Matter.Sleeping.set(seg, false);
+    Matter.Sleeping.set(flask.body, false);
+    loop.wake();
+  }, [anchorX, anchorY, isStatic, loop]);
 
   const syncDom = useCallback(() => {
     if (!bodiesRef.current) return;
     const { chain, flask } = bodiesRef.current;
 
     // Skip DOM sync when flask body is sleeping — nothing moved
-    if (flask.body.isSleeping) {
-      rafRef.current = requestAnimationFrame(syncDom);
-      return;
-    }
+    if (flask.body.isSleeping) return;
 
     // Chain links: only scale X (width) so segments stay touching vertically
     for (let i = 0; i < chain.segments.length; i++) {
@@ -233,16 +237,15 @@ export default function FlaskChain({
       iconWetRef.current?.setAttribute("transform", iconRotate);
       iconDryRef.current?.setAttribute("transform", iconRotate);
     }
-
-    rafRef.current = requestAnimationFrame(syncDom);
   }, [scale, opacity]);
 
-  // Start RAF loop only for physics layers
+  // Register this flask's DOM sync with the central loop (physics layers only).
+  // One shared rAF drives every flask instead of one rAF per flask.
   useEffect(() => {
     if (isStatic) return;
-    rafRef.current = requestAnimationFrame(syncDom);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [syncDom, isStatic]);
+    loop.register(instanceId, syncDom);
+    return () => loop.unregister(instanceId);
+  }, [loop, instanceId, isStatic, syncDom]);
 
   const segmentHeights = Array.from({ length: segmentCount }, (_, i) =>
     getSegmentHeight(i)

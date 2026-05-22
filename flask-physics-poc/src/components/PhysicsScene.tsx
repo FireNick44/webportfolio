@@ -1,7 +1,10 @@
 import { useRef, useState, useEffect, useMemo } from "react";
 import Matter from "matter-js";
 import { usePhysicsEngine } from "../hooks/usePhysicsEngine";
-import { useAnimationSync } from "../hooks/useAnimationSync";
+import {
+  useFlaskFieldLoop,
+  FlaskFieldLoopContext,
+} from "../hooks/useFlaskFieldLoop";
 import { useMousePhysics } from "../hooks/useMousePhysics";
 import {
   WALL_FILTER,
@@ -13,6 +16,7 @@ import {
   MAX_FLASKS,
   MAX_PHYSICS_FLASKS,
   FLASK_FRICTION,
+  ENGINE_WAKE_MS,
 } from "../physics/constants";
 import {
   generateFlaskField,
@@ -73,7 +77,7 @@ export default function PhysicsScene() {
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const wallsRef = useRef<Matter.Body[]>([]);
 
-  useAnimationSync(engine);
+  const loop = useFlaskFieldLoop(engine, ENGINE_WAKE_MS);
   useMousePhysics(engine, containerRef);
 
   // Per-session seed: stable while the tab is open, fresh next visit.
@@ -189,6 +193,7 @@ export default function PhysicsScene() {
         });
       }
       scrollDelta = 0;
+      loop.wake(); // resume the (possibly suspended) loop to integrate the nudge
     };
 
     const onScroll = () => {
@@ -208,35 +213,37 @@ export default function PhysicsScene() {
       window.removeEventListener("scroll", onScroll);
       if (scrollRAF) cancelAnimationFrame(scrollRAF);
     };
-  }, [engine]);
+  }, [engine, loop]);
 
   return (
-    <div
-      ref={containerRef}
-      style={{
-        position: "sticky",
-        top: 0,
-        width: "100%",
-        height: "100vh",
-        overflow: "hidden",
-      }}
-    >
-      {dims.width > 0 &&
-        flasks.map((cfg, i) => (
-          <FlaskChain
-            key={`flask-${i}`}
-            engine={engine}
-            anchorX={cfg.xPct * dims.width}
-            anchorY={cfg.anchorY}
-            instanceId={`flask-${i}`}
-            color={cfg.color}
-            segmentCount={cfg.segments}
-            layer={cfg.layer}
-            skillIcon={cfg.skillIcon}
-            isSkeleton={cfg.isSkeleton}
-          />
-        ))}
-      <DebugPanel engine={engine} containerRef={containerRef} />
-    </div>
+    <FlaskFieldLoopContext.Provider value={loop}>
+      <div
+        ref={containerRef}
+        style={{
+          position: "sticky",
+          top: 0,
+          width: "100%",
+          height: "100vh",
+          overflow: "hidden",
+        }}
+      >
+        {dims.width > 0 &&
+          flasks.map((cfg, i) => (
+            <FlaskChain
+              key={`flask-${i}`}
+              engine={engine}
+              anchorX={cfg.xPct * dims.width}
+              anchorY={cfg.anchorY}
+              instanceId={`flask-${i}`}
+              color={cfg.color}
+              segmentCount={cfg.segments}
+              layer={cfg.layer}
+              skillIcon={cfg.skillIcon}
+              isSkeleton={cfg.isSkeleton}
+            />
+          ))}
+        <DebugPanel engine={engine} containerRef={containerRef} />
+      </div>
+    </FlaskFieldLoopContext.Provider>
   );
 }
