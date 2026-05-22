@@ -44,12 +44,6 @@ export const WALL_FILTER = {
   mask: CAT_LAYER[0] | CAT_LAYER[1] | CAT_LAYER[2],
 };
 
-// Visual depth (front → back): same opacity, only scale changes. Steeper
-// gradient = stronger sense of depth (front flasks read clearly bigger than the
-// ones behind). Visual only — the physics hitbox is fixed per flask.
-export const DEPTH_SCALE = [1.0, 0.7, 0.48] as const;
-export const DEPTH_OPACITY = [1.0, 1.0, 1.0] as const;
-
 // Per-tier visual+physics scale, front → back. Length defines the desktop tier
 // count. Single source of truth for size at each depth.
 export const LAYER_SCALE = [1.0, 0.82, 0.66, 0.5, 0.36] as const;
