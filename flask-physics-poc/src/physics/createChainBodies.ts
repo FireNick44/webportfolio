@@ -18,8 +18,7 @@ export interface ChainResult {
 export function createChainBodies(
   anchorX: number,
   anchorY: number,
-  segmentCount: number = CHAIN_SEGMENT_COUNT,
-  layer: number = 0
+  segmentCount: number = CHAIN_SEGMENT_COUNT
 ): ChainResult {
   const segments: Matter.Body[] = [];
   const segmentHeights: number[] = [];

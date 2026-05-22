@@ -93,7 +93,7 @@ export default function FlaskChain({
     const ax = anchorRef.current.x;
     const ay = anchorRef.current.y;
 
-    const chain = createChainBodies(ax, ay, segmentCount, layer);
+    const chain = createChainBodies(ax, ay, segmentCount);
     const lastH = chain.segmentHeights[chain.segmentHeights.length - 1];
     const flask = createFlaskBody(
       chain.segments[chain.segments.length - 1],
