@@ -18,6 +18,7 @@
 - **Do NOT gate on `next build`** — it fails on pre-existing react-compiler ESLint errors unrelated to this work. Gate on `tsc` + `vitest`.
 - **Manual checks** use `npm run dev` (open `http://localhost:3000/en`, scroll to the footer, use `/en/settings` → Appearance → "Outro scene").
 - Phase 1 needs **no external art assets** — sand, kelp, and bubbles are generated in code; the background reuses the existing `web/public/svg/intro-bg.svg`.
+- **Vitest has no path-alias config in this repo** (no `vitest.config.*`; existing tests use relative imports). So any module reachable from a `.test.ts` must use **relative imports** (e.g. `../../physics/generateFlasks`), not `@/...`. Components/hooks that are only typechecked (tsc) and run by Next.js may keep `@/` aliases. Do not "tidy" the generators' relative imports back to `@/` — it will break `npm test`.
 - Work happens on the existing branch `feature/underwater-outro`.
 
 ## File structure (Phase 1)
@@ -257,7 +258,7 @@ Expected: FAIL — cannot resolve `./bubbles`.
 Create `web/src/lib/outro/bubbles.ts`:
 
 ```ts
-import { mulberry32 } from "@/physics/generateFlasks";
+import { mulberry32 } from "../../physics/generateFlasks";
 
 export interface Bubble {
   id: number;
@@ -355,7 +356,7 @@ Expected: FAIL — cannot resolve `./sand`.
 Create `web/src/lib/outro/sand.ts`:
 
 ```ts
-import { mulberry32 } from "@/physics/generateFlasks";
+import { mulberry32 } from "../../physics/generateFlasks";
 
 const SAND_TONES = ["#d9c08a", "#d2b87f", "#c9ad72", "#e0caa0"];
 const PEBBLE = "#a98f5f";
@@ -453,7 +454,7 @@ Expected: FAIL — cannot resolve `./kelp`.
 Create `web/src/lib/outro/kelp.ts`:
 
 ```ts
-import { mulberry32 } from "@/physics/generateFlasks";
+import { mulberry32 } from "../../physics/generateFlasks";
 
 const GREENS = ["#1f6b3a", "#2f8a4d", "#3fa861", "#176030"];
 
