@@ -13,6 +13,8 @@ export interface PointerField {
   vy: number;
   /** True while the pointer is over the container's bounds. */
   active: boolean;
+  /** performance.now() of the last move — lets consumers gate on "is moving". */
+  movedAt: number;
 }
 
 /**
@@ -24,7 +26,7 @@ export function usePointerField(
   containerRef: RefObject<HTMLElement | null>,
   enabled: boolean,
 ): RefObject<PointerField> {
-  const field = useRef<PointerField>({ x: 0, y: 0, vx: 0, vy: 0, active: false });
+  const field = useRef<PointerField>({ x: 0, y: 0, vx: 0, vy: 0, active: false, movedAt: 0 });
 
   useEffect(() => {
     if (!enabled) {
@@ -43,6 +45,7 @@ export function usePointerField(
       field.current.x = x;
       field.current.y = y;
       field.current.active = inside;
+      field.current.movedAt = performance.now();
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     return () => window.removeEventListener("pointermove", onMove);

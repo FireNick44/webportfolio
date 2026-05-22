@@ -55,8 +55,11 @@ export function WaterCanvas({
 
       const p = enableCursor ? pointer?.current : null;
       const cursorOn = !!p && p.active;
+      // Velocity is stale after the mouse stops (pointermove stops firing), so
+      // only emit trail/ripple while the pointer has ACTUALLY moved recently.
+      const moving = cursorOn && now - p.movedAt < 90;
 
-      if (cursorOn) {
+      if (moving) {
         const speed = Math.hypot(p.vx, p.vy);
         trailAccum.current += dt;
         if (trailAccum.current > 0.04 && speed > 1.5) {
@@ -78,9 +81,13 @@ export function WaterCanvas({
         }
       }
 
+      // Update + draw bubbles. Trail bubbles (id < 0) are ephemeral: they pop at
+      // the top instead of recycling, so they can never accumulate.
+      const survivors: Bubble[] = [];
       for (const b of bubblesRef.current) {
         b.y -= b.speed * dt;
         if (b.y < -b.r) {
+          if (b.id < 0) continue; // trail bubble pops and is dropped
           b.y = h + b.r;
           b.baseX = Math.random();
         }
@@ -97,7 +104,9 @@ export function WaterCanvas({
         ctx.strokeStyle = "rgba(210, 240, 250, 0.22)";
         ctx.lineWidth = 1;
         ctx.stroke();
+        survivors.push(b);
       }
+      bubblesRef.current = survivors;
 
       if (ripplesRef.current.length) {
         for (const r of ripplesRef.current) {
