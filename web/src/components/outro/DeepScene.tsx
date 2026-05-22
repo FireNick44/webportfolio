@@ -3,8 +3,10 @@
 import { useRef } from "react";
 import { useGraphicsTier } from "@/hooks/useGraphicsTier";
 import { useSceneActive } from "@/hooks/useSceneActive";
-import type { GraphicsTier } from "@/lib/outro/tiers";
+import { usePointerField } from "@/hooks/usePointerField";
+import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
 import { WaterCanvas } from "./WaterCanvas";
+import { CursorFollower } from "./CursorFollower";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
 
@@ -20,6 +22,8 @@ export function DeepScene() {
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
   const animated = tier !== "off";
+  const cursorOn = atLeast(tier, "medium") && active;
+  const pointer = usePointerField(containerRef, cursorOn);
 
   return (
     <div ref={containerRef} aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
@@ -33,9 +37,15 @@ export function DeepScene() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#04121f]/70 via-[#062436]/80 to-[#01243a]/90" />
 
-      <WaterCanvas active={active && animated} bubbleCount={BUBBLE_COUNT[tier]} />
+      <WaterCanvas
+        active={active && animated}
+        bubbleCount={BUBBLE_COUNT[tier]}
+        pointer={pointer}
+        enableCursor={cursorOn}
+      />
       <Kelp animated={animated} />
       <SandFloor />
+      {cursorOn && <CursorFollower pointer={pointer} />}
     </div>
   );
 }
