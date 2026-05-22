@@ -2,6 +2,7 @@ import Matter from "matter-js";
 import {
   FLASK_HITBOX_WIDTH,
   FLASK_HITBOX_HEIGHT,
+  FLASK_FRICTION,
   layerFilter,
 } from "./constants";
 
@@ -26,6 +27,7 @@ export function createFlaskBody(
     {
       collisionFilter: layerFilter(layer),
       density: 0.012,
+      friction: FLASK_FRICTION,
       frictionAir: 0.025,
       restitution: 0,
       sleepThreshold: 30,

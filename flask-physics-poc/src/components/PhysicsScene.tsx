@@ -78,7 +78,6 @@ export default function PhysicsScene() {
   const wallsRef = useRef<Matter.Body[]>([]);
 
   const loop = useFlaskFieldLoop(engine, ENGINE_WAKE_MS);
-  useMousePhysics(engine, containerRef);
 
   // Per-session seed: stable while the tab is open, fresh next visit.
   const seed = useMemo(() => getSessionSeed(), []);
@@ -95,6 +94,7 @@ export default function PhysicsScene() {
   );
 
   const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
+  useMousePhysics(engine, containerRef, loop, isMobile);
 
   // Recompute only when the derived count (or mobile/seed) changes — not every
   // resize pixel. Positions are stored as xPct, so between count-steps a resize
