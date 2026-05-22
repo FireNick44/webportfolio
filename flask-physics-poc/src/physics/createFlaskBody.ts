@@ -2,7 +2,6 @@ import Matter from "matter-js";
 import {
   FLASK_HITBOX_WIDTH,
   FLASK_HITBOX_HEIGHT,
-  FLASK_HEIGHT,
   layerFilter,
 } from "./constants";
 
@@ -20,7 +19,7 @@ export function createFlaskBody(
 
   const body = Matter.Bodies.trapezoid(
     segPos.x,
-    segPos.y + lastSegmentHeight / 2 + FLASK_HEIGHT / 2,
+    segPos.y + lastSegmentHeight / 2 + FLASK_HITBOX_HEIGHT / 2,
     FLASK_HITBOX_WIDTH,
     FLASK_HITBOX_HEIGHT,
     0.3,
@@ -38,7 +37,7 @@ export function createFlaskBody(
     bodyA: lastChainSegment,
     pointA: { x: 0, y: lastSegmentHeight / 2 },
     bodyB: body,
-    pointB: { x: 0, y: -FLASK_HEIGHT / 2 },
+    pointB: { x: 0, y: -FLASK_HITBOX_HEIGHT / 2 },
     stiffness: 1,
     damping: 0.7,
     length: 0,

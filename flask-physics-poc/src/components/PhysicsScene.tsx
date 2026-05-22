@@ -14,10 +14,9 @@ import DebugPanel from "./DebugPanel";
 import skills from "../data/skills.json";
 
 const FLASK_COUNT = 40;
+const MOBILE_FLASK_COUNT = 18;
 const MIN_SEGMENTS = 3;
 const MAX_SEGMENTS = 14;
-const MOBILE_MIN_SEGMENTS = 5;
-const MOBILE_MAX_SEGMENTS = 18;
 
 const FLASK_COLORS = [
   "rgba(255, 86, 86, 0.7)",
@@ -46,85 +45,151 @@ interface FlaskConfig {
   color: string;
   layer: number;
   skillIcon?: string;
+  anchorY?: number;
 }
 
-function generateFlasks(count: number, mobile: boolean): FlaskConfig[] {
+function generateFlasks(
+  count: number,
+  mobile: boolean,
+  viewportHeight: number = 800
+): FlaskConfig[] {
   const rng = mulberry32(42);
   const flasks: FlaskConfig[] = [];
-  const layerPositions: number[][] = Array.from(
-    { length: DEPTH_LAYERS },
-    () => []
-  );
-
-  const minDist = MIN_SAME_LAYER_DISTANCE_PCT;
-  const maxRetries = 50;
-
-  const minSeg = mobile ? MOBILE_MIN_SEGMENTS : MIN_SEGMENTS;
-  const maxSeg = mobile ? MOBILE_MAX_SEGMENTS : MAX_SEGMENTS;
-  const xMin = mobile ? 0.08 : 0.03;
-  const xRange = mobile ? 0.84 : 0.94;
 
   // Shuffle skills for random assignment
   const shuffledSkills = [...skills];
   for (let i = shuffledSkills.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
-    [shuffledSkills[i], shuffledSkills[j]] = [shuffledSkills[j], shuffledSkills[i]];
+    [shuffledSkills[i], shuffledSkills[j]] = [
+      shuffledSkills[j],
+      shuffledSkills[i],
+    ];
   }
   let skillIndex = 0;
 
-  for (let i = 0; i < count; i++) {
-    const layer = Math.floor(rng() * DEPTH_LAYERS);
-    const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
-    const color = FLASK_COLORS[Math.floor(rng() * FLASK_COLORS.length)];
+  if (mobile) {
+    // Mobile: 3 rows, each row = one layer, short chains
+    const numRows = 3;
+    const rowHeight = viewportHeight / numRows;
+    const perRow = Math.ceil(count / numRows);
+    const minDist = 0.12;
 
-    let xPct = 0;
-    let placed = false;
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-      xPct = xMin + rng() * xRange;
+    for (let row = 0; row < numRows; row++) {
+      const layer = row; // top row = layer 0 (front), bottom = layer 2 (back)
+      const anchorY = row * rowHeight - 80;
+      const rowPositions: number[] = [];
+
+      for (let j = 0; j < perRow; j++) {
+        let xPct = 0;
+        let placed = false;
+        for (let attempt = 0; attempt < 50; attempt++) {
+          xPct = 0.08 + rng() * 0.84;
+          const tooClose = rowPositions.some(
+            (ex) => Math.abs(ex - xPct) < minDist
+          );
+          if (!tooClose) {
+            placed = true;
+            break;
+          }
+        }
+        if (!placed) continue;
+
+        const segments = 2 + Math.floor(rng() * 3); // 2-4 segments
+        const color = FLASK_COLORS[Math.floor(rng() * FLASK_COLORS.length)];
+
+        let skillIcon: string | undefined;
+        if (layer !== 2 && skillIndex < shuffledSkills.length) {
+          skillIcon = shuffledSkills[skillIndex].svgPath;
+          skillIndex++;
+        }
+
+        rowPositions.push(xPct);
+        flasks.push({ xPct, segments, color, layer, skillIcon, anchorY });
+      }
+    }
+  } else {
+    // Desktop: generate all flasks, then assign layers by chain length
+    const rawFlasks: { xPct: number; segments: number; color: string }[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const segments =
+        MIN_SEGMENTS + Math.floor(rng() * (MAX_SEGMENTS - MIN_SEGMENTS + 1));
+      const xPct = 0.03 + rng() * 0.94;
+      const color = FLASK_COLORS[Math.floor(rng() * FLASK_COLORS.length)];
+      rawFlasks.push({ xPct, segments, color });
+    }
+
+    // Sort by segments ascending: shorter chains → front (layer 0)
+    rawFlasks.sort((a, b) => a.segments - b.segments);
+
+    const layerPositions: number[][] = [[], [], []];
+    const minDist = MIN_SAME_LAYER_DISTANCE_PCT;
+    const third = Math.ceil(rawFlasks.length / DEPTH_LAYERS);
+
+    for (let i = 0; i < rawFlasks.length; i++) {
+      const layer = Math.min(Math.floor(i / third), DEPTH_LAYERS - 1);
+      const { xPct, segments, color } = rawFlasks[i];
+
       const tooClose = layerPositions[layer].some(
         (existing) => Math.abs(existing - xPct) < minDist
       );
-      if (!tooClose) {
-        placed = true;
-        break;
+      if (tooClose) continue;
+
+      let skillIcon: string | undefined;
+      if (layer !== 2 && skillIndex < shuffledSkills.length) {
+        skillIcon = shuffledSkills[skillIndex].svgPath;
+        skillIndex++;
       }
-    }
-    if (!placed) continue;
 
-    // Only assign icons to layers 0 and 1, each skill used once
-    let skillIcon: string | undefined;
-    if (layer !== 2 && skillIndex < shuffledSkills.length) {
-      skillIcon = shuffledSkills[skillIndex].svgPath;
-      skillIndex++;
+      layerPositions[layer].push(xPct);
+      flasks.push({ xPct, segments, color, layer, skillIcon });
     }
-
-    layerPositions[layer].push(xPct);
-    flasks.push({ xPct, segments, color, layer, skillIcon });
   }
 
+  // Sort by layer descending (back to front) for render order
   flasks.sort((a, b) => b.layer - a.layer);
   return flasks;
 }
 
 function createBoundaryWalls(width: number, height: number) {
   const t = 100;
-  return [
-    Matter.Bodies.rectangle(-t / 2, height / 2, t, height * 3, {
-      isStatic: true,
-      collisionFilter: WALL_FILTER,
-      label: "wall-left",
-    }),
-    Matter.Bodies.rectangle(width + t / 2, height / 2, t, height * 3, {
-      isStatic: true,
-      collisionFilter: WALL_FILTER,
-      label: "wall-right",
-    }),
+  const walls: Matter.Body[] = [];
+
+  // Top wall only — no side walls so flasks can drift off-screen
+  walls.push(
     Matter.Bodies.rectangle(width / 2, -t / 2, width * 3, t, {
       isStatic: true,
       collisionFilter: WALL_FILTER,
       label: "wall-top",
-    }),
-  ];
+    })
+  );
+
+  // Curved bottom: dome shape (center high, edges low) so flasks slide to sides
+  const numSeg = 7;
+  const totalW = width * 1.4;
+  const segW = totalW / numSeg;
+  const curveHeight = 120;
+  const baseY = height + 30;
+
+  for (let i = 0; i < numSeg; i++) {
+    const frac = (i + 0.5) / numSeg;
+    const nx = (frac - 0.5) * 2; // -1..1
+    const xPos = -width * 0.2 + frac * totalW;
+    const yPos = baseY + curveHeight * nx * nx;
+    const slope = (4 * curveHeight * nx) / totalW;
+    const angle = Math.atan(slope);
+
+    walls.push(
+      Matter.Bodies.rectangle(xPos, yPos, segW + 10, t, {
+        isStatic: true,
+        angle,
+        collisionFilter: WALL_FILTER,
+        label: "wall-bottom",
+      })
+    );
+  }
+
+  return walls;
 }
 
 export default function PhysicsScene() {
@@ -138,7 +203,15 @@ export default function PhysicsScene() {
 
   const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
   const flasks = useMemo(
-    () => (dims.width > 0 ? generateFlasks(FLASK_COUNT, isMobile) : []),
+    () =>
+      dims.width > 0
+        ? generateFlasks(
+            isMobile ? MOBILE_FLASK_COUNT : FLASK_COUNT,
+            isMobile,
+            dims.height
+          )
+        : [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [dims.width > 0, isMobile]
   );
 
@@ -248,7 +321,7 @@ export default function PhysicsScene() {
             key={`flask-${i}`}
             engine={engine}
             anchorX={cfg.xPct * dims.width}
-            anchorY={-80}
+            anchorY={cfg.anchorY ?? -80}
             instanceId={`flask-${i}`}
             color={cfg.color}
             segmentCount={cfg.segments}
