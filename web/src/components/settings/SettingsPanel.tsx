@@ -301,7 +301,7 @@ export default function SettingsPanel({
               <div className="flex flex-wrap items-center gap-3">
                 <span className="lab-label w-20">Scene</span>
                 <div className="flex gap-px bg-border">
-                  {(["classic", "deep"] as const).map((s) => (
+                  {(["classic", "deep", "reef"] as const).map((s) => (
                     <button
                       key={s}
                       type="button"
@@ -313,7 +313,7 @@ export default function SettingsPanel({
                           : "text-muted-foreground hover:text-foreground",
                       )}
                     >
-                      {s === "classic" ? "Current" : "The Deep"}
+                      {s === "classic" ? "Current" : s === "deep" ? "The Deep" : "Reef"}
                     </button>
                   ))}
                 </div>

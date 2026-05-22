@@ -33,8 +33,8 @@ interface AppState {
   advanced: boolean;
   setAdvanced: (advanced: boolean) => void;
   /** Which outro variant renders at the bottom of the page. */
-  outroScene: "classic" | "deep";
-  setOutroScene: (scene: "classic" | "deep") => void;
+  outroScene: "classic" | "deep" | "reef";
+  setOutroScene: (scene: "classic" | "deep" | "reef") => void;
   /** Game-style quality tier for the underwater scene. */
   graphicsTier: "off" | "low" | "medium" | "high";
   setGraphicsTier: (tier: "off" | "low" | "medium" | "high") => void;

@@ -5,14 +5,24 @@ import { generateKelp } from "@/lib/outro/kelp";
 
 const STRANDS = generateKelp(11, 12);
 
-export function Kelp({ animated }: { animated: boolean }) {
+export function Kelp({
+  animated,
+  clusterAround,
+}: {
+  animated: boolean;
+  /** If set (0–100), pull strands toward this % to form one dense patch. */
+  clusterAround?: number;
+}) {
   return (
     <div aria-hidden className="absolute inset-x-0 bottom-0 z-[3] h-[42%]">
       {STRANDS.map((s) => (
         <div
           key={s.id}
           className="absolute bottom-0 flex flex-col-reverse items-center"
-          style={{ left: `${s.leftPct}%`, width: s.widthPx * s.scale }}
+          style={{
+            left: `${clusterAround == null ? s.leftPct : clusterAround + (s.leftPct - 50) * 0.3}%`,
+            width: s.widthPx * s.scale,
+          }}
         >
           {s.segments.map((grid, i) => {
             const style: CSSProperties = {
