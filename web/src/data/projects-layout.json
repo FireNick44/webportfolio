@@ -1,0 +1,10 @@
+{
+  "columns": { "base": 2, "sm": 3, "lg": 4 },
+  "rowHeight": "11rem",
+  "gap": "1rem",
+  "sizes": {
+    "default": { "col": 1, "row": 1 },
+    "wide": { "col": 2, "row": 1 },
+    "large": { "col": 2, "row": 2 }
+  }
+}

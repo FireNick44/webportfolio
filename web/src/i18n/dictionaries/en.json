@@ -1,0 +1,97 @@
+{
+  "nav": {
+    "me": "Me",
+    "skills": "Skills",
+    "projects": "Projects",
+    "contact": "Contact",
+    "settings": "Settings"
+  },
+  "hero": {
+    "greeting": "Hello World, I'm",
+    "name": "Noel Studer",
+    "tagline": "Software developer & digital tinkerer.",
+    "scroll": "Scroll"
+  },
+  "about": {
+    "label": "01 / Me",
+    "title": "A bit about the person behind the flasks",
+    "bio": [
+      "I'm Noel — a software developer who likes turning fuzzy ideas into things that actually run.",
+      "I move comfortably between front end and back end, care about details, and enjoy the moment a clunky workflow finally feels effortless."
+    ],
+    "columns": [
+      {
+        "title": "Coding & Frameworks",
+        "items": [
+          "Java",
+          "JavaScript / TypeScript",
+          "Python",
+          "PHP / Laravel",
+          "C / C++ / C#",
+          "React & Vue",
+          "Angular",
+          "Node.js",
+          "SQL",
+          "HTML / CSS / Sass"
+        ]
+      },
+      {
+        "title": "Software",
+        "items": ["VS Code", "Visual Studio", "JetBrains Suite", "Git & GitHub"]
+      },
+      {
+        "title": "Systems",
+        "items": ["Windows 10 / 11", "Ubuntu", "Kali Linux", "Garuda", "Raspberry Pi"]
+      },
+      {
+        "title": "Languages",
+        "items": ["German — native", "English — fluent", "French — basics"]
+      },
+      {
+        "title": "Beyond code",
+        "items": ["Electronics & tinkering", "Music", "Photography", "Good coffee"]
+      }
+    ]
+  },
+  "skills": {
+    "label": "02 / Skills",
+    "title": "Suspended in solution",
+    "subtitle": "Every flask holds a tool I work with, hanging on its own chain.",
+    "hint": "Stir up the flasks"
+  },
+  "projects": {
+    "label": "03 / Selected work",
+    "title": "Things I've built",
+    "subtitle": "A handful of experiments, tools and client work.",
+    "viewCode": "View source"
+  },
+  "contact": {
+    "label": "04 / Contact",
+    "title": "Let's mix something",
+    "subtitle": "Tell me about your idea. No email or phone to copy down — just write and hit send.",
+    "name": "Name",
+    "namePlaceholder": "Your name",
+    "email": "Email",
+    "emailPlaceholder": "you@example.com",
+    "message": "Message",
+    "messagePlaceholder": "What are you working on?",
+    "send": "Send message",
+    "sending": "Sending…",
+    "success": "Thanks — your message is on its way. I'll be in touch soon.",
+    "error": "Something went wrong sending that. Please try again in a moment.",
+    "invalid": "Please fill in your name, a valid email and a message."
+  },
+  "footer": {
+    "thanks": "Thanks for stopping by.",
+    "note": "This corner of the web is still brewing — like everything worth building. ;)",
+    "rights": "© 2026 Noel Studer",
+    "builtWith": "Built with Next.js, Matter.js & a lot of caffeine.",
+    "backToTop": "Back to top"
+  },
+  "menu": {
+    "open": "Menu",
+    "close": "Close",
+    "theme": "Theme",
+    "language": "Language"
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "categories": [
+    {
+      "title": "Coding & Frameworks",
+      "groups": [
+        { "label": "//basics+++", "items": ["HTML / CSS", "SCSS", "JavaScript", "C#", "C++", "Laravel"] },
+        { "label": "//basics++", "items": ["TypeScript", "Vue.js", "Angular", "PHP"] },
+        { "label": "//basics", "items": ["Java", "SQL", "Python"] }
+      ]
+    },
+    {
+      "title": "Software",
+      "groups": [
+        { "label": "//coding", "items": ["Visual Studio", "VS Code", "WebStorm", "PhpStorm", "IntelliJ IDEA"] },
+        { "label": "//office", "items": ["Microsoft Office", "Adobe Creative Cloud"] }
+      ]
+    },
+    {
+      "title": "OS",
+      "groups": [
+        { "label": "//we don't talk about it", "items": ["Windows"] },
+        { "label": "//still learning <3", "items": ["Linux (Garuda, Kali, Raspbian, Ubuntu, EndeavourOS)"] }
+      ]
+    },
+    {
+      "title": "Languages",
+      "groups": [
+        { "label": "//native", "items": ["de-DE Deutsch"] },
+        { "label": "//fluent", "items": ["en-US English"] }
+      ]
+    },
+    {
+      "title": "Other interests",
+      "groups": [
+        { "items": ["Games", "Painting"] },
+        { "items": ["Diving", "Project AWARE"] },
+        { "items": ["Security", "Ethics"] }
+      ]
+    }
+  ]
+}

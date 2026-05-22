@@ -1,0 +1,47 @@
+[
+  {
+    "name": "Im.ProveYou",
+    "subtitle": "IMS Thesis",
+    "tech": ["Laravel"],
+    "url": "https://github.com/improveU/improveyou-website",
+    "size": "large"
+  },
+  {
+    "name": "Personal Webportfolio",
+    "tech": ["HTML/SCSS", "JS"],
+    "url": "https://github.com/FireNick44/webportfolio"
+  },
+  {
+    "name": "Login Frontend",
+    "tech": ["HTML/CSS", "JS"],
+    "url": "https://github.com/FireNick44/LoginFrontend"
+  },
+  {
+    "name": "Swiss Transport",
+    "tech": ["C#", "Transport API"],
+    "url": "https://github.com/FireNick44/YS-SwissTransport",
+    "size": "wide"
+  },
+  {
+    "name": "Pointer Quartet",
+    "tech": ["C++"],
+    "url": "https://github.com/FireNick44/PointerQuartet"
+  },
+  {
+    "name": "Web TicTacToe",
+    "tech": ["HTML/SCSS", "TS"],
+    "url": "https://github.com/FireNick44/WebTicTacToe"
+  },
+  {
+    "name": "C++ TicTacToe",
+    "tech": ["C++"],
+    "url": "https://github.com/FireNick44/TicTacToe"
+  },
+  {
+    "name": "Guess The Number",
+    "subtitle": "First program",
+    "tech": ["C++"],
+    "url": "https://github.com/FireNick44/GuessTheNumber",
+    "secret": true
+  }
+]

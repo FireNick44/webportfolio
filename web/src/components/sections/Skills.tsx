@@ -1,0 +1,56 @@
+import type { Dictionary } from "@/i18n/types";
+import { Reveal } from "@/components/ui/Reveal";
+import PhysicsSceneClient from "@/components/physics/PhysicsSceneClient";
+
+// Just the colourful layered background sits behind the flasks. BOTH waves are
+// rendered inside PhysicsScene, in front of the flasks, so the bottles tuck
+// behind them top and bottom.
+function FlaskBackdrop() {
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/svg/skill-bg.svg"
+        alt=""
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+    </div>
+  );
+}
+
+export default function Skills({ dict }: { dict: Dictionary }) {
+  return (
+    <section id="skills" className="relative overflow-hidden">
+      {/* Skills overview — plain black/white background (no bubbles) */}
+      <div className="relative pb-6 pt-24 sm:pt-32">
+        <div className="relative z-10 mx-auto max-w-3xl px-6 text-center">
+          <Reveal>
+            <span className="lab-label">{dict.skills.label}</span>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <h2 className="mt-5 font-display text-4xl font-bold tracking-tight sm:text-6xl">
+              {dict.skills.title}
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mx-auto mt-5 max-w-xl text-foreground/90">
+              {dict.skills.subtitle}
+            </p>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <p className="lab-label mt-8 inline-block border border-border px-3 py-2">
+              {dict.skills.hint}
+            </p>
+          </Reveal>
+        </div>
+      </div>
+
+      {/* The real Matter.js flask rack. Height == the sticky scene (100vh) so
+          there's no empty "overhang" under the bottles — they fall as an
+          entering animation and the bottom wave sits right beneath them. */}
+      <div className="relative" style={{ height: "100vh" }}>
+        <PhysicsSceneClient backdrop={<FlaskBackdrop />} hint={dict.skills.hint} />
+      </div>
+    </section>
+  );
+}

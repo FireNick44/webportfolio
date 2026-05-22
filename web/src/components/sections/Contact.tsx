@@ -1,0 +1,148 @@
+"use client";
+
+import { useState } from "react";
+import { motion } from "motion/react";
+import type { Dictionary } from "@/i18n/types";
+import { Reveal } from "@/components/ui/Reveal";
+import { cn } from "@/lib/utils";
+
+type Status = "idle" | "sending" | "success" | "error";
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+
+export default function Contact({ dict }: { dict: Dictionary }) {
+  const c = dict.contact;
+  const [status, setStatus] = useState<Status>("idle");
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const fd = new FormData(form);
+    const data = {
+      name: String(fd.get("name") || "").trim(),
+      email: String(fd.get("email") || "").trim(),
+      message: String(fd.get("message") || "").trim(),
+      company: String(fd.get("company") || ""),
+    };
+
+    if (!data.name || !data.message || !EMAIL_RE.test(data.email)) {
+      setStatus("error");
+      return;
+    }
+
+    setStatus("sending");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const json = await res.json().catch(() => ({ ok: false }));
+      if (res.ok && json.ok) {
+        setStatus("success");
+        form.reset();
+      } else {
+        setStatus("error");
+      }
+    } catch {
+      setStatus("error");
+    }
+  }
+
+  const fieldCls =
+    "w-full border border-border bg-transparent px-4 py-3 text-foreground placeholder:text-muted-foreground/60 transition-colors focus:border-foreground focus:outline-none";
+
+  return (
+    <section
+      id="contact"
+      className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36"
+    >
+      <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-20">
+        <div>
+          <Reveal>
+            <span className="lab-label">{c.label}</span>
+          </Reveal>
+          <Reveal delay={0.05}>
+            <h2 className="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl">
+              {c.title}
+            </h2>
+          </Reveal>
+          <Reveal delay={0.1}>
+            <p className="mt-5 max-w-md text-muted-foreground">{c.subtitle}</p>
+          </Reveal>
+        </div>
+
+        <Reveal delay={0.1}>
+          <form onSubmit={onSubmit} className="flex flex-col gap-5" noValidate>
+            {/* honeypot */}
+            <input
+              type="text"
+              name="company"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden
+              className="hidden"
+            />
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <label className="flex flex-col gap-2">
+                <span className="lab-label">{c.name}</span>
+                <input
+                  name="name"
+                  type="text"
+                  required
+                  placeholder={c.namePlaceholder}
+                  className={fieldCls}
+                />
+              </label>
+              <label className="flex flex-col gap-2">
+                <span className="lab-label">{c.email}</span>
+                <input
+                  name="email"
+                  type="email"
+                  required
+                  placeholder={c.emailPlaceholder}
+                  className={fieldCls}
+                />
+              </label>
+            </div>
+
+            <label className="flex flex-col gap-2">
+              <span className="lab-label">{c.message}</span>
+              <textarea
+                name="message"
+                required
+                rows={5}
+                placeholder={c.messagePlaceholder}
+                className={cn(fieldCls, "resize-none")}
+              />
+            </label>
+
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <motion.button
+                type="submit"
+                disabled={status === "sending"}
+                whileTap={{ scale: 0.98 }}
+                className="group inline-flex items-center justify-center gap-3 border border-foreground bg-foreground px-7 py-3.5 font-mono text-sm uppercase tracking-[0.22em] text-background transition-colors hover:bg-transparent hover:text-foreground disabled:opacity-50"
+              >
+                {status === "sending" ? c.sending : c.send}
+              </motion.button>
+
+              <p
+                aria-live="polite"
+                className={cn(
+                  "text-sm",
+                  status === "success" && "text-accent",
+                  status === "error" && "text-destructive",
+                  (status === "idle" || status === "sending") && "sr-only",
+                )}
+              >
+                {status === "success" && c.success}
+                {status === "error" && c.error}
+              </p>
+            </div>
+          </form>
+        </Reveal>
+      </div>
+    </section>
+  );
+}
