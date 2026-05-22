@@ -24,6 +24,7 @@ interface Props {
   segmentCount?: number;
   layer?: number;
   skillIcon?: string;
+  isSkeleton?: boolean;
 }
 
 export default function FlaskChain({
@@ -35,6 +36,7 @@ export default function FlaskChain({
   segmentCount = CHAIN_SEGMENT_COUNT,
   layer = 0,
   skillIcon,
+  isSkeleton,
 }: Props) {
   const chainRefs = useRef<(HTMLDivElement | null)[]>([]);
   const flaskRef = useRef<HTMLDivElement | null>(null);
@@ -55,7 +57,7 @@ export default function FlaskChain({
 
   const scale = DEPTH_SCALE[layer];
   const opacity = DEPTH_OPACITY[layer];
-  const isStatic = layer === 2;
+  const isStatic = isSkeleton ?? layer === 2;
 
   // Static positioning for layer 2 (no physics)
   useEffect(() => {

@@ -4,152 +4,25 @@ import { usePhysicsEngine } from "../hooks/usePhysicsEngine";
 import { useAnimationSync } from "../hooks/useAnimationSync";
 import { useMousePhysics } from "../hooks/useMousePhysics";
 import {
-  DEPTH_LAYERS,
-  MIN_SAME_LAYER_DISTANCE_PCT,
   WALL_FILTER,
   MOBILE_BREAKPOINT,
+  COLUMN_COUNT,
+  SKELETON_BANDS,
+  FLASK_SPACING_X,
+  MIN_FLASKS,
+  MAX_FLASKS,
+  MAX_PHYSICS_FLASKS,
+  FLASK_FRICTION,
 } from "../physics/constants";
+import {
+  generateFlaskField,
+  computeTargetCount,
+} from "../layout/generateFlaskField";
+import { getSessionSeed } from "../layout/rng";
+import type { LayoutConfig } from "../types/flask";
 import FlaskChain from "./FlaskChain";
 import DebugPanel from "./DebugPanel";
 import skills from "../data/skills.json";
-
-const FLASK_COUNT = 40;
-const MOBILE_FLASK_COUNT = 18;
-const MIN_SEGMENTS = 3;
-const MAX_SEGMENTS = 14;
-
-const FLASK_COLORS = [
-  "rgba(255, 86, 86, 0.7)",
-  "rgba(86, 200, 255, 0.7)",
-  "rgba(86, 255, 130, 0.7)",
-  "rgba(255, 200, 60, 0.7)",
-  "rgba(200, 86, 255, 0.7)",
-  "rgba(255, 140, 60, 0.7)",
-  "rgba(60, 255, 220, 0.7)",
-  "rgba(255, 100, 180, 0.7)",
-];
-
-function mulberry32(seed: number) {
-  return () => {
-    seed |= 0;
-    seed = (seed + 0x6d2b79f5) | 0;
-    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-interface FlaskConfig {
-  xPct: number;
-  segments: number;
-  color: string;
-  layer: number;
-  skillIcon?: string;
-  anchorY?: number;
-}
-
-function generateFlasks(
-  count: number,
-  mobile: boolean,
-  viewportHeight: number = 800
-): FlaskConfig[] {
-  const rng = mulberry32(42);
-  const flasks: FlaskConfig[] = [];
-
-  // Shuffle skills for random assignment
-  const shuffledSkills = [...skills];
-  for (let i = shuffledSkills.length - 1; i > 0; i--) {
-    const j = Math.floor(rng() * (i + 1));
-    [shuffledSkills[i], shuffledSkills[j]] = [
-      shuffledSkills[j],
-      shuffledSkills[i],
-    ];
-  }
-  let skillIndex = 0;
-
-  if (mobile) {
-    // Mobile: 3 rows, each row = one layer, short chains
-    const numRows = 3;
-    const rowHeight = viewportHeight / numRows;
-    const perRow = Math.ceil(count / numRows);
-    const minDist = 0.12;
-
-    for (let row = 0; row < numRows; row++) {
-      const layer = row; // top row = layer 0 (front), bottom = layer 2 (back)
-      const anchorY = row * rowHeight - 80;
-      const rowPositions: number[] = [];
-
-      for (let j = 0; j < perRow; j++) {
-        let xPct = 0;
-        let placed = false;
-        for (let attempt = 0; attempt < 50; attempt++) {
-          xPct = 0.08 + rng() * 0.84;
-          const tooClose = rowPositions.some(
-            (ex) => Math.abs(ex - xPct) < minDist
-          );
-          if (!tooClose) {
-            placed = true;
-            break;
-          }
-        }
-        if (!placed) continue;
-
-        const segments = 2 + Math.floor(rng() * 3); // 2-4 segments
-        const color = FLASK_COLORS[Math.floor(rng() * FLASK_COLORS.length)];
-
-        let skillIcon: string | undefined;
-        if (layer !== 2 && skillIndex < shuffledSkills.length) {
-          skillIcon = shuffledSkills[skillIndex].svgPath;
-          skillIndex++;
-        }
-
-        rowPositions.push(xPct);
-        flasks.push({ xPct, segments, color, layer, skillIcon, anchorY });
-      }
-    }
-  } else {
-    // Desktop: generate all flasks, then assign layers by chain length
-    const rawFlasks: { xPct: number; segments: number; color: string }[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const segments =
-        MIN_SEGMENTS + Math.floor(rng() * (MAX_SEGMENTS - MIN_SEGMENTS + 1));
-      const xPct = 0.03 + rng() * 0.94;
-      const color = FLASK_COLORS[Math.floor(rng() * FLASK_COLORS.length)];
-      rawFlasks.push({ xPct, segments, color });
-    }
-
-    // Sort by segments ascending: shorter chains → front (layer 0)
-    rawFlasks.sort((a, b) => a.segments - b.segments);
-
-    const layerPositions: number[][] = [[], [], []];
-    const minDist = MIN_SAME_LAYER_DISTANCE_PCT;
-    const third = Math.ceil(rawFlasks.length / DEPTH_LAYERS);
-
-    for (let i = 0; i < rawFlasks.length; i++) {
-      const layer = Math.min(Math.floor(i / third), DEPTH_LAYERS - 1);
-      const { xPct, segments, color } = rawFlasks[i];
-
-      const tooClose = layerPositions[layer].some(
-        (existing) => Math.abs(existing - xPct) < minDist
-      );
-      if (tooClose) continue;
-
-      let skillIcon: string | undefined;
-      if (layer !== 2 && skillIndex < shuffledSkills.length) {
-        skillIcon = shuffledSkills[skillIndex].svgPath;
-        skillIndex++;
-      }
-
-      layerPositions[layer].push(xPct);
-      flasks.push({ xPct, segments, color, layer, skillIcon });
-    }
-  }
-
-  // Sort by layer descending (back to front) for render order
-  flasks.sort((a, b) => b.layer - a.layer);
-  return flasks;
-}
 
 function createBoundaryWalls(width: number, height: number) {
   const t = 100;
@@ -160,6 +33,7 @@ function createBoundaryWalls(width: number, height: number) {
     Matter.Bodies.rectangle(width / 2, -t / 2, width * 3, t, {
       isStatic: true,
       collisionFilter: WALL_FILTER,
+      friction: FLASK_FRICTION,
       label: "wall-top",
     })
   );
@@ -184,6 +58,7 @@ function createBoundaryWalls(width: number, height: number) {
         isStatic: true,
         angle,
         collisionFilter: WALL_FILTER,
+        friction: FLASK_FRICTION,
         label: "wall-bottom",
       })
     );
@@ -201,18 +76,42 @@ export default function PhysicsScene() {
   useAnimationSync(engine);
   useMousePhysics(engine, containerRef);
 
+  // Per-session seed: stable while the tab is open, fresh next visit.
+  const seed = useMemo(() => getSessionSeed(), []);
+  const layoutConfig: LayoutConfig = useMemo(
+    () => ({
+      columnCount: COLUMN_COUNT,
+      skeletonBands: SKELETON_BANDS,
+      flaskSpacingX: FLASK_SPACING_X,
+      minFlasks: MIN_FLASKS,
+      maxFlasks: MAX_FLASKS,
+      maxPhysicsFlasks: MAX_PHYSICS_FLASKS,
+    }),
+    []
+  );
+
   const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
+
+  // Recompute only when the derived count (or mobile/seed) changes — not every
+  // resize pixel. Positions are stored as xPct, so between count-steps a resize
+  // still repositions smoothly via anchorX = xPct * width.
+  const targetCount =
+    dims.width > 0 ? computeTargetCount(dims.width, layoutConfig) : 0;
+
   const flasks = useMemo(
     () =>
       dims.width > 0
-        ? generateFlasks(
-            isMobile ? MOBILE_FLASK_COUNT : FLASK_COUNT,
+        ? generateFlaskField({
+            width: dims.width,
+            height: dims.height,
             isMobile,
-            dims.height
-          )
+            skills,
+            seed,
+            config: layoutConfig,
+          })
         : [],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [dims.width > 0, isMobile]
+    [targetCount, isMobile, seed]
   );
 
   useEffect(() => {
@@ -231,6 +130,13 @@ export default function PhysicsScene() {
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
+    // Seed dimensions synchronously on mount. ResizeObserver's initial delivery
+    // is deferred while a tab is hidden/backgrounded, so relying on it alone can
+    // leave the field unrendered; getBoundingClientRect works regardless.
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      setDims({ width: rect.width, height: rect.height });
+    }
     const ro = new ResizeObserver((entries) => {
       const { width, height } = entries[0].contentRect;
       if (width > 0 && height > 0) {
@@ -321,12 +227,13 @@ export default function PhysicsScene() {
             key={`flask-${i}`}
             engine={engine}
             anchorX={cfg.xPct * dims.width}
-            anchorY={cfg.anchorY ?? -80}
+            anchorY={cfg.anchorY}
             instanceId={`flask-${i}`}
             color={cfg.color}
             segmentCount={cfg.segments}
             layer={cfg.layer}
             skillIcon={cfg.skillIcon}
+            isSkeleton={cfg.isSkeleton}
           />
         ))}
       <DebugPanel engine={engine} containerRef={containerRef} />
