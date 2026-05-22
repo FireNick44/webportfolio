@@ -1,4 +1,5 @@
 import { LAYER_SCALE } from "./constants";
+import type { GraphicsTier } from "@/lib/outro/tiers";
 
 export interface FieldConfig {
   /** Total flasks to attempt to place. */
@@ -15,7 +16,7 @@ export interface FieldConfig {
   layout: "field" | "column";
 }
 
-// Lean desktop default (Phase 1). Quality presets replace this later.
+// Desktop "medium" baseline; tier presets below derive from it.
 export const DESKTOP_DEFAULT: FieldConfig = {
   flaskCount: 30,
   maxPhysicsFlasks: 18,
@@ -35,33 +36,27 @@ export const MOBILE_CONFIG: FieldConfig = {
   layout: "column",
 };
 
-export type Quality = "low" | "medium" | "high";
-
-export const QUALITY_PRESETS: Record<Quality, FieldConfig> = {
+// Desktop flask field per graphics tier (shares the site-wide GraphicsTier so
+// one setting controls both this rack and the underwater outro).
+//   off    → fully static rack: maxPhysicsFlasks 0 makes every flask a
+//            skeleton (no physics, no rAF). This is also how reduced-motion is
+//            honoured, since useGraphicsTier maps reduced-motion → "off".
+//   low    → light: ~8 physics, more skeleton depth, shorter chains.
+//   medium → today's default (~18 physics).
+//   high   → full field (~26 physics; >22 means a few empty-but-interactive
+//            flasks appear once the 22 skills run out).
+export const FIELD_BY_TIER: Record<GraphicsTier, FieldConfig> = {
+  off: { flaskCount: 24, maxPhysicsFlasks: 0, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 11], layout: "field" },
   low: { flaskCount: 26, maxPhysicsFlasks: 8, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 7], layout: "field" },
   medium: { ...DESKTOP_DEFAULT, maxPhysicsFlasks: 18, skeletonBands: 2 },
-  // high's flaskCount is sized so the 3 physics tiers hold >22 slots → a few
-  // empty-but-interactive flasks appear once the 22 skills run out.
   high: { flaskCount: 44, maxPhysicsFlasks: 26, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 11], layout: "field" },
 };
 
-export interface DeviceSignals {
-  cores: number;
-  memory: number; // GB; use 8 when unknown
-  prefersReducedMotion: boolean;
-  isMobile: boolean;
-}
-
-export function resolveQuality(s: DeviceSignals): Quality {
-  if (s.prefersReducedMotion) return "low";
-  let q: Quality = s.cores < 4 ? "low" : s.cores <= 8 ? "medium" : "high";
-  if (q === "high" && s.memory < 4) q = "medium"; // low RAM caps it
-  return q;
-}
-
-const ORDER: Quality[] = ["low", "medium", "high"];
-export function applyFpsDowngrade(q: Quality, fps: number, threshold = 45): Quality {
-  if (fps >= threshold) return q;
-  const i = ORDER.indexOf(q);
-  return ORDER[Math.max(0, i - 1)];
+/** Pick the flask field config for the resolved tier + device. Mobile keeps the
+ *  column layout; "off" forces a fully static rack on either. */
+export function fieldConfigFor(tier: GraphicsTier, isMobile: boolean): FieldConfig {
+  if (isMobile) {
+    return tier === "off" ? { ...MOBILE_CONFIG, maxPhysicsFlasks: 0 } : MOBILE_CONFIG;
+  }
+  return FIELD_BY_TIER[tier];
 }

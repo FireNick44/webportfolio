@@ -5,6 +5,7 @@ import Matter from "matter-js";
 import { usePhysicsEngine } from "@/hooks/usePhysicsEngine";
 import { useAnimationSync } from "@/hooks/useAnimationSync";
 import { useMousePhysics } from "@/hooks/useMousePhysics";
+import { useGraphicsTier } from "@/hooks/useGraphicsTier";
 import { useAppStore } from "@/store/useAppStore";
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
@@ -12,7 +13,7 @@ import FlaskHint from "./FlaskHint";
 import { WALL_FILTER, MOBILE_BREAKPOINT } from "@/physics/constants";
 import FlaskChain from "./FlaskChain";
 import { generateFlasks } from "@/physics/generateFlasks";
-import { DESKTOP_DEFAULT, MOBILE_CONFIG } from "@/physics/fieldConfig";
+import { fieldConfigFor } from "@/physics/fieldConfig";
 import skills from "@/data/skills.json";
 
 // The wavy "surface" the flasks hang from. Black/white (the page background) so
@@ -78,14 +79,17 @@ export default function PhysicsScene({
   const [active, setActive] = useState(false);
   const [interacted, setInteracted] = useState(hasInteractedWithRack);
   const advanced = useAppStore((s) => s.advanced);
+  // Shared site-wide graphics setting (capped by reduced-motion / touch).
+  const tier = useGraphicsTier();
 
-  useAnimationSync(engine, active);
+  // "off" tier (or reduced-motion) → fully static rack, so stop the engine loop.
+  useAnimationSync(engine, active && tier !== "off");
   useMousePhysics(engine, containerRef);
 
   const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
   const flasks = useMemo(() => {
     if (dims.width === 0) return [];
-    const config = isMobile ? MOBILE_CONFIG : DESKTOP_DEFAULT;
+    const config = fieldConfigFor(tier, isMobile);
     const skillPaths = skills.map((s) => s.svgPath);
     return generateFlasks(
       config,
@@ -94,7 +98,7 @@ export default function PhysicsScene({
       42
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dims.width > 0, isMobile, dims.height]);
+  }, [dims.width > 0, isMobile, dims.height, tier]);
 
   useEffect(() => {
     if (dims.width === 0) return;
