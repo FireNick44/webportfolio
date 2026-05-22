@@ -1,29 +1,26 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import Matter from "matter-js";
 
 export function usePhysicsEngine() {
-  const engineRef = useRef<Matter.Engine | null>(null);
-
-  if (!engineRef.current) {
-    const engine = Matter.Engine.create({
+  // Lazy useState init creates the engine exactly once without reading/writing
+  // a ref during render (which the react-hooks lint rule flags).
+  const [engine] = useState(() => {
+    const e = Matter.Engine.create({
       enableSleeping: true,
       gravity: { x: 0, y: 1, scale: 0.001 },
     });
     // Higher iterations = more stable constraints, less springy behavior
-    engine.positionIterations = 10;
-    engine.velocityIterations = 8;
-    engine.constraintIterations = 4;
-    engineRef.current = engine;
-  }
+    e.positionIterations = 10;
+    e.velocityIterations = 8;
+    e.constraintIterations = 4;
+    return e;
+  });
 
   useEffect(() => {
     return () => {
-      if (engineRef.current) {
-        Matter.Engine.clear(engineRef.current);
-        engineRef.current = null;
-      }
+      Matter.Engine.clear(engine);
     };
-  }, []);
+  }, [engine]);
 
-  return engineRef.current;
+  return engine;
 }
