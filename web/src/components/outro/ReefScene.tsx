@@ -58,6 +58,17 @@ export function ReefScene() {
       <SandFloor />
       <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(80px,11vw,150px)] w-full opacity-90" />
 
+      {/* Foreground kelp — bigger, in front of the floor, and darker, so the
+          viewer peers THROUGH near kelp (its own seed → distinct from the back patch). */}
+      <Kelp
+        animated={animated}
+        seed={5}
+        count={7}
+        scaleMul={1.9}
+        clusterAround={26}
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[68%] brightness-[0.55]"
+      />
+
       {cursorOn && <CursorFollower pointer={pointer} />}
     </div>
   );
