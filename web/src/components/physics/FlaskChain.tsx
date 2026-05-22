@@ -71,11 +71,13 @@ export default function FlaskChain({
 
     let currentY = anchorY;
     for (let i = 0; i < segmentCount; i++) {
-      const h = getSegmentHeight(i) * scale;
+      // Height is unscaled (full); only width thins with depth — matches the
+      // dynamic path and the physics bodies.
+      const h = getSegmentHeight(i);
       const el = chainRefs.current[i];
       if (el) {
         const x = anchorX - CHAIN_SEGMENT_WIDTH / 2;
-        el.style.transform = `translate(${x}px, ${currentY}px) scale(${scale})`;
+        el.style.transform = `translate(${x}px, ${currentY}px) scaleX(${scale})`;
         el.style.transformOrigin = `${CHAIN_SEGMENT_WIDTH / 2}px ${h / 2}px`;
         el.style.opacity = String(opacity);
       }

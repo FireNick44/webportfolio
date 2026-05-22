@@ -27,7 +27,10 @@ export function createChainBodies(
   let currentY = anchorY;
 
   for (let i = 0; i < segmentCount; i++) {
-    const h = getSegmentHeight(i) * scale;
+    // Width scales with depth (perspective/thickness); height does NOT — chain
+    // LENGTH is driven by segment count per tier, so back tiers can hang far
+    // longer than front tiers instead of the scale cancelling the extra links.
+    const h = getSegmentHeight(i);
     segmentHeights.push(h);
 
     const y = currentY + h / 2;

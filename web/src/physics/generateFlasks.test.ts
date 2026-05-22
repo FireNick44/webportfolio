@@ -44,6 +44,16 @@ describe("generateFlasks (field)", () => {
     const f = generateFlasks(FIELD, vp, skills, 42);
     expect(f.filter((x) => x.skillIcon).length).toBeLessThanOrEqual(skills.length);
   });
+
+  it("chain length (segments) grows from front tier to back tier", () => {
+    const f = generateFlasks(FIELD, vp, skills, 42);
+    const avg = (layer: number) => {
+      const xs = f.filter((x) => x.layer === layer);
+      return xs.reduce((s, x) => s + x.segments, 0) / Math.max(1, xs.length);
+    };
+    expect(avg(0)).toBeLessThan(avg(2));
+    expect(avg(2)).toBeLessThan(avg(4));
+  });
 });
 
 describe("generateFlasks (column / mobile)", () => {

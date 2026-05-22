@@ -28,10 +28,11 @@ export function mulberry32(seed: number) {
   };
 }
 
-/** Sum of scaled segment heights for a chain of `segments` links at `scale`. */
-function chainLength(segments: number, scale: number): number {
+/** Sum of (unscaled) segment heights for a chain of `segments` links. Chain
+ *  length is independent of depth-scale (only width/thickness scales). */
+function chainLength(segments: number): number {
   let s = 0;
-  for (let k = 0; k < segments; k++) s += getSegmentHeight(k) * scale;
+  for (let k = 0; k < segments; k++) s += getSegmentHeight(k);
   return s;
 }
 
@@ -72,20 +73,24 @@ export function generateFlasks(
     return { xPct, anchorY, segments, color, scale, isSkeleton, layer, skillIcon };
   };
 
+  // Chain length grows with depth: front tier ≈ minSeg (short), back tier ≈
+  // maxSeg (way longer), interpolated across tiers, with ±1 jitter for variety.
+  const tierSegments = (layer: number): number => {
+    const t = tierCount > 1 ? layer / (tierCount - 1) : 0;
+    const base = Math.round(minSeg + (maxSeg - minSeg) * t);
+    const jitter = Math.floor(rng() * 3) - 1; // -1..+1
+    return Math.max(minSeg, base + jitter);
+  };
+
   if (config.layout === "field") {
-    const raw = Array.from({ length: config.flaskCount }, () => ({
-      xPct: 0.03 + rng() * 0.94,
-      segments: minSeg + Math.floor(rng() * (maxSeg - minSeg + 1)),
-    }));
-    raw.sort((a, b) => a.segments - b.segments);
-    const perTier = Math.ceil(raw.length / tierCount);
+    const perTier = Math.ceil(config.flaskCount / tierCount);
     const placed: number[][] = Array.from({ length: tierCount }, () => []);
-    for (let i = 0; i < raw.length; i++) {
+    for (let i = 0; i < config.flaskCount; i++) {
       const layer = Math.min(Math.floor(i / perTier), tierCount - 1);
-      const { xPct } = raw[i];
+      const xPct = 0.03 + rng() * 0.94;
       if (placed[layer].some((x) => Math.abs(x - xPct) < MIN_SAME_LAYER_DISTANCE_PCT)) continue;
       placed[layer].push(xPct);
-      out.push(makeFlask(xPct, layer, -80, raw[i].segments));
+      out.push(makeFlask(xPct, layer, -80, tierSegments(layer)));
     }
     out.sort((a, b) => b.layer - a.layer);
     return out;
@@ -101,7 +106,7 @@ export function generateFlasks(
     const scale = config.layerScale[0];
     const anchorY =
       (bodyFrac[i % bodyFrac.length] ?? 0.5) * viewport.height -
-      chainLength(segments, scale) - (FLASK_HITBOX_HEIGHT * scale) / 2;
+      chainLength(segments) - (FLASK_HITBOX_HEIGHT * scale) / 2;
     out.push(makeFlask(xPct, 0, anchorY, segments));
   }
   const bgCount = Math.max(0, config.flaskCount - foreground);
@@ -109,8 +114,7 @@ export function generateFlasks(
     const layer = 1 + (i % Math.max(1, tierCount - 1));
     const xPct = 0.12 + rng() * 0.76;
     const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
-    const scale = config.layerScale[layer] ?? config.layerScale[config.layerScale.length - 1];
-    const anchorY = (0.2 + rng() * 0.6) * viewport.height - chainLength(segments, scale);
+    const anchorY = (0.2 + rng() * 0.6) * viewport.height - chainLength(segments);
     out.push(makeFlask(xPct, layer, anchorY, segments));
   }
   out.sort((a, b) => b.layer - a.layer);
