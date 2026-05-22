@@ -191,3 +191,14 @@ html.vt-no-transition * {
     transform: rotate(var(--kelp-to, 4deg));
   }
 }
+
+/* Underwater outro: "NS" pixel sign-off — gentle bioluminescent glow. */
+@keyframes ns-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}

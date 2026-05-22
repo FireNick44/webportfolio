@@ -9,6 +9,7 @@ import { WaterCanvas } from "./WaterCanvas";
 import { CursorFollower } from "./CursorFollower";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
+import { PixelSignoff } from "./PixelSignoff";
 
 const BUBBLE_COUNT: Record<GraphicsTier, number> = {
   off: 0,
@@ -46,6 +47,7 @@ export function DeepScene() {
       <Kelp animated={animated} />
       <SandFloor />
       {cursorOn && <CursorFollower pointer={pointer} />}
+      {tier === "high" && <PixelSignoff />}
     </div>
   );
 }
