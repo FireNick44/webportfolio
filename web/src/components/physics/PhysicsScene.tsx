@@ -3,7 +3,7 @@
 import { useRef, useState, useEffect, useMemo, type ReactNode } from "react";
 import Matter from "matter-js";
 import { usePhysicsEngine } from "@/hooks/usePhysicsEngine";
-import { useAnimationSync } from "@/hooks/useAnimationSync";
+import { useFrameLoop, FrameLoopContext } from "@/hooks/useFrameLoop";
 import { useMousePhysics } from "@/hooks/useMousePhysics";
 import { useGraphicsTier } from "@/hooks/useGraphicsTier";
 import { useAppStore } from "@/store/useAppStore";
@@ -83,7 +83,7 @@ export default function PhysicsScene({
   const tier = useGraphicsTier();
 
   // "off" tier (or reduced-motion) → fully static rack, so stop the engine loop.
-  useAnimationSync(engine, active && tier !== "off");
+  const loop = useFrameLoop(engine, active && tier !== "off");
   useMousePhysics(engine, containerRef);
 
   const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
@@ -176,24 +176,26 @@ export default function PhysicsScene({
       }}
     >
       {backdrop}
-      {dims.width > 0 &&
-        flasks.map((cfg, i) => (
-          <FlaskChain
-            key={`flask-${i}`}
-            engine={engine}
-            anchorX={cfg.xPct * dims.width}
-            anchorY={cfg.anchorY}
-            instanceId={`flask-${i}`}
-            color={cfg.color}
-            segmentCount={cfg.segments}
-            layer={cfg.layer}
-            scale={cfg.scale}
-            isSkeleton={cfg.isSkeleton}
-            skillIcon={cfg.skillIcon}
-            active={active}
-            noFlaskCollision={isMobile}
-          />
-        ))}
+      <FrameLoopContext.Provider value={loop}>
+        {dims.width > 0 &&
+          flasks.map((cfg, i) => (
+            <FlaskChain
+              key={`flask-${i}`}
+              engine={engine}
+              anchorX={cfg.xPct * dims.width}
+              anchorY={cfg.anchorY}
+              instanceId={`flask-${i}`}
+              color={cfg.color}
+              segmentCount={cfg.segments}
+              layer={cfg.layer}
+              scale={cfg.scale}
+              isSkeleton={cfg.isSkeleton}
+              skillIcon={cfg.skillIcon}
+              active={active}
+              noFlaskCollision={isMobile}
+            />
+          ))}
+      </FrameLoopContext.Provider>
 
       {/* Waves: rendered AFTER the flasks so the bottles tuck behind them top
           and bottom. pointer-events-none so they never block the rack

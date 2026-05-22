@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useContext } from "react";
 import Matter from "matter-js";
 import ChainLinkSVG from "./ChainLinkSVG";
 import FlaskSVG from "./FlaskSVG";
 import { createChainBodies, type ChainResult } from "@/physics/createChainBodies";
 import { createFlaskBody, type FlaskResult } from "@/physics/createFlaskBody";
+import { FrameLoopContext } from "@/hooks/useFrameLoop";
 import {
   CHAIN_SEGMENT_COUNT,
   CHAIN_SEGMENT_WIDTH,
@@ -55,8 +56,8 @@ export default function FlaskChain({
     chain: ChainResult;
     flask: FlaskResult;
   } | null>(null);
-  const rafRef = useRef<number>(0);
   const anchorRef = useRef({ x: anchorX, y: anchorY });
+  const loop = useContext(FrameLoopContext);
 
   // Spring state for icon rotation (delayed overshoot)
   const iconAngleRef = useRef(0);
@@ -197,10 +198,7 @@ export default function FlaskChain({
     const { chain, flask } = bodiesRef.current;
 
     // Skip DOM sync when flask body is sleeping — nothing moved
-    if (flask.body.isSleeping) {
-      rafRef.current = requestAnimationFrame(syncDom);
-      return;
-    }
+    if (flask.body.isSleeping) return;
 
     // Chain links: only scale X (width) so segments stay touching vertically
     for (let i = 0; i < chain.segments.length; i++) {
@@ -248,16 +246,13 @@ export default function FlaskChain({
       iconWetRef.current?.setAttribute("transform", iconRotate);
       iconDryRef.current?.setAttribute("transform", iconRotate);
     }
-
-    rafRef.current = requestAnimationFrame(syncDom);
   }, [scale, opacity]);
 
-  // Start RAF loop only for physics layers while the scene is active
+  // Subscribe to the shared frame loop only for physics layers while active
   useEffect(() => {
-    if (isStatic || !active) return;
-    rafRef.current = requestAnimationFrame(syncDom);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [syncDom, isStatic, active]);
+    if (isStatic || !active || !loop) return;
+    return loop.subscribe(instanceId, syncDom);
+  }, [loop, syncDom, isStatic, active, instanceId]);
 
   const segmentHeights = Array.from({ length: segmentCount }, (_, i) =>
     getSegmentHeight(i)
