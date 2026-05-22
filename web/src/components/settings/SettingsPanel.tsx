@@ -114,6 +114,10 @@ export default function SettingsPanel({
   const advanced = useAppStore((s) => s.advanced);
   const setAdvanced = useAppStore((s) => s.setAdvanced);
   const setHasShownLoader = useAppStore((s) => s.setHasShownLoader);
+  const outroScene = useAppStore((s) => s.outroScene);
+  const setOutroScene = useAppStore((s) => s.setOutroScene);
+  const graphicsTier = useAppStore((s) => s.graphicsTier);
+  const setGraphicsTier = useAppStore((s) => s.setGraphicsTier);
 
   const [mounted, setMounted] = useState(false);
   const [tab, setTab] = useState<Tab>("appearance");
@@ -287,6 +291,59 @@ export default function SettingsPanel({
             <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
               Advanced mode hides the rack&apos;s top wave and overlays the
               Matter.js physics wireframes + stats on the flask section.
+            </p>
+          </div>
+
+          {/* Outro scene */}
+          <div className="border border-border">
+            <PanelHead>Outro scene</PanelHead>
+            <div className="space-y-5 p-5">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="lab-label w-20">Scene</span>
+                <div className="flex gap-px bg-border">
+                  {(["classic", "deep"] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setOutroScene(s)}
+                      className={cn(
+                        "bg-background px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
+                        outroScene === s
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {s === "classic" ? "Current" : "The Deep"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="lab-label w-20">Graphics</span>
+                <div className="flex gap-px bg-border">
+                  {(["off", "low", "medium", "high"] as const).map((t) => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => setGraphicsTier(t)}
+                      className={cn(
+                        "bg-background px-3 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
+                        graphicsTier === t
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
+              Switch the page&apos;s ending between the current outro and the
+              interactive underwater scene. Graphics scales the effect — Off
+              respects reduced motion; touch devices cap at Low.
             </p>
           </div>
 
