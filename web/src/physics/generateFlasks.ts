@@ -55,9 +55,13 @@ export function generateFlasks(
   let physicsCount = 0;
   const out: FlaskConfig[] = [];
 
-  const makeFlask = (xPct: number, layer: number, anchorY: number): FlaskConfig => {
+  const makeFlask = (
+    xPct: number,
+    layer: number,
+    anchorY: number,
+    segments: number,
+  ): FlaskConfig => {
     const scale = config.layerScale[layer];
-    const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
     const color = FLASK_COLORS[Math.floor(rng() * FLASK_COLORS.length)];
     const bandSkeleton = layer >= firstSkelTier;
     const overBudget = !bandSkeleton && physicsCount >= config.maxPhysicsFlasks;
@@ -81,7 +85,7 @@ export function generateFlasks(
       const { xPct } = raw[i];
       if (placed[layer].some((x) => Math.abs(x - xPct) < MIN_SAME_LAYER_DISTANCE_PCT)) continue;
       placed[layer].push(xPct);
-      out.push(makeFlask(xPct, layer, -80));
+      out.push(makeFlask(xPct, layer, -80, raw[i].segments));
     }
     out.sort((a, b) => b.layer - a.layer);
     return out;
@@ -98,7 +102,7 @@ export function generateFlasks(
     const anchorY =
       (bodyFrac[i % bodyFrac.length] ?? 0.5) * viewport.height -
       chainLength(segments, scale) - (FLASK_HITBOX_HEIGHT * scale) / 2;
-    out.push(makeFlask(xPct, 0, anchorY));
+    out.push(makeFlask(xPct, 0, anchorY, segments));
   }
   const bgCount = Math.max(0, config.flaskCount - foreground);
   for (let i = 0; i < bgCount; i++) {
@@ -107,7 +111,7 @@ export function generateFlasks(
     const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
     const scale = config.layerScale[layer] ?? config.layerScale[config.layerScale.length - 1];
     const anchorY = (0.2 + rng() * 0.6) * viewport.height - chainLength(segments, scale);
-    out.push(makeFlask(xPct, layer, anchorY));
+    out.push(makeFlask(xPct, layer, anchorY, segments));
   }
   out.sort((a, b) => b.layer - a.layer);
   return out;
