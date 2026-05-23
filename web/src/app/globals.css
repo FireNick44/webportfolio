@@ -98,6 +98,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* The scroll container is <html>, so the body rule alone doesn't stop the
+     elastic rubber-band that reveals the page bg past the content. */
+  overscroll-behavior: none;
 }
 
 body {
