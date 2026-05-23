@@ -3,9 +3,10 @@
 import { useEffect, useRef } from "react";
 
 /**
- * A big creature that occasionally cruises LEFT → RIGHT (flipped to face that
- * way) on a randomized, undulating path — different height, bob and speed each
- * pass, with long random gaps so it's a rare event.
+ * A big creature that occasionally cruises across the scene — left→right or
+ * right→left at random, flipped to face the way it's swimming — on a randomized,
+ * undulating path (different height, bob, speed each pass), with moderate gaps so
+ * it shows up but stays a treat.
  */
 export function Rook() {
   const elRef = useRef<HTMLImageElement>(null);
@@ -13,12 +14,13 @@ export function Rook() {
   const st = useRef({
     active: false,
     t0: 0,
-    dur: 12000,
+    dur: 6000,
     baseY: 0,
     bobAmp: 0,
     bobCycles: 2,
     nextAt: 0,
     init: false,
+    dir: 1 as 1 | -1,
   });
 
   useEffect(() => {
@@ -30,10 +32,11 @@ export function Rook() {
       const s = st.current;
       s.active = true;
       s.t0 = now;
-      s.dur = 4000 + Math.random() * 3000; // 4–7s crossing (faster)
+      s.dur = 4500 + Math.random() * 3000; // 4.5–7.5s crossing
       s.baseY = H * (0.22 + Math.random() * 0.42); // random height per pass
       s.bobAmp = 24 + Math.random() * 48; // vertical wander
       s.bobCycles = 1.4 + Math.random() * 1.6; // a couple of up/downs across
+      s.dir = Math.random() < 0.5 ? 1 : -1; // L→R or R→L
     };
 
     const frame = (now: number) => {
@@ -44,7 +47,7 @@ export function Rook() {
 
       if (!s.init) {
         s.init = true;
-        s.nextAt = now + 6000 + Math.random() * 9000;
+        s.nextAt = now + 3000 + Math.random() * 4000; // first pass soon (3–7s)
         el.style.opacity = "1";
       }
       if (!s.active && now >= s.nextAt) begin(now, H);
@@ -53,14 +56,16 @@ export function Rook() {
         const p = (now - s.t0) / s.dur;
         if (p >= 1) {
           s.active = false;
-          s.nextAt = now + 30000 + Math.random() * 45000; // long random gap (rare: ~30–75s)
+          s.nextAt = now + 12000 + Math.random() * 14000; // occasional (~12–26s)
           el.style.transform = "translate(-99999px,0)";
         } else {
           const ww = el.offsetWidth || 240;
-          const x = -ww - 60 + (W + ww * 2 + 120) * p; // off-left → off-right
+          const span = W + ww * 2 + 120;
+          // dir=1: off-left → off-right; dir=-1: off-right → off-left.
+          const x = s.dir === 1 ? -ww - 60 + span * p : W + ww + 60 - span * p;
           const y = s.baseY + Math.sin(p * Math.PI * 2 * s.bobCycles) * s.bobAmp;
-          // scaleX(-1) flips it to face the direction it's swimming (rightward).
-          el.style.transform = `translate(${x}px, ${y}px) scaleX(-1)`;
+          // gif faces left natively; scaleX(-1) faces right. Face travel direction:
+          el.style.transform = `translate(${x}px, ${y}px) scaleX(${-s.dir})`;
         }
       } else {
         el.style.transform = "translate(-99999px,0)"; // parked off-screen
