@@ -50,14 +50,18 @@ export function ReefScene() {
         enableCursor={cursorOn}
       />
 
-      {/* Kelp gathered into one dense patch. */}
-      <Kelp animated={animated} clusterAround={70} />
+      {/* Background kelp patch — behind the sand floor (rooted look). */}
+      <Kelp
+        animated={animated}
+        clusterAround={70}
+        className="absolute inset-x-0 bottom-0 z-[2] h-[42%]"
+      />
 
-      {/* Floor: textured pixel sand as the TALL back layer (its wavy dune top
-          rises above the waves = "texture on the furthest layer"), with the
-          colourful ByeSand waves shorter and in front. */}
-      <SandFloor rows={11} />
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(60px,8vw,110px)] w-full opacity-90" />
+      {/* Floor: textured pixel sand in front of the background but UNDER the
+          colourful ByeSand waves, which are translucent so the texture reads
+          through. Kept short so it doesn't take over the scene. */}
+      <SandFloor rows={7} className="absolute inset-x-0 bottom-0 z-[3]" />
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] block h-[clamp(70px,9vw,120px)] w-full opacity-70" />
 
       {/* Foreground kelp — bigger, in front of the floor, and darker, so the
           viewer peers THROUGH near kelp (its own seed → distinct from the back patch). */}
@@ -67,7 +71,7 @@ export function ReefScene() {
         count={7}
         scaleMul={1.9}
         clusterAround={26}
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] h-[68%] brightness-[0.55]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[68%] brightness-[0.55]"
       />
 
       {cursorOn && <CursorFollower pointer={pointer} />}
