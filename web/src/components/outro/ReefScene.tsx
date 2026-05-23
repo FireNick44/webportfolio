@@ -8,12 +8,12 @@ import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
 import { ByeSand } from "@/components/layout/ByeSand";
 import { WaterCanvas } from "./WaterCanvas";
 import { CursorFollower } from "./CursorFollower";
+import { Coral } from "./Coral";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
 
-// "Reef" = a combination of Classic + The Deep: the colourful ByeSand floor and
-// the SVG bubble backdrop fused with the procedural canvas bubbles, kelp, and
-// pixel-sand texture.
+// "Reef" = Classic + The Deep combined: SVG bubble backdrop + canvas bubbles,
+// kelp, pixel-sand texture, the colourful ByeSand waves, coral and a rare cruiser.
 const BUBBLE_COUNT: Record<GraphicsTier, number> = {
   off: 0,
   low: 26,
@@ -31,7 +31,7 @@ export function ReefScene() {
 
   return (
     <div ref={containerRef} aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
-      {/* Back layer: the bubble SVG, kept bright so it reads through the canvas. */}
+      {/* Back: the bubble SVG, kept bright so it reads through the canvas. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/svg/intro-bg.svg"
@@ -39,10 +39,9 @@ export function ReefScene() {
         className="absolute inset-0 h-full w-full object-cover"
         style={{ filter: "saturate(1.2) brightness(0.8)" }}
       />
-      {/* Lighter wash than The Deep so the SVG bubbles stay visible behind the canvas. */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#0b2a3a]/35 via-[#0e3346]/40 to-[#06212f]/60" />
 
-      {/* Canvas bubbles stacked on top of the SVG for depth. */}
+      {/* Canvas bubbles (z1). */}
       <WaterCanvas
         active={active && animated}
         bubbleCount={BUBBLE_COUNT[tier]}
@@ -50,28 +49,43 @@ export function ReefScene() {
         enableCursor={cursorOn}
       />
 
-      {/* Background kelp patch — behind the sand floor (rooted look). */}
+      {/* Rare creature cruising right → left, behind the floor/kelp (z2). */}
+      {atLeast(tier, "medium") && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/underwater/rook.gif"
+          alt=""
+          draggable={false}
+          className="pointer-events-none absolute left-0 z-[2]"
+          style={{
+            top: "18%",
+            width: "clamp(140px, 18vw, 240px)",
+            animation: "rook-cruise 55s linear infinite",
+          }}
+        />
+      )}
+
+      {/* Floor stack, back → front: ByeSand waves (z3) → background kelp (z4,
+          behind the sand but in front of the waves) → pixel sand (z5) → coral. */}
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(90px,12vw,150px)] w-full opacity-95" />
       <Kelp
         animated={animated}
         clusterAround={70}
-        className="absolute inset-x-0 bottom-0 z-[2] h-[42%]"
+        scaleMul={1.4}
+        className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
+      <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[5]" />
+      <Coral src="/underwater/coral_red_blue.jpeg" leftPct={13} widthPx={88} />
+      <Coral src="/underwater/coral_green.jpeg" leftPct={82} widthPx={74} flip delay={1.4} />
 
-      {/* Floor: colourful ByeSand waves BEHIND; the generated pixel sand IN
-          FRONT at the very bottom, shorter so the wave crests still show above
-          it (its wavy mask top means no hard cut over the waves). */}
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(90px,12vw,150px)] w-full opacity-95" />
-      <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[4]" />
-
-      {/* Foreground kelp — bigger, in front of the floor, and darker, so the
-          viewer peers THROUGH near kelp (its own seed → distinct from the back patch). */}
+      {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp
         animated={animated}
         seed={5}
         count={7}
         scaleMul={1.9}
         clusterAround={26}
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[52%] brightness-[0.55]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[52%] brightness-[0.55]"
       />
 
       {cursorOn && <CursorFollower pointer={pointer} />}

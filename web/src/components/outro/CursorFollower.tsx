@@ -42,7 +42,7 @@ export function CursorFollower({ pointer }: { pointer: RefObject<PointerField | 
     <div
       ref={elRef}
       aria-hidden
-      className="pointer-events-none absolute left-0 top-0 z-[6] select-none leading-none transition-opacity duration-300"
+      className="pointer-events-none absolute left-0 top-0 z-[7] select-none leading-none transition-opacity duration-300"
       style={{ willChange: "transform", opacity: 0 }}
     >
       {failed ? (
@@ -52,11 +52,9 @@ export function CursorFollower({ pointer }: { pointer: RefObject<PointerField | 
         <img
           src="/underwater/octopus.gif"
           alt=""
-          width={56}
-          height={56}
           draggable={false}
           onError={() => setFailed(true)}
-          style={{ imageRendering: "pixelated", display: "block" }}
+          style={{ height: 64, width: "auto", imageRendering: "pixelated", display: "block" }}
         />
       )}
     </div>
