@@ -9,9 +9,9 @@ import { cursorCapture } from "@/lib/outro/cursorCapture";
  *  - continuously, smoothly steers away from a moving cursor (no bumping);
  *  - a still cursor lures it in to sneak up and steal it;
  *  - persistent hunting builds scare → hide; "too angry" → it also steals;
- *  - when it steals, it drags the cursor to a screen edge and LEAVES it there
- *    (cursorCapture.dropped) until you move; it then can't re-grab the dropped
- *    cursor (cooldown) — it just comes back and hovers near it.
+ *  - when it steals, it drags the cursor to a screen edge and relocates it via a
+ *    persistent offset (the cursor then tracks the mouse from that spot); a
+ *    cooldown prevents an immediate re-grab.
  */
 const SPRING = 1.8;
 const DAMP = 2.4;
