@@ -23,7 +23,7 @@ export function BubblesBackdrop({
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const y = useTransform(scrollYProgress, [0, 1], ["-22%", "22%"]);
   const op = intensity === "subtle" ? "opacity-70" : "opacity-100";
 
   return (
@@ -33,7 +33,7 @@ export function BubblesBackdrop({
         src="/svg/intro-bg.svg"
         alt=""
         style={{ y, ...imgStyle }}
-        className={cn("absolute inset-0 h-full w-full scale-[1.3] object-cover", op)}
+        className={cn("absolute inset-0 h-full w-full scale-[1.5] object-cover", op)}
       />
     </div>
   );

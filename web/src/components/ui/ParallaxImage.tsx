@@ -14,7 +14,7 @@ export function ParallaxImage({
   className,
   imgClassName,
   imgStyle,
-  strength = 12,
+  strength = 22,
 }: {
   src: string;
   className?: string;
@@ -34,7 +34,7 @@ export function ParallaxImage({
         src={src}
         alt=""
         style={{ y, ...imgStyle }}
-        className={cn("absolute inset-0 h-full w-full scale-[1.3] object-cover", imgClassName)}
+        className={cn("absolute inset-0 h-full w-full scale-[1.5] object-cover", imgClassName)}
       />
     </div>
   );
