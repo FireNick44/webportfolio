@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 
-const SIZE = 170;
+const SIZE = 140;
 const DUR = 16000; // ms for one left → right crossing (loops continuously)
 
 /** A single crab walking continuously left → right along the sand. */

@@ -6,8 +6,9 @@ import { cursorCapture } from "@/lib/outro/cursorCapture";
 
 /**
  * The animate-ui arrow cursor, spring-following the mouse while over the outro
- * (High tier; native cursor hidden). The octopus can pin it (held) or leave it
- * dropped near an edge — moving the real mouse reclaims it.
+ * (High tier; native cursor hidden). The octopus can pin it (held) or relocate
+ * it via a persistent offset — it then tracks the mouse from the dropped spot,
+ * re-aligning when the pointer leaves the outro.
  */
 export function SceneCursor() {
   const x = useSpring(0, { stiffness: 900, damping: 40, mass: 0.3 });
@@ -23,19 +24,27 @@ export function SceneCursor() {
     const onMove = (e: PointerEvent) => {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
-      // Any real move reclaims a dropped cursor.
-      if (cursorCapture.dropped) cursorCapture.dropped = false;
       const r = footer.getBoundingClientRect();
-      overRef.current =
+      const inside =
         e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+      overRef.current = inside;
+      // Leaving the outro re-aligns the cursor with the real mouse.
+      if (!inside) {
+        cursorCapture.offsetX = 0;
+        cursorCapture.offsetY = 0;
+      }
     };
     window.addEventListener("pointermove", onMove, { passive: true });
 
     const tick = () => {
-      const pinned = cursorCapture.held || cursorCapture.dropped;
-      x.set(pinned ? cursorCapture.x : mouse.current.x);
-      y.set(pinned ? cursorCapture.y : mouse.current.y);
-      op.set(pinned || overRef.current ? 1 : 0);
+      if (cursorCapture.held) {
+        x.set(cursorCapture.x);
+        y.set(cursorCapture.y);
+      } else {
+        x.set(mouse.current.x + cursorCapture.offsetX);
+        y.set(mouse.current.y + cursorCapture.offsetY);
+      }
+      op.set(cursorCapture.held || overRef.current ? 1 : 0);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);

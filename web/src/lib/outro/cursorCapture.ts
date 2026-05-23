@@ -1,13 +1,17 @@
 /**
- * Per-frame coordination so the octopus can "capture" the custom cursor.
- *  - held:    the octopus is actively dragging the cursor (pinned to it).
- *  - dropped: the octopus let go; the cursor stays at (x,y) near a screen edge
- *             until the user moves the real mouse (then SceneCursor reclaims it).
- *  - x,y:     viewport coords to pin the cursor to while held or dropped.
+ * Per-frame coordination so the octopus can "capture" and relocate the custom
+ * cursor.
+ *  - held:        the octopus is dragging the cursor (pinned to x,y).
+ *  - x,y:         viewport coords to pin to while held.
+ *  - offsetX/Y:   persistent displacement applied after a drop, so the cursor
+ *                 stays where the octopus left it and tracks the mouse FROM
+ *                 there (visual = realMouse + offset). Reset to 0 when the
+ *                 pointer leaves the outro so it re-aligns with the real mouse.
  */
 export const cursorCapture = {
   held: false,
-  dropped: false,
   x: 0,
   y: 0,
+  offsetX: 0,
+  offsetY: 0,
 };

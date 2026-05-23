@@ -68,15 +68,11 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       let cx = 0;
       let cy = 0;
       let cMovedAt = 0;
-      if (cursorCapture.dropped) {
+      if (p && p.active) {
         cActive = true;
-        cx = cursorCapture.x - ox;
-        cy = cursorCapture.y - oy;
-        cMovedAt = p ? p.movedAt : 0;
-      } else if (p && p.active) {
-        cActive = true;
-        cx = p.x;
-        cy = p.y;
+        // Track the VISUAL cursor (real mouse + the octopus's displacement).
+        cx = p.x + cursorCapture.offsetX;
+        cy = p.y + cursorCapture.offsetY;
         cMovedAt = p.movedAt;
       }
 
@@ -103,7 +99,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
           // Curious: sneak up on the still cursor. Don't re-grab a dropped one.
           ax = (cx - st.x) * APPROACH_K - st.vx * DAMP;
           ay = (cy - st.y) * APPROACH_K - st.vy * DAMP;
-          if (dist < 46 && now >= st.captureReadyAt && !cursorCapture.dropped) {
+          if (dist < 46 && now >= st.captureReadyAt) {
             st.mode = "carry";
             cursorCapture.held = true;
             const goRight = st.x < W / 2;
@@ -124,7 +120,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
             st.nextAt = now + 2600 + Math.random() * 3200;
           }
           if (st.scare >= SCARE_TRIGGER) {
-            if (cActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt && !cursorCapture.dropped) {
+            if (cActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt) {
               st.mode = "grab";
               st.grabUntil = now + 2600;
             } else {
@@ -162,12 +158,14 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
           // Drag the cursor a bit to the left of the octopus.
           cursorCapture.x = ox + st.x - 40;
           cursorCapture.y = oy + st.y;
-          // Drop it near the edge (on-screen) and leave it there.
+          // Drop it near the edge: relocate via a persistent offset so it stays
+          // there and then tracks the mouse from that spot.
           if ((goingRight && st.x > W - 80) || (!goingRight && st.x < 80)) {
             cursorCapture.held = false;
-            cursorCapture.dropped = true;
-            cursorCapture.x = ox + (goingRight ? W - 56 : 56);
-            cursorCapture.y = oy + Math.min(st.y, H * 0.7);
+            const dropX = ox + (goingRight ? W - 56 : 56);
+            const dropY = oy + Math.min(st.y, H * 0.7);
+            cursorCapture.offsetX = dropX - (p ? p.clientX : dropX);
+            cursorCapture.offsetY = dropY - (p ? p.clientY : dropY);
             st.captureReadyAt = now + CAPTURE_COOLDOWN;
           }
         }
@@ -212,7 +210,8 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
     return () => {
       cancelAnimationFrame(rafRef.current);
       cursorCapture.held = false;
-      cursorCapture.dropped = false;
+      cursorCapture.offsetX = 0;
+      cursorCapture.offsetY = 0;
     };
   }, [pointer]);
 

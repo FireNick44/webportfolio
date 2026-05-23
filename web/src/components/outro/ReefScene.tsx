@@ -84,7 +84,7 @@ export function ReefScene() {
       />
       <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
       <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={132} bottomPx={18} z={5} animated={animated} />
-      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} z={7} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} z={5} animated={animated} />
       {creaturesOn && <Crab />}
 
       <Kelp
