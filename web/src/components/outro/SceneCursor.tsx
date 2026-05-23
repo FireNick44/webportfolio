@@ -6,8 +6,8 @@ import { cursorCapture } from "@/lib/outro/cursorCapture";
 
 /**
  * The animate-ui arrow cursor, spring-following the mouse while over the outro
- * (High tier; native cursor hidden). When the octopus captures the cursor it
- * pins to the octopus instead of the mouse, then springs back when released.
+ * (High tier; native cursor hidden). The octopus can pin it (held) or leave it
+ * dropped near an edge — moving the real mouse reclaims it.
  */
 export function SceneCursor() {
   const x = useSpring(0, { stiffness: 900, damping: 40, mass: 0.3 });
@@ -23,6 +23,8 @@ export function SceneCursor() {
     const onMove = (e: PointerEvent) => {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
+      // Any real move reclaims a dropped cursor.
+      if (cursorCapture.dropped) cursorCapture.dropped = false;
       const r = footer.getBoundingClientRect();
       overRef.current =
         e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
@@ -30,10 +32,10 @@ export function SceneCursor() {
     window.addEventListener("pointermove", onMove, { passive: true });
 
     const tick = () => {
-      const held = cursorCapture.held;
-      x.set(held ? cursorCapture.x : mouse.current.x);
-      y.set(held ? cursorCapture.y : mouse.current.y);
-      op.set(held || overRef.current ? 1 : 0);
+      const pinned = cursorCapture.held || cursorCapture.dropped;
+      x.set(pinned ? cursorCapture.x : mouse.current.x);
+      y.set(pinned ? cursorCapture.y : mouse.current.y);
+      op.set(pinned || overRef.current ? 1 : 0);
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);

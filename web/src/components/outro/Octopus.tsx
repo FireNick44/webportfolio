@@ -5,30 +5,29 @@ import type { PointerField } from "@/hooks/usePointerField";
 import { cursorCapture } from "@/lib/outro/cursorCapture";
 
 /**
- * An octopus that lives its own life and is cursor-aware:
- *  - it CONTINUOUSLY, smoothly steers away from the cursor (it always knows the
- *    pointer's x/y, so it never bumps into it and stutters);
- *  - persistent hunting builds "scare" → it flees fully off-screen and hides
- *    ~8–13s, then peeks back calmer;
- *  - hunt it enough that it gets "too angry" → it GRABS the custom cursor, drags
- *    it off-screen, and flings it back in from that side (High + desktop only).
- * It never drifts up over the heading text (except while grabbing/carrying).
+ * Cursor-aware octopus:
+ *  - continuously, smoothly steers away from a moving cursor (no bumping);
+ *  - a still cursor lures it in to sneak up and steal it;
+ *  - persistent hunting builds scare → hide; "too angry" → it also steals;
+ *  - when it steals, it drags the cursor to a screen edge and LEAVES it there
+ *    (cursorCapture.dropped) until you move; it then can't re-grab the dropped
+ *    cursor (cooldown) — it just comes back and hovers near it.
  */
 const SPRING = 1.8;
 const DAMP = 2.4;
-const AVOID_R = 340; // it starts easing away this far out
+const AVOID_R = 340;
 const AVOID_FORCE = 5200;
 const SCARE_R = 220;
 const SCARE_GAIN = 2.5;
 const SCARE_DECAY = 0.5;
 const SCARE_TRIGGER = 1.4;
-const ANGER_DECAY = 0.015; // slow — so repeated spooks accumulate to a capture
+const ANGER_DECAY = 0.015;
 const ANGER_CAPTURE = 2;
 const HIDE_MIN = 8000;
 const HIDE_RAND = 5000;
 const MAX_SPEED = 1100;
 const CAPTURE_COOLDOWN = 22000;
-const IDLE_MS = 1400; // a cursor still this long lures the octopus in
+const IDLE_MS = 1400;
 const APPROACH_K = 1.6;
 
 export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }) {
@@ -36,24 +35,10 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
   const rafRef = useRef(0);
   const [failed, setFailed] = useState(false);
   const s = useRef({
-    x: 0,
-    y: 0,
-    vx: 0,
-    vy: 0,
-    tx: 0,
-    ty: 0,
-    nextAt: 0,
-    init: false,
+    x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, nextAt: 0, init: false,
     mode: "wander" as "wander" | "hide" | "grab" | "carry",
-    scare: 0,
-    anger: 0,
-    hideUntil: 0,
-    hideX: 0,
-    hideY: 0,
-    carryX: 0,
-    carryY: 0,
-    grabUntil: 0,
-    captureReadyAt: 0,
+    scare: 0, anger: 0, hideUntil: 0, hideX: 0, hideY: 0,
+    carryX: 0, carryY: 0, grabUntil: 0, captureReadyAt: 0,
   });
 
   useEffect(() => {
@@ -73,43 +58,52 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       const oy = rect?.top || 0;
 
       if (!st.init) {
-        st.x = W * 0.5;
-        st.y = H * 0.5;
-        st.tx = st.x;
-        st.ty = st.y;
-        st.nextAt = now;
-        st.init = true;
-        el.style.opacity = "1";
+        st.x = W * 0.5; st.y = H * 0.5; st.tx = st.x; st.ty = st.y;
+        st.nextAt = now; st.init = true; el.style.opacity = "1";
       }
 
+      // Effective cursor: a dropped cursor sits at the edge; else the real one.
       const p = pointer.current;
-      const cursorActive = !!p && p.active;
+      let cActive = false;
+      let cx = 0;
+      let cy = 0;
+      let cMovedAt = 0;
+      if (cursorCapture.dropped) {
+        cActive = true;
+        cx = cursorCapture.x - ox;
+        cy = cursorCapture.y - oy;
+        cMovedAt = p ? p.movedAt : 0;
+      } else if (p && p.active) {
+        cActive = true;
+        cx = p.x;
+        cy = p.y;
+        cMovedAt = p.movedAt;
+      }
+
       let dist = Infinity;
       let dirX = 0;
       let dirY = 0;
-      if (cursorActive) {
-        const dx = st.x - p.x;
-        const dy = st.y - p.y;
+      if (cActive) {
+        const dx = st.x - cx;
+        const dy = st.y - cy;
         dist = Math.hypot(dx, dy) || 0.01;
         dirX = dx / dist;
         dirY = dy / dist;
       }
-      if (cursorActive && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
+      if (cActive && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
       else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
       st.anger = Math.max(0, st.anger - ANGER_DECAY * dt);
-      // A cursor that sits still long enough makes the octopus curious (it sneaks
-      // up) rather than scared (it flees).
-      const idle = !!p && p.active && now - p.movedAt > IDLE_MS;
+      const idle = cActive && now - cMovedAt > IDLE_MS;
 
       let ax = 0;
       let ay = 0;
 
       if (st.mode === "wander") {
-        if (idle && p) {
-          // Curious: sneak up on the still cursor and steal it.
-          ax = (p.x - st.x) * APPROACH_K - st.vx * DAMP;
-          ay = (p.y - st.y) * APPROACH_K - st.vy * DAMP;
-          if (dist < 46 && now >= st.captureReadyAt) {
+        if (idle) {
+          // Curious: sneak up on the still cursor. Don't re-grab a dropped one.
+          ax = (cx - st.x) * APPROACH_K - st.vx * DAMP;
+          ay = (cy - st.y) * APPROACH_K - st.vy * DAMP;
+          if (dist < 46 && now >= st.captureReadyAt && !cursorCapture.dropped) {
             st.mode = "carry";
             cursorCapture.held = true;
             const goRight = st.x < W / 2;
@@ -119,8 +113,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
         } else {
           ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
           ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
-          // Continuous, smooth avoidance — eases away well before contact.
-          if (cursorActive && dist < AVOID_R) {
+          if (cActive && dist < AVOID_R) {
             const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
             ax += dirX * f;
             ay += dirY * f;
@@ -131,32 +124,32 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
             st.nextAt = now + 2600 + Math.random() * 3200;
           }
           if (st.scare >= SCARE_TRIGGER) {
-            if (cursorActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt) {
+            if (cActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt && !cursorCapture.dropped) {
               st.mode = "grab";
               st.grabUntil = now + 2600;
             } else {
               st.mode = "hide";
               st.anger += 1;
               st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
-              const goRight = cursorActive ? p.x < st.x : Math.random() < 0.5;
+              const goRight = cActive ? cx < st.x : Math.random() < 0.5;
               st.hideX = goRight ? W + 280 : -280;
               st.hideY = H * (0.7 + Math.random() * 0.25);
             }
           }
         }
       } else if (st.mode === "grab") {
-        if (!cursorActive || now > st.grabUntil) {
+        if (!cActive || now > st.grabUntil) {
           st.mode = "hide";
           st.hideUntil = now + HIDE_MIN;
           st.hideX = st.x > W / 2 ? W + 280 : -280;
           st.hideY = H * 0.75;
         } else {
-          ax = (p.x - st.x) * 5 - st.vx * 3;
-          ay = (p.y - st.y) * 5 - st.vy * 3;
+          ax = (cx - st.x) * 5 - st.vx * 3;
+          ay = (cy - st.y) * 5 - st.vy * 3;
           if (dist < 40) {
             st.mode = "carry";
             cursorCapture.held = true;
-            const goRight = st.x > W / 2;
+            const goRight = st.x < W / 2;
             st.carryX = goRight ? W + 360 : -360;
             st.carryY = H * (0.5 + Math.random() * 0.3);
           }
@@ -164,14 +157,24 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       } else if (st.mode === "carry") {
         ax = (st.carryX - st.x) * 2.6 - st.vx * 2.4;
         ay = (st.carryY - st.y) * 2.6 - st.vy * 2.4;
-        cursorCapture.x = ox + st.x; // pin the cursor to the octopus (viewport)
-        cursorCapture.y = oy + st.y;
+        const goingRight = st.carryX > W * 0.5;
+        if (cursorCapture.held) {
+          // Drag the cursor a bit to the left of the octopus.
+          cursorCapture.x = ox + st.x - 40;
+          cursorCapture.y = oy + st.y;
+          // Drop it near the edge (on-screen) and leave it there.
+          if ((goingRight && st.x > W - 80) || (!goingRight && st.x < 80)) {
+            cursorCapture.held = false;
+            cursorCapture.dropped = true;
+            cursorCapture.x = ox + (goingRight ? W - 56 : 56);
+            cursorCapture.y = oy + Math.min(st.y, H * 0.7);
+            st.captureReadyAt = now + CAPTURE_COOLDOWN;
+          }
+        }
         if (st.x < -240 || st.x > W + 240) {
-          cursorCapture.held = false; // release → cursor shoots back from this side
           st.mode = "hide";
           st.scare = 0;
           st.anger = 0;
-          st.captureReadyAt = now + CAPTURE_COOLDOWN;
           st.hideUntil = now + 4000 + Math.random() * 3000;
           st.hideX = st.x;
           st.hideY = H * 0.8;
@@ -198,8 +201,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       st.x += st.vx * dt;
       st.y += st.vy * dt;
 
-      // Top limit only while calmly wandering — it may reach the cursor anywhere
-      // while curious (idle), grabbing or carrying.
+      // Top limit only while calmly wandering.
       if (st.mode === "hide" || (st.mode === "wander" && !idle)) st.y = Math.max(H * 0.4, st.y);
 
       const rot = Math.max(-25, Math.min(25, st.vx * 0.045));
@@ -209,7 +211,8 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
     rafRef.current = requestAnimationFrame(frame);
     return () => {
       cancelAnimationFrame(rafRef.current);
-      cursorCapture.held = false; // release if unmounted mid-capture
+      cursorCapture.held = false;
+      cursorCapture.dropped = false;
     };
   }, [pointer]);
 
