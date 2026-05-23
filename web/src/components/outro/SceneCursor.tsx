@@ -1,40 +1,54 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { motion, useSpring } from "motion/react";
+import { cursorCapture } from "@/lib/outro/cursorCapture";
 
 /**
- * The animate-ui cursor (its default arrow), spring-following the mouse while
- * over the outro on High tier — native cursor hidden so interacting feels
- * distinct. Black fill + white outline so it reads on the dark water.
+ * The animate-ui arrow cursor, spring-following the mouse while over the outro
+ * (High tier; native cursor hidden). When the octopus captures the cursor it
+ * pins to the octopus instead of the mouse, then springs back when released.
  */
 export function SceneCursor() {
-  const [over, setOver] = useState(false);
   const x = useSpring(0, { stiffness: 900, damping: 40, mass: 0.3 });
   const y = useSpring(0, { stiffness: 900, damping: 40, mass: 0.3 });
+  const op = useSpring(0, { stiffness: 300, damping: 30 });
+  const mouse = useRef({ x: 0, y: 0 });
+  const overRef = useRef(false);
+  const rafRef = useRef(0);
 
   useEffect(() => {
     const footer = document.querySelector("footer");
     if (!footer) return;
     const onMove = (e: PointerEvent) => {
+      mouse.current.x = e.clientX;
+      mouse.current.y = e.clientY;
       const r = footer.getBoundingClientRect();
-      const inside =
+      overRef.current =
         e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      setOver(inside);
-      if (inside) {
-        x.set(e.clientX);
-        y.set(e.clientY);
-      }
     };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
-  }, [x, y]);
+
+    const tick = () => {
+      const held = cursorCapture.held;
+      x.set(held ? cursorCapture.x : mouse.current.x);
+      y.set(held ? cursorCapture.y : mouse.current.y);
+      op.set(held || overRef.current ? 1 : 0);
+      rafRef.current = requestAnimationFrame(tick);
+    };
+    rafRef.current = requestAnimationFrame(tick);
+
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [x, y, op]);
 
   return (
     <motion.div
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-[60] transition-opacity duration-150"
-      style={{ x, y, opacity: over ? 1 : 0 }}
+      className="pointer-events-none fixed left-0 top-0 z-[60]"
+      style={{ x, y, opacity: op }}
     >
       {/* animate-ui default cursor arrow (its exact path), tip at the pointer. */}
       <svg viewBox="0 0 40 40" width="26" height="26" style={{ display: "block" }}>

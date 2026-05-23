@@ -68,7 +68,7 @@ export function ReefScene() {
 
       {/* Floor (raised a touch for coral room): waves (z3) → bg kelp (z4) →
           pixel sand (z5) → coral. */}
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(110px,14vw,185px)] w-full opacity-95" />
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(110px,14vw,185px)] w-full opacity-95" />
       <Kelp
         animated={animated}
         clusterAround={70}
@@ -77,8 +77,8 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={42} widthPx={132} bottomPx={18} animated={animated} />
-      <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} bottomPx={18} animated={animated} />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={132} bottomPx={18} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} animated={animated} />
 
       {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp

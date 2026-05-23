@@ -30,7 +30,7 @@ export function Rook() {
       const s = st.current;
       s.active = true;
       s.t0 = now;
-      s.dur = 5500 + Math.random() * 4000; // 5.5–9.5s crossing (faster)
+      s.dur = 4000 + Math.random() * 3000; // 4–7s crossing (faster)
       s.baseY = H * (0.22 + Math.random() * 0.42); // random height per pass
       s.bobAmp = 24 + Math.random() * 48; // vertical wander
       s.bobCycles = 1.4 + Math.random() * 1.6; // a couple of up/downs across
@@ -79,7 +79,7 @@ export function Rook() {
       alt=""
       aria-hidden
       draggable={false}
-      className="pointer-events-none absolute left-0 top-0 z-[2]"
+      className="pointer-events-none absolute left-0 top-0 z-[3]"
       style={{ width: "clamp(300px, 38vw, 540px)", opacity: 0, willChange: "transform" }}
     />
   );
