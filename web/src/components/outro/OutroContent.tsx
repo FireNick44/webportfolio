@@ -23,13 +23,13 @@ export function OutroContent({ dict }: { dict: Dictionary }) {
       className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8"
       style={{
         paddingTop: "clamp(6rem, 12vw, 9rem)",
-        paddingBottom: "clamp(12rem, 20vw, 18rem)",
+        paddingBottom: "clamp(8rem, 12vw, 11rem)",
         textShadow: "0 2px 24px rgba(8,12,40,0.45)",
       }}
     >
       <h2 className="font-display text-3xl font-bold leading-[1.05] tracking-tight sm:text-5xl">
         {words.map((w, i) => (
-          <span key={i} className="inline-block overflow-hidden align-bottom">
+          <span key={i} className="inline-block overflow-hidden align-bottom pb-[0.25em] -mb-[0.25em]">
             <motion.span
               className="inline-block"
               initial={{ y: "100%", opacity: 0 }}

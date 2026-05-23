@@ -11,7 +11,7 @@ export default function OutroSection({ dict }: { dict: Dictionary; lang: string 
   const scene = useAppStore((s) => s.outroScene);
 
   return (
-    <footer className="relative isolate overflow-hidden text-[#f5f0e6]">
+    <footer className="relative isolate min-h-[clamp(46rem,82vh,64rem)] overflow-hidden text-[#f5f0e6]">
       {scene === "deep" ? (
         <DeepScene />
       ) : scene === "reef" ? (
