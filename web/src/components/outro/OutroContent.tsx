@@ -22,8 +22,8 @@ export function OutroContent({ dict }: { dict: Dictionary }) {
     <div
       className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8"
       style={{
-        paddingTop: "clamp(7rem, 14vw, 11rem)",
-        paddingBottom: "clamp(6.5rem, 12vw, 10rem)",
+        paddingTop: "clamp(10rem, 20vw, 16rem)",
+        paddingBottom: "clamp(9rem, 16vw, 14rem)",
         textShadow: "0 2px 24px rgba(8,12,40,0.45)",
       }}
     >
