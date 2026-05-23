@@ -9,8 +9,9 @@ import { cursorCapture } from "@/lib/outro/cursorCapture";
  *  - continuously, smoothly steers away from a moving cursor (no bumping);
  *  - a still cursor lures it in to sneak up and steal it;
  *  - persistent hunting builds scare → hide; "too angry" → it also steals;
- *  - when it steals, it borrows the cursor and swims around with it for ~2s,
- *    then lets go — the cursor springs back to the user's real pointer (the OS
+ *  - when it steals, it grabs the cursor (keeping its exact offset, so no jump),
+ *    swims around with it for ~2s, then returns to the grab spot and lets go —
+ *    the cursor ends up right where it was taken, so there's no flicker (the OS
  *    cursor can't be moved, so we never relocate it). A cooldown prevents an
  *    immediate re-grab.
  */
@@ -39,7 +40,9 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
     x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, nextAt: 0, init: false,
     mode: "wander" as "wander" | "hide" | "grab" | "carry",
     scare: 0, anger: 0, hideUntil: 0, hideX: 0, hideY: 0,
-    carryUntil: 0, grabUntil: 0, captureReadyAt: 0,
+    swingUntil: 0, carryPhase: "swing" as "swing" | "return",
+    holdDX: 0, holdDY: 0, returnX: 0, returnY: 0,
+    grabUntil: 0, captureReadyAt: 0,
   });
 
   useEffect(() => {
@@ -102,7 +105,14 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
           if (dist < 46 && now >= st.captureReadyAt) {
             st.mode = "carry";
             cursorCapture.held = true;
-            st.carryUntil = now + 1500 + Math.random() * 1200;
+            // Keep the cursor's exact offset from the octopus (no grab jump) and
+            // remember the grab point to return the cursor there before letting go.
+            st.holdDX = cx - ox - st.x;
+            st.holdDY = cy - oy - st.y;
+            st.returnX = st.x;
+            st.returnY = st.y;
+            st.swingUntil = now + 1200 + Math.random() * 1000;
+            st.carryPhase = "swing";
             st.nextAt = now;
           }
         } else {
@@ -144,35 +154,49 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
           if (dist < 40) {
             st.mode = "carry";
             cursorCapture.held = true;
-            st.carryUntil = now + 1500 + Math.random() * 1200;
+            // Keep the cursor's exact offset from the octopus (no grab jump) and
+            // remember the grab point to return the cursor there before letting go.
+            st.holdDX = cx - ox - st.x;
+            st.holdDY = cy - oy - st.y;
+            st.returnX = st.x;
+            st.returnY = st.y;
+            st.swingUntil = now + 1200 + Math.random() * 1000;
+            st.carryPhase = "swing";
             st.nextAt = now;
           }
         }
       } else if (st.mode === "carry") {
-        // Playful tug: swim to a few random spots holding the cursor, then let
-        // go — the cursor springs back to the user's real pointer.
-        if (now >= st.carryUntil) {
-          cursorCapture.held = false;
-          st.captureReadyAt = now + CAPTURE_COOLDOWN;
-          st.mode = "hide";
-          st.scare = 0;
-          st.anger = 0;
-          st.hideUntil = now + 4000 + Math.random() * 3000;
-          st.hideX = st.x > W / 2 ? W + 280 : -280;
-          st.hideY = H * 0.78;
-        } else {
-          if (now >= st.nextAt) {
+        // Grab → swing around → return to the grab spot → release. The cursor
+        // keeps its exact offset from the octopus, so there's no jump on grab,
+        // and returning to the grab point means no snap-back on release either.
+        if (st.carryPhase === "swing") {
+          if (now >= st.swingUntil) {
+            st.carryPhase = "return";
+          } else if (now >= st.nextAt) {
             st.tx = W * (0.2 + Math.random() * 0.6);
             st.ty = H * (0.3 + Math.random() * 0.45);
             st.nextAt = now + 450 + Math.random() * 500;
           }
-          ax = (st.tx - st.x) * 3 - st.vx * 2.6;
-          ay = (st.ty - st.y) * 3 - st.vy * 2.6;
-          if (cursorCapture.held) {
-            // Hold the cursor just beside the octopus while it swims.
-            cursorCapture.x = ox + st.x - 36;
-            cursorCapture.y = oy + st.y + 6;
+        }
+        if (st.carryPhase === "return") {
+          st.tx = st.returnX;
+          st.ty = st.returnY;
+          if (Math.hypot(st.tx - st.x, st.ty - st.y) < 10) {
+            cursorCapture.held = false; // release exactly where it was grabbed
+            st.captureReadyAt = now + CAPTURE_COOLDOWN;
+            st.mode = "hide";
+            st.scare = 0;
+            st.anger = 0;
+            st.hideUntil = now + 4000 + Math.random() * 3000;
+            st.hideX = st.x > W / 2 ? W + 280 : -280;
+            st.hideY = H * 0.78;
           }
+        }
+        ax = (st.tx - st.x) * 3 - st.vx * 2.6;
+        ay = (st.ty - st.y) * 3 - st.vy * 2.6;
+        if (cursorCapture.held) {
+          cursorCapture.x = ox + st.x + st.holdDX;
+          cursorCapture.y = oy + st.y + st.holdDY;
         }
       } else {
         ax = (st.hideX - st.x) * 1.5 - st.vx * 2.2;
