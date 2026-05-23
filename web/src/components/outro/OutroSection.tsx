@@ -19,6 +19,13 @@ export default function OutroSection({ dict }: { dict: Dictionary; lang: string 
       ) : (
         <ClassicBackdrop />
       )}
+      {/* Soft scrim behind the text so swimming creatures never hurt legibility. */}
+      {scene !== "classic" && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-0 h-[55%] bg-gradient-to-b from-[#03121d]/45 to-transparent"
+        />
+      )}
       <OutroContent dict={dict} />
     </footer>
   );
