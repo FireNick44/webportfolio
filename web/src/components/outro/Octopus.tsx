@@ -2,47 +2,79 @@
 
 import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PointerField } from "@/hooks/usePointerField";
-import { cursorCapture } from "@/lib/outro/cursorCapture";
+import { useAppStore } from "@/store/useAppStore";
 
 /**
- * Cursor-aware octopus:
- *  - continuously, smoothly steers away from a moving cursor (no bumping);
- *  - a still cursor lures it in to sneak up and steal it;
- *  - persistent hunting builds scare → hide; "too angry" → it also steals;
- *  - when it steals, it grabs the cursor (keeping its exact offset, so no jump),
- *    swims around with it for ~2s, then returns to the grab spot and lets go —
- *    the cursor ends up right where it was taken, so there's no flicker (the OS
- *    cursor can't be moved, so we never relocate it). A cooldown prevents an
- *    immediate re-grab.
+ * Cursor-aware octopus (reacts to the real cursor — we never move it):
+ *  - cursor still → curious: it loops AROUND the cursor on a wobbly, randomised
+ *    orbit (radius + angular speed vary, re-seeded each session — not a flat circle);
+ *  - cursor moving → afraid: it steers away (quicker the more scared it is), and
+ *    persistent close hunting builds scare → it darts off-screen to hide, then
+ *    sneaks back.
+ * Speed varies with mood: gentle while orbiting, quick while fleeing.
+ * In advanced mode it draws its target trail so the motion is easy to debug.
  */
-const SPRING = 1.8;
 const DAMP = 2.4;
+const SPRING = 1.8;
 const AVOID_R = 340;
 const AVOID_FORCE = 5200;
 const SCARE_R = 220;
 const SCARE_GAIN = 2.5;
-const SCARE_DECAY = 0.5;
+const SCARE_DECAY = 0.6;
 const SCARE_TRIGGER = 1.4;
-const ANGER_DECAY = 0.015;
-const ANGER_CAPTURE = 2;
-const HIDE_MIN = 8000;
-const HIDE_RAND = 5000;
-const MAX_SPEED = 1100;
-const CAPTURE_COOLDOWN = 22000;
-const IDLE_MS = 1400;
-const APPROACH_K = 1.6;
+const HIDE_MIN = 7000;
+const HIDE_RAND = 4000;
+const IDLE_MS = 800;
+const ORBIT_R = 130;
+const ORBIT_SPEED = 2.0;
+const ORBIT_K = 3.2;
+const MIN_GAP = 105; // hard floor: the octopus never gets closer than this to the cursor
+// Mood-based speed caps (px/s): calm orbit < wary avoid < panicked flee.
+const SPEED_ORBIT = 760;
+const SPEED_WARY = 1080;
+const SPEED_FLEE = 1500;
+const TAU = Math.PI * 2;
+
+// Favourite hangouts (fractions of the scene) the octopus drifts between when it
+// isn't reacting to the cursor — weighted so it has habits, not pure randomness.
+const SPOTS: { x: number; y: number; w: number }[] = [
+  { x: 0.24, y: 0.74, w: 4 }, // tucked behind the front kelp
+  { x: 0.05, y: 0.6, w: 3 }, //  lurking at the left edge
+  { x: 0.95, y: 0.6, w: 3 }, //  lurking at the right edge
+  { x: 0.5, y: 0.56, w: 1 }, //  open water (rarely)
+  { x: 0.72, y: 0.72, w: 1 }, // sand, right of centre
+];
+const SPOT_TOTAL = SPOTS.reduce((sum, p) => sum + p.w, 0);
+const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
+
+/** Weighted pick of a favourite spot, with a little jitter so it's never exact. */
+function pickSpot(W: number, H: number): { x: number; y: number } {
+  let r = Math.random() * SPOT_TOTAL;
+  let spot = SPOTS[0];
+  for (const p of SPOTS) {
+    r -= p.w;
+    if (r <= 0) { spot = p; break; }
+  }
+  return {
+    x: clamp(spot.x + (Math.random() - 0.5) * 0.12, 0.02, 0.98) * W,
+    y: clamp(spot.y + (Math.random() - 0.5) * 0.1, 0.45, 0.85) * H,
+  };
+}
 
 export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }) {
   const elRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
   const [failed, setFailed] = useState(false);
+  const advanced = useAppStore((s) => s.advanced);
   const s = useRef({
     x: 0, y: 0, vx: 0, vy: 0, tx: 0, ty: 0, nextAt: 0, init: false,
-    mode: "wander" as "wander" | "hide" | "grab" | "carry",
-    scare: 0, anger: 0, hideUntil: 0, hideX: 0, hideY: 0,
-    swingUntil: 0, carryPhase: "swing" as "swing" | "return",
-    holdDX: 0, holdDY: 0, returnX: 0, returnY: 0,
-    grabUntil: 0, captureReadyAt: 0,
+    mode: "wander" as "wander" | "hide",
+    scare: 0, hideUntil: 0, hideX: 0, hideY: 0,
+    orbitAngle: 0, wasIdle: false, wob1: 0, wob2: 0, wob3: 0,
+    goalX: 0, goalY: 0,
+    noiseX: 0, noiseY: 0, noiseTX: 0, noiseTY: 0, noiseAt: 0,
+    trail: [] as number[],
   });
 
   useEffect(() => {
@@ -58,149 +90,98 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       const rect = scene?.getBoundingClientRect();
       const W = rect?.width || 800;
       const H = rect?.height || 400;
-      const ox = rect?.left || 0;
-      const oy = rect?.top || 0;
 
       if (!st.init) {
         st.x = W * 0.5; st.y = H * 0.5; st.tx = st.x; st.ty = st.y;
         st.nextAt = now; st.init = true; el.style.opacity = "1";
       }
 
-      // The octopus reacts to the real pointer (no persistent offset anymore).
       const p = pointer.current;
-      let cActive = false;
-      let cx = 0;
-      let cy = 0;
-      let cMovedAt = 0;
-      if (p && p.active) {
-        cActive = true;
-        cx = p.x;
-        cy = p.y;
-        cMovedAt = p.movedAt;
-      }
+      let cActive = false, cx = 0, cy = 0, cMovedAt = 0;
+      if (p && p.active) { cActive = true; cx = p.x; cy = p.y; cMovedAt = p.movedAt; }
 
-      let dist = Infinity;
-      let dirX = 0;
-      let dirY = 0;
+      let dist = Infinity, dirX = 0, dirY = 0;
       if (cActive) {
-        const dx = st.x - cx;
-        const dy = st.y - cy;
+        const dx = st.x - cx, dy = st.y - cy;
         dist = Math.hypot(dx, dy) || 0.01;
-        dirX = dx / dist;
-        dirY = dy / dist;
+        dirX = dx / dist; dirY = dy / dist;
       }
-      if (cActive && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
-      else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
-      st.anger = Math.max(0, st.anger - ANGER_DECAY * dt);
       const idle = cActive && now - cMovedAt > IDLE_MS;
+      if (cActive && !idle && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
+      else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
 
-      let ax = 0;
-      let ay = 0;
+      let ax = 0, ay = 0;
+      let cap = SPEED_WARY;
 
       if (st.mode === "wander") {
         if (idle) {
-          // Curious: sneak up on the still cursor. Don't re-grab a dropped one.
-          ax = (cx - st.x) * APPROACH_K - st.vx * DAMP;
-          ay = (cy - st.y) * APPROACH_K - st.vy * DAMP;
-          if (dist < 46 && now >= st.captureReadyAt) {
-            st.mode = "carry";
-            cursorCapture.held = true;
-            // Keep the cursor's exact offset from the octopus (no grab jump) and
-            // remember the grab point to return the cursor there before letting go.
-            st.holdDX = cx - ox - st.x;
-            st.holdDY = cy - oy - st.y;
-            st.returnX = st.x;
-            st.returnY = st.y;
-            st.swingUntil = now + 1200 + Math.random() * 1000;
-            st.carryPhase = "swing";
-            st.nextAt = now;
+          if (!st.wasIdle) {
+            // New curious session → reseed the loop wobble so it's never the
+            // same shape twice.
+            st.wob1 = Math.random() * TAU;
+            st.wob2 = Math.random() * TAU;
+            st.wob3 = Math.random() * TAU;
           }
+          // Wobbly loop: angular speed AND radius vary as it goes round, so it's
+          // an organic, lopsided lasso rather than a flat circle.
+          st.orbitAngle += ORBIT_SPEED * (1 + 0.5 * Math.sin(now * 0.0013 + st.wob1)) * dt;
+          const rWob =
+            ORBIT_R +
+            Math.sin(st.orbitAngle * 2 + st.wob2) * 34 +
+            Math.sin(st.orbitAngle * 1.3 + st.wob3) * 20;
+          // Smoothed random-walk noise so the loop isn't a clean function.
+          if (now >= st.noiseAt) {
+            st.noiseTX = (Math.random() - 0.5) * 90;
+            st.noiseTY = (Math.random() - 0.5) * 90;
+            st.noiseAt = now + 500 + Math.random() * 800;
+          }
+          st.noiseX += (st.noiseTX - st.noiseX) * 0.05;
+          st.noiseY += (st.noiseTY - st.noiseY) * 0.05;
+          let tx2 = cx + Math.cos(st.orbitAngle) * rWob + st.noiseX;
+          let ty2 = cy + Math.sin(st.orbitAngle) * rWob + st.noiseY;
+          // Keep the orbit target outside the gap so it circles, never overlaps.
+          const td = Math.hypot(tx2 - cx, ty2 - cy) || 1;
+          if (td < MIN_GAP + 25) {
+            const k = (MIN_GAP + 25) / td;
+            tx2 = cx + (tx2 - cx) * k;
+            ty2 = cy + (ty2 - cy) * k;
+          }
+          st.goalX = tx2; st.goalY = ty2;
+          ax = (tx2 - st.x) * ORBIT_K - st.vx * DAMP;
+          ay = (ty2 - st.y) * ORBIT_K - st.vy * DAMP;
+          cap = SPEED_ORBIT;
         } else {
+          if (cActive) st.orbitAngle = Math.atan2(st.y - cy, st.x - cx);
           ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
           ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
           if (cActive && dist < AVOID_R) {
             const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
-            ax += dirX * f;
-            ay += dirY * f;
+            ax += dirX * f; ay += dirY * f;
+            cap = SPEED_WARY + st.scare * 220; // more scared → quicker getaway
           }
-          if (now >= st.nextAt) {
-            st.tx = W * (0.45 + Math.random() * 0.4);
-            st.ty = H * (0.45 + Math.random() * 0.4);
-            st.nextAt = now + 2600 + Math.random() * 3200;
+          // Travel between favourite spots: re-pick on arrival (or after a
+          // timeout) so it deliberately visits its haunts, not random points.
+          if (Math.hypot(st.tx - st.x, st.ty - st.y) < 70 || now >= st.nextAt) {
+            const spot = pickSpot(W, H);
+            st.tx = spot.x;
+            st.ty = spot.y;
+            st.nextAt = now + 2200 + Math.random() * 3400;
           }
+          st.goalX = st.tx; st.goalY = st.ty;
           if (st.scare >= SCARE_TRIGGER) {
-            if (cActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt) {
-              st.mode = "grab";
-              st.grabUntil = now + 2600;
-            } else {
-              st.mode = "hide";
-              st.anger += 1;
-              st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
-              const goRight = cActive ? cx < st.x : Math.random() < 0.5;
-              st.hideX = goRight ? W + 280 : -280;
-              st.hideY = H * (0.7 + Math.random() * 0.25);
-            }
-          }
-        }
-      } else if (st.mode === "grab") {
-        if (!cActive || now > st.grabUntil) {
-          st.mode = "hide";
-          st.hideUntil = now + HIDE_MIN;
-          st.hideX = st.x > W / 2 ? W + 280 : -280;
-          st.hideY = H * 0.75;
-        } else {
-          ax = (cx - st.x) * 5 - st.vx * 3;
-          ay = (cy - st.y) * 5 - st.vy * 3;
-          if (dist < 40) {
-            st.mode = "carry";
-            cursorCapture.held = true;
-            // Keep the cursor's exact offset from the octopus (no grab jump) and
-            // remember the grab point to return the cursor there before letting go.
-            st.holdDX = cx - ox - st.x;
-            st.holdDY = cy - oy - st.y;
-            st.returnX = st.x;
-            st.returnY = st.y;
-            st.swingUntil = now + 1200 + Math.random() * 1000;
-            st.carryPhase = "swing";
-            st.nextAt = now;
-          }
-        }
-      } else if (st.mode === "carry") {
-        // Grab → swing around → return to the grab spot → release. The cursor
-        // keeps its exact offset from the octopus, so there's no jump on grab,
-        // and returning to the grab point means no snap-back on release either.
-        if (st.carryPhase === "swing") {
-          if (now >= st.swingUntil) {
-            st.carryPhase = "return";
-          } else if (now >= st.nextAt) {
-            st.tx = W * (0.2 + Math.random() * 0.6);
-            st.ty = H * (0.3 + Math.random() * 0.45);
-            st.nextAt = now + 450 + Math.random() * 500;
-          }
-        }
-        if (st.carryPhase === "return") {
-          st.tx = st.returnX;
-          st.ty = st.returnY;
-          if (Math.hypot(st.tx - st.x, st.ty - st.y) < 10) {
-            cursorCapture.held = false; // release exactly where it was grabbed
-            st.captureReadyAt = now + CAPTURE_COOLDOWN;
             st.mode = "hide";
-            st.scare = 0;
-            st.anger = 0;
-            st.hideUntil = now + 4000 + Math.random() * 3000;
-            st.hideX = st.x > W / 2 ? W + 280 : -280;
-            st.hideY = H * 0.78;
+            st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
+            const goRight = cActive ? cx < st.x : Math.random() < 0.5;
+            st.hideX = goRight ? W + 280 : -280;
+            st.hideY = H * (0.7 + Math.random() * 0.25);
           }
-        }
-        ax = (st.tx - st.x) * 3 - st.vx * 2.6;
-        ay = (st.ty - st.y) * 3 - st.vy * 2.6;
-        if (cursorCapture.held) {
-          cursorCapture.x = ox + st.x + st.holdDX;
-          cursorCapture.y = oy + st.y + st.holdDY;
         }
       } else {
-        ax = (st.hideX - st.x) * 1.5 - st.vx * 2.2;
-        ay = (st.hideY - st.y) * 1.5 - st.vy * 2.2;
+        // Fleeing → strong pull + high cap, so it darts away fast.
+        ax = (st.hideX - st.x) * 2.4 - st.vx * 2.2;
+        ay = (st.hideY - st.y) * 2.4 - st.vy * 2.2;
+        st.goalX = st.hideX; st.goalY = st.hideY;
+        cap = SPEED_FLEE;
         if (now >= st.hideUntil) {
           st.mode = "wander";
           st.scare = 0.25;
@@ -209,50 +190,111 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
           st.nextAt = now + 2500;
         }
       }
+      st.wasIdle = idle;
 
       st.vx += ax * dt;
       st.vy += ay * dt;
       const sp = Math.hypot(st.vx, st.vy);
-      if (sp > MAX_SPEED) {
-        st.vx = (st.vx / sp) * MAX_SPEED;
-        st.vy = (st.vy / sp) * MAX_SPEED;
-      }
+      if (sp > cap) { st.vx = (st.vx / sp) * cap; st.vy = (st.vy / sp) * cap; }
       st.x += st.vx * dt;
       st.y += st.vy * dt;
 
-      // Top limit only while calmly wandering.
-      if (st.mode === "hide" || (st.mode === "wander" && !idle)) st.y = Math.max(H * 0.4, st.y);
+      // Only keep it from leaving the top of the scene — it renders behind the
+      // heading (lower z), so it's free to roam the whole water column.
+      st.y = Math.max(H * 0.12, st.y);
+
+      // Never touch the cursor — hold a fair gap and only ever swim around it.
+      if (cActive) {
+        const gdx = st.x - cx;
+        const gdy = st.y - cy;
+        const gd = Math.hypot(gdx, gdy);
+        if (gd < MIN_GAP) {
+          const nx = gd > 0.01 ? gdx / gd : 1;
+          const ny = gd > 0.01 ? gdy / gd : 0;
+          st.x = cx + nx * MIN_GAP;
+          st.y = cy + ny * MIN_GAP;
+          const vr = st.vx * nx + st.vy * ny; // cancel any inward velocity
+          if (vr < 0) {
+            st.vx -= vr * nx;
+            st.vy -= vr * ny;
+          }
+        }
+      }
 
       const rot = Math.max(-25, Math.min(25, st.vx * 0.045));
-      el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-50%, -50%) rotate(${rot}deg)`;
+      // Anchor on the octopus's MASS centre (47%,58% of the gif), not the
+      // geometric centre, so the orbit/avoid maths track the creature itself.
+      el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-47%, -58%) rotate(${rot}deg)`;
+
+      // Advanced-mode debug: a fading trail of the goal point, plus the octopus
+      // and a link line — so the orbit/flee path is visible.
+      // Matter.js-style wireframe debug: transparent canvas (never darkens the
+      // scene), coloured lines — green actual path, red "where it's going"
+      // vector + goal, cyan octopus, yellow rings for its favourite spots.
+      const cv = canvasRef.current;
+      const ctx = cv?.getContext("2d");
+      if (cv && ctx) {
+        if (cv.width !== Math.round(W) || cv.height !== Math.round(H)) {
+          cv.width = Math.round(W);
+          cv.height = Math.round(H);
+        }
+        st.trail.push(st.x, st.y);
+        if (st.trail.length > 160) st.trail.splice(0, st.trail.length - 160);
+        ctx.clearRect(0, 0, cv.width, cv.height);
+
+        ctx.lineWidth = 1.5; // favourite spots (sized by preference weight)
+        ctx.strokeStyle = "rgba(255,210,70,0.55)";
+        for (const sp of SPOTS) {
+          ctx.beginPath();
+          ctx.arc(sp.x * W, sp.y * H, 7 + sp.w * 3, 0, TAU);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 2; // actual path, fading toward the tail
+        for (let i = 2; i < st.trail.length; i += 2) {
+          ctx.strokeStyle = `rgba(80,255,150,${(i / st.trail.length) * 0.8})`;
+          ctx.beginPath();
+          ctx.moveTo(st.trail[i - 2], st.trail[i - 1]);
+          ctx.lineTo(st.trail[i], st.trail[i + 1]);
+          ctx.stroke();
+        }
+        ctx.strokeStyle = "rgba(255,70,70,0.9)"; // heading vector + goal
+        ctx.beginPath(); ctx.moveTo(st.x, st.y); ctx.lineTo(st.goalX, st.goalY); ctx.stroke();
+        ctx.fillStyle = "rgba(255,70,70,0.95)";
+        ctx.beginPath(); ctx.arc(st.goalX, st.goalY, 5, 0, TAU); ctx.fill();
+        ctx.fillStyle = "rgba(90,210,255,1)"; // octopus
+        ctx.beginPath(); ctx.arc(st.x, st.y, 4.5, 0, TAU); ctx.fill();
+      }
+
       rafRef.current = requestAnimationFrame(frame);
     };
     rafRef.current = requestAnimationFrame(frame);
-    return () => {
-      cancelAnimationFrame(rafRef.current);
-      cursorCapture.held = false;
-    };
+    return () => cancelAnimationFrame(rafRef.current);
   }, [pointer]);
 
   return (
-    <div
-      ref={elRef}
-      aria-hidden
-      className="pointer-events-none absolute left-0 top-0 z-[8] select-none leading-none transition-opacity duration-700"
-      style={{ willChange: "transform", opacity: 0 }}
-    >
-      {failed ? (
-        <span className="text-5xl">🐙</span>
-      ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src="/underwater/octopus.gif"
-          alt=""
-          draggable={false}
-          onError={() => setFailed(true)}
-          style={{ height: 140, width: "auto", imageRendering: "pixelated", display: "block" }}
-        />
+    <>
+      {advanced && (
+        <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 z-[20]" />
       )}
-    </div>
+      <div
+        ref={elRef}
+        aria-hidden
+        className="pointer-events-none absolute left-0 top-0 z-[8] select-none leading-none transition-opacity duration-700"
+        style={{ willChange: "transform", opacity: 0, transformOrigin: "47% 58%" }}
+      >
+        {failed ? (
+          <span className="text-5xl">🐙</span>
+        ) : (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src="/underwater/octopus.gif"
+            alt=""
+            draggable={false}
+            onError={() => setFailed(true)}
+            style={{ height: 160, width: "auto", imageRendering: "pixelated", display: "block" }}
+          />
+        )}
+      </div>
+    </>
   );
 }

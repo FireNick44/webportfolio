@@ -2,26 +2,31 @@
 
 import { useEffect, useRef } from "react";
 
-const SOLO_SIZE = 140;
-const SOLO_DUR = 16000; // ms for one crossing (loops continuously)
+const SOLO_SIZE = 118;
+const SOLO_DUR = 16000; // avg ms for one crossing (loops continuously)
 
 // Family: lead crab + two trailing little ones (size, x-offset from lead, bob phase).
 const FAMILY = [
-  { size: 140, dx: 0, phase: 0 },
-  { size: 96, dx: -120, phase: 0.7 },
-  { size: 82, dx: -212, phase: 1.4 },
+  { size: 118, dx: 0, phase: 0 },
+  { size: 80, dx: -104, phase: 0.7 },
+  { size: 68, dx: -182, phase: 1.4 },
 ];
-const FAM_DUR = 18000; // one crossing
+const FAM_DUR = 18000; // avg ms for one crossing
 const FAM_GAP_MIN = 14000;
 const FAM_GAP_RAND = 12000;
 const FAM_START_DELAY = 3000;
+const TAU = Math.PI * 2;
 
 const randDir = (): 1 | -1 => (Math.random() < 0.5 ? 1 : -1);
+// Always-forward speed that wobbles 0.4×–1.6× so a crab visibly slows then
+// speeds up as it walks (phase re-rolled each crossing for variety).
+const speedMul = (now: number, phase: number) => 1 + 0.6 * Math.sin(now * 0.0011 + phase);
 
 /**
  * Two independent crab events, each animated as a directly-transformed <img>
  * (the approach that actually renders). Each pass picks a random direction and
- * flips the sprite (scaleX) to face the way it's walking:
+ * flips the sprite (scaleX) to face the way it walks, and walks at a varying
+ * pace:
  *  - a solo crab looping continuously across the sand;
  *  - a separate family (lead + two trailing) that strolls by periodically.
  */
@@ -29,13 +34,10 @@ export function Crab() {
   const soloRef = useRef<HTMLImageElement>(null);
   const famRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rafRef = useRef(0);
-  const t0 = useRef(0);
-  const solo = useRef<{ lastP: number; dir: 1 | -1 }>({ lastP: 0, dir: 1 });
-  const fam = useRef<{ startAt: number; dur: number; dir: 1 | -1 }>({
-    startAt: 0,
-    dur: FAM_DUR,
-    dir: 1,
-  });
+  const initRef = useRef(false);
+  const lastRef = useRef(0);
+  const solo = useRef({ prog: 0, dir: 1 as 1 | -1, phase: 0 });
+  const fam = useRef({ prog: 0, dir: 1 as 1 | -1, phase: 0, waiting: true, until: 0 });
 
   useEffect(() => {
     const el = soloRef.current;
@@ -44,38 +46,53 @@ export function Crab() {
     el.style.opacity = "1";
 
     const frame = (now: number) => {
-      if (!t0.current) {
-        t0.current = now;
-        fam.current.startAt = now + FAM_START_DELAY;
+      if (!initRef.current) {
+        initRef.current = true;
+        lastRef.current = now;
         solo.current.dir = randDir();
+        solo.current.phase = Math.random() * TAU;
         fam.current.dir = randDir();
+        fam.current.phase = Math.random() * TAU;
+        fam.current.waiting = true;
+        fam.current.until = now + FAM_START_DELAY;
       }
+      const dt = Math.min(now - lastRef.current, 50); // ms, clamped
+      lastRef.current = now;
       const W = scene?.getBoundingClientRect().width || 1000;
 
-      // Solo: continuous loop; new random direction each lap.
+      // Solo: continuous loop, variable pace; new direction + pace each lap.
+      const so = solo.current;
+      so.prog += (speedMul(now, so.phase) * dt) / SOLO_DUR;
+      if (so.prog >= 1) {
+        so.prog -= 1;
+        so.dir = randDir();
+        so.phase = Math.random() * TAU;
+      }
       const sgw = SOLO_SIZE + 60;
-      const sp = ((now - t0.current) % SOLO_DUR) / SOLO_DUR;
-      if (sp < solo.current.lastP) solo.current.dir = randDir(); // wrapped → new lap
-      solo.current.lastP = sp;
-      const sd = solo.current.dir;
-      const sx = sd === 1 ? -sgw + (W + sgw * 2) * sp : W + sgw - (W + sgw * 2) * sp;
-      el.style.transform = `translate(${sx}px, ${Math.sin(now / 280) * 4}px) scaleX(${sd})`;
+      const sx = so.dir === 1 ? -sgw + (W + sgw * 2) * so.prog : W + sgw - (W + sgw * 2) * so.prog;
+      el.style.transform = `translate(${sx}px, ${Math.sin(now / 280) * 4}px) scaleX(${so.dir})`;
 
-      // Family: periodic crossings, hidden off-screen during the gap between.
-      const fgw = FAMILY[0].size + 260;
+      // Family: periodic crossings (variable pace), hidden during the gap.
       const f = fam.current;
-      const elapsed = now - f.startAt;
-      let visible = elapsed >= 0;
+      const fgw = FAMILY[0].size + 260;
+      let visible = !f.waiting;
       let fx = -fgw;
-      if (elapsed >= 0) {
-        const fp = elapsed / f.dur;
-        if (fp >= 1) {
-          f.startAt = now + FAM_GAP_MIN + Math.random() * FAM_GAP_RAND;
-          f.dur = FAM_DUR;
+      if (f.waiting) {
+        if (now >= f.until) {
+          f.waiting = false;
+          f.prog = 0;
           f.dir = randDir();
+          f.phase = Math.random() * TAU;
+          visible = true;
+        }
+      } else {
+        f.prog += (speedMul(now, f.phase) * dt) / FAM_DUR;
+        if (f.prog >= 1) {
+          f.waiting = true;
+          f.until = now + FAM_GAP_MIN + Math.random() * FAM_GAP_RAND;
           visible = false;
         } else {
-          fx = f.dir === 1 ? -fgw + (W + fgw * 2) * fp : W + fgw - (W + fgw * 2) * fp;
+          fx = f.dir === 1 ? -fgw + (W + fgw * 2) * f.prog : W + fgw - (W + fgw * 2) * f.prog;
         }
       }
       const fd = f.dir;
@@ -102,7 +119,7 @@ export function Crab() {
         alt=""
         aria-hidden
         draggable={false}
-        className="pointer-events-none absolute bottom-[10px] left-0 z-[6]"
+        className="pointer-events-none absolute bottom-[44px] left-0 z-[6]"
         style={{ width: SOLO_SIZE, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
       />
       {FAMILY.map((m, i) => (
@@ -116,7 +133,7 @@ export function Crab() {
           alt=""
           aria-hidden
           draggable={false}
-          className="pointer-events-none absolute bottom-[10px] left-0 z-[6]"
+          className="pointer-events-none absolute bottom-[44px] left-0 z-[6]"
           style={{ width: m.size, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
         />
       ))}

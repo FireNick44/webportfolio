@@ -5,8 +5,8 @@ import { useEffect, useRef } from "react";
 /**
  * A big creature that occasionally cruises across the scene — left→right or
  * right→left at random, flipped to face the way it's swimming — on a randomized,
- * undulating path (different height, bob, speed each pass), with moderate gaps so
- * it shows up but stays a treat.
+ * undulating path (different height, bob, speed each pass), with long gaps
+ * (~5–10 min) so it's a rare treat.
  */
 export function Rook() {
   const elRef = useRef<HTMLImageElement>(null);
@@ -47,7 +47,7 @@ export function Rook() {
 
       if (!s.init) {
         s.init = true;
-        s.nextAt = now + 3000 + Math.random() * 4000; // first pass soon (3–7s)
+        s.nextAt = now + 60000 + Math.random() * 60000; // first pass after ~1–2 min
         el.style.opacity = "1";
       }
       if (!s.active && now >= s.nextAt) begin(now, H);
@@ -56,7 +56,7 @@ export function Rook() {
         const p = (now - s.t0) / s.dur;
         if (p >= 1) {
           s.active = false;
-          s.nextAt = now + 12000 + Math.random() * 14000; // occasional (~12–26s)
+          s.nextAt = now + 300000 + Math.random() * 300000; // rare: once every ~5–10 min
           el.style.transform = "translate(-99999px,0)";
         } else {
           const ww = el.offsetWidth || 240;

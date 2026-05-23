@@ -5,6 +5,7 @@ import { useGraphicsTier } from "@/hooks/useGraphicsTier";
 import { useSceneActive } from "@/hooks/useSceneActive";
 import { usePointerField } from "@/hooks/usePointerField";
 import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
+import { BubblesBackdrop } from "@/components/bubbles/BubblesBackdrop";
 import { ByeSand } from "@/components/layout/ByeSand";
 import { WaterCanvas } from "./WaterCanvas";
 import { Octopus } from "./Octopus";
@@ -43,7 +44,7 @@ export function ReefScene() {
   //  off    – fully static.
   //  low    – SVG bg + CSS sway + ambient creatures (no canvas, no cursor) ← mobile.
   //  medium – + canvas bubbles.
-  //  high   – + cursor interaction (octopus avoids/flees/steals, kelp reacts).
+  //  high   – + cursor interaction (octopus avoids/flees, kelp reacts; native cursor).
   const animated = tier !== "off";
   const creaturesOn = atLeast(tier, "low") && active;
   const canvasOn = atLeast(tier, "medium") && active;
@@ -51,14 +52,15 @@ export function ReefScene() {
   const pointer = usePointerField(containerRef, interactive);
 
   return (
-    <div ref={containerRef} aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
-      {/* Back: the bubble SVG, darkened/graded to read as the deep bottom. */}
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/svg/intro-bg.svg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-        style={{ filter: "saturate(1.25) brightness(0.58) hue-rotate(8deg)" }}
+    <div
+      ref={containerRef}
+      aria-hidden
+      className="absolute inset-0 -z-10 select-none overflow-hidden [-webkit-touch-callout:none]"
+    >
+      {/* Back: the bubble SVG (parallax), darkened/graded to read as the deep bottom. */}
+      <BubblesBackdrop
+        className="absolute inset-0"
+        imgStyle={{ filter: "saturate(1.25) brightness(0.58) hue-rotate(8deg)" }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#05151f]/55 via-[#06212e]/66 to-[#010d16]/88" />
 
@@ -74,7 +76,7 @@ export function ReefScene() {
 
       {/* Floor: waves (z2) → bg kelp (z4) → sand (z5) → corals (z5) → crab
           (z6, in front of both corals) → octopus (z8) → front kelp (z9). */}
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(110px,14vw,185px)] w-full opacity-95" />
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(135px,17vw,195px)] w-full opacity-95" />
       <Kelp
         animated={animated}
         clusterAround={70}
@@ -84,7 +86,8 @@ export function ReefScene() {
         reactive={interactive}
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
-      <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
+      {/* On mobile the pixel sand sits a bit lower so more of the colourful wave shows. */}
+      <SandFloor rows={6} className={`absolute inset-x-0 bottom-0 z-[5]${vw < 640 ? " translate-y-[20px]" : ""}`} />
       <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={Math.round(158 * coralScale)} bottomPx={6} z={5} animated={animated} />
       <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={Math.round(136 * coralScale)} flip delay={1.4} bottomPx={6} z={5} animated={animated} />
       {creaturesOn && <Crab />}

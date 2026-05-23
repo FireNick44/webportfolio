@@ -32,9 +32,6 @@ interface AppState {
   /** Advanced/diagnostic mode: hides the rack's top wave + shows physics debug. */
   advanced: boolean;
   setAdvanced: (advanced: boolean) => void;
-  /** Which outro variant renders at the bottom of the page. */
-  outroScene: "classic" | "deep" | "reef";
-  setOutroScene: (scene: "classic" | "deep" | "reef") => void;
   /** Game-style quality tier for the underwater scene. */
   graphicsTier: "off" | "low" | "medium" | "high";
   setGraphicsTier: (tier: "off" | "low" | "medium" | "high") => void;
@@ -62,8 +59,6 @@ export const useAppStore = create<AppState>()(
       setHasShownLoader: (shown) => set({ hasShownLoader: shown }),
       advanced: false,
       setAdvanced: (advanced) => set({ advanced }),
-      outroScene: "classic",
-      setOutroScene: (outroScene) => set({ outroScene }),
       graphicsTier: "medium",
       setGraphicsTier: (graphicsTier) => set({ graphicsTier }),
     }),
@@ -77,7 +72,6 @@ export const useAppStore = create<AppState>()(
         preset: state.preset,
         tokenOverrides: state.tokenOverrides,
         advanced: state.advanced,
-        outroScene: state.outroScene,
         graphicsTier: state.graphicsTier,
       }),
     },

@@ -97,8 +97,8 @@ export function generateFlasks(
   }
 
   // layout === "column"
-  const colJitter = [-0.05, 0.06, -0.04, 0.05];
-  const bodyFrac = [0.32, 0.46, 0.58, 0.7];
+  const colJitter = [-0.06, 0.07, -0.04, 0.05, -0.07, 0.04, 0.06];
+  const bodyFrac = [0.26, 0.36, 0.46, 0.56, 0.66, 0.76, 0.84];
   const foreground = Math.max(1, config.maxPhysicsFlasks);
   for (let i = 0; i < foreground; i++) {
     const xPct = 0.5 + (colJitter[i % colJitter.length] ?? 0);

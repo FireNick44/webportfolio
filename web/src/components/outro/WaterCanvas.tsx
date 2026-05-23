@@ -81,6 +81,7 @@ export function WaterCanvas({
       const p = enableCursor ? pointer?.current : null;
       const cursorOn = !!p && p.active;
       const damp = Math.exp(-DAMP * dt);
+      const t = now / 1000;
 
       for (const b of bubblesRef.current) {
         // The cursor shoves the bubble for REAL (adds to its velocity), so it
@@ -92,9 +93,9 @@ export function WaterCanvas({
         }
         b.vx *= damp;
         b.vy *= damp;
-        // Persistent push + steady buoyant rise.
+        // Persistent push + buoyant rise with a gentle speed pulse (less uniform).
         b.x += b.vx * dt;
-        b.y += b.vy * dt - b.speed * dt;
+        b.y += b.vy * dt - b.speed * (0.8 + 0.35 * Math.sin(t * 0.6 + b.wobblePhase)) * dt;
 
         // Respawn at the bottom; wrap horizontally if shoved off a side.
         if (b.y < -b.r) {
@@ -106,7 +107,11 @@ export function WaterCanvas({
         if (b.x < -b.r) b.x = w + b.r;
         else if (b.x > w + b.r) b.x = -b.r;
 
-        const drawX = b.x + Math.sin((now / 1000) * b.wobbleFreq + b.wobblePhase) * b.wobbleAmp;
+        // Two layered wobbles → a meandering, custom-feeling rising path.
+        const drawX =
+          b.x +
+          Math.sin(t * b.wobbleFreq + b.wobblePhase) * b.wobbleAmp +
+          Math.sin(t * b.wobbleFreq * 0.47 + b.wobblePhase * 1.7) * b.wobbleAmp * 0.55;
         ctx.beginPath();
         ctx.arc(drawX, b.y, b.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(180, 220, 235, ${0.08 + Math.min(b.r, 6) * 0.03})`;

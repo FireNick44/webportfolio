@@ -1,26 +1,39 @@
+"use client";
+
+import { useRef, type CSSProperties } from "react";
+import { motion, useScroll, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 
 /**
- * The animated "bubbles" background reused from Noel's original portfolio
- * (src/svg/intro-bg.svg) — full colour, embedded via <img> so its SMIL
- * animation runs (it does not as a CSS background).
+ * The animated bubbles SVG background (src/svg/intro-bg.svg), embedded via <img>
+ * so its SMIL animation runs. It has a gentle scroll-linked PARALLAX so it
+ * drifts slower than the page (reads as sitting "further back"); scaled up a
+ * touch so the parallax shift never reveals its edges. Only the SVG parallaxes —
+ * the canvas bubbles (WaterCanvas) are separate.
  */
 export function BubblesBackdrop({
   className,
   intensity = "full",
+  imgStyle,
 }: {
   className?: string;
   intensity?: "subtle" | "full";
+  /** Extra image styles (e.g. the reef's colour grade filter). */
+  imgStyle?: CSSProperties;
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
   const op = intensity === "subtle" ? "opacity-70" : "opacity-100";
 
   return (
-    <div aria-hidden className={cn("overflow-hidden", className)}>
+    <div ref={ref} aria-hidden className={cn("overflow-hidden", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <motion.img
         src="/svg/intro-bg.svg"
         alt=""
-        className={cn("absolute inset-0 h-full w-full object-cover", op)}
+        style={{ y, ...imgStyle }}
+        className={cn("absolute inset-0 h-full w-full scale-[1.3] object-cover", op)}
       />
     </div>
   );

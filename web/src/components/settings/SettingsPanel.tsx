@@ -114,8 +114,6 @@ export default function SettingsPanel({
   const advanced = useAppStore((s) => s.advanced);
   const setAdvanced = useAppStore((s) => s.setAdvanced);
   const setHasShownLoader = useAppStore((s) => s.setHasShownLoader);
-  const outroScene = useAppStore((s) => s.outroScene);
-  const setOutroScene = useAppStore((s) => s.setOutroScene);
   const graphicsTier = useAppStore((s) => s.graphicsTier);
   const setGraphicsTier = useAppStore((s) => s.setGraphicsTier);
 
@@ -294,31 +292,10 @@ export default function SettingsPanel({
             </p>
           </div>
 
-          {/* Outro scene */}
+          {/* Underwater outro */}
           <div className="border border-border">
-            <PanelHead>Outro scene</PanelHead>
+            <PanelHead>Underwater outro</PanelHead>
             <div className="space-y-5 p-5">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="lab-label w-20">Scene</span>
-                <div className="flex gap-px bg-border">
-                  {(["classic", "deep", "reef"] as const).map((s) => (
-                    <button
-                      key={s}
-                      type="button"
-                      onClick={() => setOutroScene(s)}
-                      className={cn(
-                        "bg-background px-4 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
-                        outroScene === s
-                          ? "text-foreground"
-                          : "text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      {s === "classic" ? "Current" : s === "deep" ? "The Deep" : "Reef"}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <div className="flex flex-wrap items-center gap-3">
                 <span className="lab-label w-20">Graphics</span>
                 <div className="flex gap-px bg-border">
