@@ -16,9 +16,9 @@ import { SandFloor } from "./SandFloor";
 // pixel-sand texture.
 const BUBBLE_COUNT: Record<GraphicsTier, number> = {
   off: 0,
-  low: 18,
-  medium: 30,
-  high: 52,
+  low: 26,
+  medium: 44,
+  high: 68,
 };
 
 export function ReefScene() {
@@ -57,11 +57,11 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[2] h-[42%]"
       />
 
-      {/* Floor: textured pixel sand in front of the background but UNDER the
-          colourful ByeSand waves, which are translucent so the texture reads
-          through. Kept short so it doesn't take over the scene. */}
-      <SandFloor rows={7} className="absolute inset-x-0 bottom-0 z-[3]" />
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[4] block h-[clamp(70px,9vw,120px)] w-full opacity-70" />
+      {/* Floor: colourful ByeSand waves BEHIND; the generated pixel sand IN
+          FRONT at the very bottom, shorter so the wave crests still show above
+          it (its wavy mask top means no hard cut over the waves). */}
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(90px,12vw,150px)] w-full opacity-95" />
+      <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[4]" />
 
       {/* Foreground kelp — bigger, in front of the floor, and darker, so the
           viewer peers THROUGH near kelp (its own seed → distinct from the back patch). */}
@@ -71,7 +71,7 @@ export function ReefScene() {
         count={7}
         scaleMul={1.9}
         clusterAround={26}
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[68%] brightness-[0.55]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[52%] brightness-[0.55]"
       />
 
       {cursorOn && <CursorFollower pointer={pointer} />}
