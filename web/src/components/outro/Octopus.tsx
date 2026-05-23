@@ -50,7 +50,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       // Re-pick a wander target every few seconds (upper ~two-thirds of water).
       if (now >= st.nextAt) {
         st.tx = W * (0.15 + Math.random() * 0.7);
-        st.ty = H * (0.18 + Math.random() * 0.42);
+        st.ty = H * (0.44 + Math.random() * 0.34);
         st.nextAt = now + 2600 + Math.random() * 3200;
       }
 
@@ -84,7 +84,8 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       // Keep it in the water, above the floor.
       const m = 44;
       st.x = Math.max(m, Math.min(W - m, st.x));
-      st.y = Math.max(m, Math.min(H * 0.78, st.y));
+      // Keep it down in the water — never up near the heading text.
+      st.y = Math.max(H * 0.4, Math.min(H * 0.82, st.y));
 
       el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-50%, -50%)`;
       rafRef.current = requestAnimationFrame(frame);
@@ -109,7 +110,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
           alt=""
           draggable={false}
           onError={() => setFailed(true)}
-          style={{ height: 100, width: "auto", imageRendering: "pixelated", display: "block" }}
+          style={{ height: 140, width: "auto", imageRendering: "pixelated", display: "block" }}
         />
       )}
     </div>
