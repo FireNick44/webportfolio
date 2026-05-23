@@ -87,7 +87,7 @@ export function ReefScene() {
         count={fgKelp}
         scaleMul={1.9}
         clusterAround={26}
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[52%] brightness-[0.55]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[9] h-[52%] brightness-[0.55]"
       />
 
       {heavy && <Octopus pointer={pointer} />}
