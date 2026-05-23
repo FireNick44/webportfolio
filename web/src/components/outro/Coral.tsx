@@ -10,6 +10,7 @@ export function Coral({
   flip = false,
   delay = 0,
   animated = true,
+  bottomPx = 0,
 }: {
   src: string;
   leftPct: number;
@@ -17,15 +18,17 @@ export function Coral({
   flip?: boolean;
   delay?: number;
   animated?: boolean;
+  bottomPx?: number;
 }) {
   const wrap: CSSProperties = {
     left: `${leftPct}%`,
+    bottom: bottomPx,
     width: widthPx,
     transformOrigin: "bottom center",
     animation: animated ? `coral-sway 7s ease-in-out ${delay}s infinite` : "none",
   };
   return (
-    <div aria-hidden className="pointer-events-none absolute bottom-0 z-[5]" style={wrap}>
+    <div aria-hidden className="pointer-events-none absolute z-[5]" style={wrap}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}

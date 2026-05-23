@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGraphicsTier } from "@/hooks/useGraphicsTier";
 import { useSceneActive } from "@/hooks/useSceneActive";
 import { usePointerField } from "@/hooks/usePointerField";
@@ -25,14 +25,22 @@ export function ReefScene() {
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
 
-  // Tier budget:
-  //  - off: fully static.
-  //  - low: SVG bg + static floor + cheap CSS sway. NO canvas, NO creatures.
-  //  - medium: + canvas bubbles + creatures (octopus wanders, rook cruises).
-  //  - high: + cursor interaction (octopus flees, bubbles scatter).
-  const animated = tier !== "off"; // cheap CSS sway (kelp/coral)
-  const heavy = atLeast(tier, "medium") && active; // canvas + creatures (rAF)
-  const interactive = atLeast(tier, "high") && active; // cursor effects
+  // Kelp density scales with viewport — lighter on mobile, denser on desktop.
+  const [vw, setVw] = useState(1280);
+  useEffect(() => {
+    const onResize = () => setVw(window.innerWidth);
+    onResize();
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+  const bgKelp = vw < 640 ? 8 : vw < 1024 ? 12 : vw < 1600 ? 16 : 20;
+  const fgKelp = vw < 640 ? 4 : vw < 1024 ? 6 : 9;
+
+  // Tier budget: low = SVG bg + cheap CSS sway only; medium = + canvas + creatures;
+  // high = + cursor interaction.
+  const animated = tier !== "off";
+  const heavy = atLeast(tier, "medium") && active;
+  const interactive = atLeast(tier, "high") && active;
   const pointer = usePointerField(containerRef, interactive);
 
   return (
@@ -58,23 +66,25 @@ export function ReefScene() {
       )}
       {heavy && <Rook />}
 
-      {/* Floor: ByeSand waves (z3) → background kelp (z4) → pixel sand (z5) → coral. */}
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(90px,12vw,150px)] w-full opacity-95" />
+      {/* Floor (raised a touch for coral room): waves (z3) → bg kelp (z4) →
+          pixel sand (z5) → coral. */}
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(110px,14vw,185px)] w-full opacity-95" />
       <Kelp
         animated={animated}
         clusterAround={70}
         scaleMul={1.4}
+        count={bgKelp}
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
-      <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={42} widthPx={132} animated={animated} />
-      <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} animated={animated} />
+      <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={42} widthPx={132} bottomPx={18} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} bottomPx={18} animated={animated} />
 
       {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp
         animated={animated}
         seed={5}
-        count={7}
+        count={fgKelp}
         scaleMul={1.9}
         clusterAround={26}
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[52%] brightness-[0.55]"
