@@ -2,11 +2,7 @@
 
 import type { CSSProperties } from "react";
 
-/**
- * A coral planted on the sand floor. The art is a JPEG (no transparency), so
- * `mix-blend-mode: multiply` drops the white background against the light sand.
- * Gentle sway so it breathes. (Transparent PNGs would composite cleaner.)
- */
+/** A coral planted on the sand floor (transparent PNG), with a gentle sway. */
 export function Coral({
   src,
   leftPct,
@@ -33,12 +29,7 @@ export function Coral({
         src={src}
         alt=""
         draggable={false}
-        style={{
-          width: "100%",
-          display: "block",
-          mixBlendMode: "multiply",
-          transform: flip ? "scaleX(-1)" : undefined,
-        }}
+        style={{ width: "100%", display: "block", transform: flip ? "scaleX(-1)" : undefined }}
       />
     </div>
   );

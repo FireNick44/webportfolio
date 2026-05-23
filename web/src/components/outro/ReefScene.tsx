@@ -7,7 +7,7 @@ import { usePointerField } from "@/hooks/usePointerField";
 import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
 import { ByeSand } from "@/components/layout/ByeSand";
 import { WaterCanvas } from "./WaterCanvas";
-import { CursorFollower } from "./CursorFollower";
+import { Octopus } from "./Octopus";
 import { Coral } from "./Coral";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
@@ -75,8 +75,8 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.jpeg" leftPct={13} widthPx={88} />
-      <Coral src="/underwater/coral_green.jpeg" leftPct={82} widthPx={74} flip delay={1.4} />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={13} widthPx={132} />
+      <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} />
 
       {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp
@@ -88,7 +88,7 @@ export function ReefScene() {
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[52%] brightness-[0.55]"
       />
 
-      {cursorOn && <CursorFollower pointer={pointer} />}
+      {cursorOn && <Octopus pointer={pointer} />}
     </div>
   );
 }

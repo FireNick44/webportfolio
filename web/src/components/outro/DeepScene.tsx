@@ -6,7 +6,7 @@ import { useSceneActive } from "@/hooks/useSceneActive";
 import { usePointerField } from "@/hooks/usePointerField";
 import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
 import { WaterCanvas } from "./WaterCanvas";
-import { CursorFollower } from "./CursorFollower";
+import { Octopus } from "./Octopus";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
 import { PixelSignoff } from "./PixelSignoff";
@@ -46,7 +46,7 @@ export function DeepScene() {
       />
       <Kelp animated={animated} />
       <SandFloor />
-      {cursorOn && <CursorFollower pointer={pointer} />}
+      {cursorOn && <Octopus pointer={pointer} />}
       {tier === "high" && <PixelSignoff />}
     </div>
   );
