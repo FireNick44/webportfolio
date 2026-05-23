@@ -1,97 +1,47 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-// The crab content is the bottom-center ~56%×40% of the gif, so sizes are bumped.
-type CrabSpec = { size: number; dx: number; bob: number };
-const BIG: CrabSpec = { size: 190, dx: 0, bob: 0 };
-const SMALLS: CrabSpec[] = [
-  { size: 122, dx: -140, bob: 0.45 },
-  { size: 108, dx: -244, bob: 0.95 },
-];
+const SIZE = 170;
+const DUR = 16000; // ms for one left → right crossing (loops continuously)
 
-// TEMP (visibility test): raised into the water so it's easy to spot.
-// Set to "14px" to plant the family back on the sand.
-const WALK_BOTTOM = "38%";
-
-/**
- * A crab that frequently strolls left → right. Most strolls are a single crab;
- * occasionally (rare) it's a family — the big one with two smaller ones trailing.
- */
+/** A single crab walking continuously left → right along the sand. */
 export function Crab() {
-  const [family, setFamily] = useState(false);
-  const groupRef = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLImageElement>(null);
   const rafRef = useRef(0);
-  const st = useRef({ active: false, t0: 0, dur: 0, nextAt: 0, init: false });
+  const t0 = useRef(0);
 
   useEffect(() => {
-    const group = groupRef.current;
-    if (!group) return;
-    const scene = group.parentElement;
+    const el = ref.current;
+    if (!el) return;
+    const scene = el.parentElement;
+    el.style.opacity = "1";
 
     const frame = (now: number) => {
+      if (!t0.current) t0.current = now;
       const rect = scene?.getBoundingClientRect();
       const W = rect?.width || 1000;
-      const s = st.current;
-
-      if (!s.init) {
-        s.init = true;
-        s.nextAt = now + 300; // appear almost immediately
-        group.style.opacity = "1";
-      }
-      if (!s.active && now >= s.nextAt) {
-        s.active = true;
-        s.t0 = now;
-        s.dur = 14000 + Math.random() * 8000;
-        setFamily(Math.random() < 0.15);
-      }
-
-      if (s.active) {
-        const p = (now - s.t0) / s.dur;
-        if (p >= 1) {
-          s.active = false;
-          s.nextAt = now + 800 + Math.random() * 1500; // near-continuous → almost always around
-          group.style.transform = "translateX(-9999px)";
-        } else {
-          const gw = 340;
-          group.style.transform = `translateX(${-gw + (W + gw * 2) * p}px)`;
-        }
-      } else {
-        group.style.transform = "translateX(-9999px)";
-      }
+      const gw = SIZE + 60;
+      const p = ((now - t0.current) % DUR) / DUR; // 0..1, looping
+      const x = -gw + (W + gw * 2) * p;
+      const bob = Math.sin(now / 280) * 4; // little walking hop
+      el.style.transform = `translate(${x}px, ${bob}px)`;
       rafRef.current = requestAnimationFrame(frame);
     };
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
   }, []);
 
-  const crab = (c: CrabSpec, key: number) => (
+  return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      key={key}
+      ref={ref}
       src="/underwater/crab.gif"
       alt=""
-      draggable={false}
-      className="absolute bottom-0"
-      style={{
-        left: c.dx,
-        width: c.size,
-        height: "auto",
-        imageRendering: "pixelated",
-        animation: `crab-bob 0.6s ease-in-out ${c.bob}s infinite`,
-      }}
-    />
-  );
-
-  return (
-    <div
-      ref={groupRef}
       aria-hidden
-      className="pointer-events-none absolute left-0 z-[6]"
-      style={{ bottom: WALK_BOTTOM, opacity: 0, willChange: "transform" }}
-    >
-      {crab(BIG, 0)}
-      {family && SMALLS.map((c, i) => crab(c, i + 1))}
-    </div>
+      draggable={false}
+      className="pointer-events-none absolute bottom-[10px] left-0 z-[6]"
+      style={{ width: SIZE, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
+    />
   );
 }

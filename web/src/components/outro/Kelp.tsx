@@ -4,8 +4,10 @@ import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "
 import { generateKelp } from "@/lib/outro/kelp";
 import type { PointerField } from "@/hooks/usePointerField";
 
-const HIT_PAD = 26; // px — slack around a strand's box for the cursor hitbox
-const WOBBLE_AMP = 4; // deg — subtle accent (no left↔right flip)
+const FALLOFF = 95; // px — smooth ramp zone around a strand's box
+const AMP_DEG = 3.5; // deg — slight (no left↔right flip)
+const WAVE_MS = 700; // gentle oscillation period
+const EASE = 0.08; // per-frame easing so it ramps in/out, never snaps
 
 export function Kelp({
   animated,
@@ -39,8 +41,10 @@ export function Kelp({
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef(0);
+  const ampRef = useRef<number[]>([]);
 
-  // High tier: strands near the cursor bend away (the "water" is disturbed).
+  // High tier: strands near the cursor sway a touch more — a gentle wave that
+  // eases in as the cursor nears and eases out as it leaves (never snaps).
   useEffect(() => {
     if (!reactive || !pointer) return;
     const cont = containerRef.current;
@@ -55,16 +59,20 @@ export function Kelp({
       for (let i = 0; i < wrapRefs.current.length; i++) {
         const el = wrapRefs.current[i];
         if (!el) continue;
-        // Real hitbox (offsetLeft/Top/W/H are layout values, unaffected by the
-        // transform we set) — only react when the cursor is over the strand.
-        const inside =
-          cx >= el.offsetLeft - HIT_PAD &&
-          cx <= el.offsetLeft + el.offsetWidth + HIT_PAD &&
-          cy >= el.offsetTop - HIT_PAD &&
-          cy <= el.offsetTop + el.offsetHeight + HIT_PAD;
-        el.style.transform = inside
-          ? `rotate(${WOBBLE_AMP * Math.sin(now / 150 + i * 0.7)}deg)`
-          : "";
+        const x0 = el.offsetLeft;
+        const x1 = x0 + el.offsetWidth;
+        const y0 = el.offsetTop;
+        const y1 = y0 + el.offsetHeight;
+        // Distance from the cursor to the strand's box (0 if inside).
+        const dx = Math.max(x0 - cx, 0, cx - x1);
+        const dy = Math.max(y0 - cy, 0, cy - y1);
+        const distBox = Math.hypot(dx, dy);
+        const targetAmp = active && distBox < FALLOFF ? 1 - distBox / FALLOFF : 0;
+        const prev = ampRef.current[i] ?? 0;
+        const amp = prev + (targetAmp - prev) * EASE; // smooth ramp in/out
+        ampRef.current[i] = amp;
+        el.style.transform =
+          amp > 0.003 ? `rotate(${amp * AMP_DEG * Math.sin(now / WAVE_MS + i * 0.6)}deg)` : "";
       }
       rafRef.current = requestAnimationFrame(tick);
     };
