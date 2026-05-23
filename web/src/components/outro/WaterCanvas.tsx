@@ -1,9 +1,26 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
-import { generateBubbles, type Bubble } from "@/lib/outro/bubbles";
+import { generateBubbles } from "@/lib/outro/bubbles";
 import { repel } from "@/lib/outro/cursorPhysics";
 import type { PointerField } from "@/hooks/usePointerField";
+
+// A live bubble: persistent position + a push velocity the cursor adds to.
+interface Bubble {
+  x: number;
+  y: number;
+  r: number;
+  speed: number;
+  wobbleAmp: number;
+  wobbleFreq: number;
+  wobblePhase: number;
+  vx: number;
+  vy: number;
+}
+
+const FLEE_R = 130;
+const FLEE_FORCE = 2200; // px/s^2 at the cursor
+const DAMP = 3; // velocity decay per second
 
 export function WaterCanvas({
   active,
@@ -39,7 +56,17 @@ export function WaterCanvas({
       canvas.width = Math.round(w * dpr);
       canvas.height = Math.round(h * dpr);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      bubblesRef.current = generateBubbles(seed, bubbleCount, { width: w, height: h });
+      bubblesRef.current = generateBubbles(seed, bubbleCount, { width: w, height: h }).map((b) => ({
+        x: b.baseX * w,
+        y: b.y,
+        r: b.r,
+        speed: b.speed,
+        wobbleAmp: b.wobbleAmp,
+        wobbleFreq: b.wobbleFreq,
+        wobblePhase: b.wobblePhase,
+        vx: 0,
+        vy: 0,
+      }));
     };
     resize();
     const ro = new ResizeObserver(resize);
@@ -51,26 +78,37 @@ export function WaterCanvas({
       last = now;
       ctx.clearRect(0, 0, w, h);
 
-      // The cursor only ever PUSHES existing bubbles — it never spawns new ones,
-      // so the bubble count is constant and nothing accumulates / disappears.
       const p = enableCursor ? pointer?.current : null;
       const cursorOn = !!p && p.active;
+      const damp = Math.exp(-DAMP * dt);
 
       for (const b of bubblesRef.current) {
-        b.y -= b.speed * dt;
+        // The cursor shoves the bubble for REAL (adds to its velocity), so it
+        // moves away and keeps drifting — no snap-back, no redraw glitch.
+        if (cursorOn) {
+          const { dx, dy } = repel(b.x, b.y, p.x, p.y, FLEE_R, FLEE_FORCE);
+          b.vx += dx * dt;
+          b.vy += dy * dt;
+        }
+        b.vx *= damp;
+        b.vy *= damp;
+        // Persistent push + steady buoyant rise.
+        b.x += b.vx * dt;
+        b.y += b.vy * dt - b.speed * dt;
+
+        // Respawn at the bottom; wrap horizontally if shoved off a side.
         if (b.y < -b.r) {
           b.y = h + b.r;
-          b.baseX = Math.random();
+          b.x = Math.random() * w;
+          b.vx = 0;
+          b.vy = 0;
         }
-        let x = b.baseX * w + Math.sin((now / 1000) * b.wobbleFreq + b.wobblePhase) * b.wobbleAmp;
-        let y = b.y;
-        if (cursorOn) {
-          const { dx, dy } = repel(x, y, p.x, p.y, 120, 26);
-          x += dx;
-          y += dy;
-        }
+        if (b.x < -b.r) b.x = w + b.r;
+        else if (b.x > w + b.r) b.x = -b.r;
+
+        const drawX = b.x + Math.sin((now / 1000) * b.wobbleFreq + b.wobblePhase) * b.wobbleAmp;
         ctx.beginPath();
-        ctx.arc(x, y, b.r, 0, Math.PI * 2);
+        ctx.arc(drawX, b.y, b.r, 0, Math.PI * 2);
         ctx.fillStyle = `rgba(180, 220, 235, ${0.08 + Math.min(b.r, 6) * 0.03})`;
         ctx.fill();
         ctx.strokeStyle = "rgba(210, 240, 250, 0.22)";
