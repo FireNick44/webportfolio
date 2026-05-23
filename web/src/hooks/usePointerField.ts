@@ -47,8 +47,19 @@ export function usePointerField(
       field.current.active = inside;
       field.current.movedAt = performance.now();
     };
+    // Stop tracking when the pointer leaves the window so effects don't get
+    // stuck "running" at the edge after the cursor exits the scene.
+    const onLeave = () => {
+      field.current.active = false;
+    };
     window.addEventListener("pointermove", onMove, { passive: true });
-    return () => window.removeEventListener("pointermove", onMove);
+    document.addEventListener("mouseleave", onLeave);
+    window.addEventListener("blur", onLeave);
+    return () => {
+      window.removeEventListener("pointermove", onMove);
+      document.removeEventListener("mouseleave", onLeave);
+      window.removeEventListener("blur", onLeave);
+    };
   }, [containerRef, enabled]);
 
   return field;

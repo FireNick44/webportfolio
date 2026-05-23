@@ -1,19 +1,20 @@
 "use client";
 
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { lerp } from "@/lib/outro/cursorPhysics";
 import type { PointerField } from "@/hooks/usePointerField";
 
 /**
  * A creature that lazily follows the pointer (lerp → trailing lag, so fast
  * mouse moves make it "dart" to catch up). Hidden when the pointer leaves the
- * scene. Placeholder visual is an emoji; swap the marked node for
- * <img src="/underwater/octopus.gif" .../> once the real asset lands.
+ * scene. Loads the real /underwater/octopus.gif when present, falling back to
+ * an emoji until that asset is dropped in.
  */
 export function CursorFollower({ pointer }: { pointer: RefObject<PointerField | null> }) {
   const elRef = useRef<HTMLDivElement>(null);
   const rafRef = useRef(0);
   const pos = useRef({ x: 0, y: 0, init: false });
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     const el = elRef.current;
@@ -41,12 +42,23 @@ export function CursorFollower({ pointer }: { pointer: RefObject<PointerField | 
     <div
       ref={elRef}
       aria-hidden
-      className="pointer-events-none absolute left-0 top-0 z-[5] select-none text-3xl leading-none transition-opacity duration-300"
+      className="pointer-events-none absolute left-0 top-0 z-[6] select-none leading-none transition-opacity duration-300"
       style={{ willChange: "transform", opacity: 0 }}
     >
-      {/* PLACEHOLDER octopus — replace this emoji node with
-          <img src="/underwater/octopus.gif" alt="" width={48} height={48} /> later. */}
-      🐙
+      {failed ? (
+        <span className="text-3xl">🐙</span>
+      ) : (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src="/underwater/octopus.gif"
+          alt=""
+          width={56}
+          height={56}
+          draggable={false}
+          onError={() => setFailed(true)}
+          style={{ imageRendering: "pixelated", display: "block" }}
+        />
+      )}
     </div>
   );
 }
