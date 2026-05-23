@@ -36,6 +36,8 @@ export function ReefScene() {
   }, []);
   const bgKelp = vw < 640 ? 8 : vw < 1024 ? 12 : vw < 1600 ? 16 : 20;
   const fgKelp = vw < 640 ? 4 : vw < 1024 ? 6 : 9;
+  // Corals shrink on smaller screens so they don't dominate the floor.
+  const coralScale = vw < 640 ? 0.62 : vw < 1024 ? 0.8 : 1;
 
   // Tier budget:
   //  off    – fully static.
@@ -83,8 +85,8 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={158} bottomPx={6} z={5} animated={animated} />
-      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={136} flip delay={1.4} bottomPx={6} z={5} animated={animated} />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={Math.round(158 * coralScale)} bottomPx={6} z={5} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={Math.round(136 * coralScale)} flip delay={1.4} bottomPx={6} z={5} animated={animated} />
       {creaturesOn && <Crab />}
 
       <Kelp
