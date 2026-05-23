@@ -11,6 +11,7 @@ export function Coral({
   delay = 0,
   animated = true,
   bottomPx = 0,
+  z = 5,
 }: {
   src: string;
   leftPct: number;
@@ -19,16 +20,18 @@ export function Coral({
   delay?: number;
   animated?: boolean;
   bottomPx?: number;
+  z?: number;
 }) {
   const wrap: CSSProperties = {
     left: `${leftPct}%`,
     bottom: bottomPx,
     width: widthPx,
+    zIndex: z,
     transformOrigin: "bottom center",
     animation: animated ? `coral-sway 7s ease-in-out ${delay}s infinite` : "none",
   };
   return (
-    <div aria-hidden className="pointer-events-none absolute z-[5]" style={wrap}>
+    <div aria-hidden className="pointer-events-none absolute" style={wrap}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}

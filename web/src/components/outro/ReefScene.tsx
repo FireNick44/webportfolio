@@ -37,10 +37,14 @@ export function ReefScene() {
   const bgKelp = vw < 640 ? 8 : vw < 1024 ? 12 : vw < 1600 ? 16 : 20;
   const fgKelp = vw < 640 ? 4 : vw < 1024 ? 6 : 9;
 
-  // Tier budget: low = SVG bg + cheap CSS sway only; medium = + canvas + creatures;
-  // high = + cursor interaction.
+  // Tier budget:
+  //  off    – fully static.
+  //  low    – SVG bg + CSS sway + ambient creatures (no canvas, no cursor) ← mobile.
+  //  medium – + canvas bubbles.
+  //  high   – + cursor interaction (octopus avoids/flees/steals, kelp reacts).
   const animated = tier !== "off";
-  const heavy = atLeast(tier, "medium") && active;
+  const creaturesOn = atLeast(tier, "low") && active;
+  const canvasOn = atLeast(tier, "medium") && active;
   const interactive = atLeast(tier, "high") && active;
   const pointer = usePointerField(containerRef, interactive);
 
@@ -56,8 +60,7 @@ export function ReefScene() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#05151f]/55 via-[#06212e]/66 to-[#010d16]/88" />
 
-      {/* Canvas bubbles + creatures only from Medium up (Low falls back to the SVG). */}
-      {heavy && (
+      {canvasOn && (
         <WaterCanvas
           active={active}
           bubbleCount={BUBBLE_COUNT[tier]}
@@ -65,34 +68,37 @@ export function ReefScene() {
           enableCursor={interactive}
         />
       )}
-      {heavy && <Rook />}
+      {creaturesOn && <Rook />}
 
-      {/* Floor (raised a touch for coral room): waves (z3) → bg kelp (z4) →
-          pixel sand (z5) → coral. */}
+      {/* Floor: waves (z2) → bg kelp (z4) → sand (z5) → coral-behind (z5) → crab
+          (z6) → coral-front (z7) → octopus (z8) → front kelp (z9). */}
       <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(110px,14vw,185px)] w-full opacity-95" />
       <Kelp
         animated={animated}
         clusterAround={70}
         scaleMul={1.4}
         count={bgKelp}
+        pointer={pointer}
+        reactive={interactive}
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={132} bottomPx={18} animated={animated} />
-      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} animated={animated} />
-      {heavy && <Crab />}
+      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={132} bottomPx={18} z={5} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} z={7} animated={animated} />
+      {creaturesOn && <Crab />}
 
-      {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp
         animated={animated}
         seed={5}
         count={fgKelp}
         scaleMul={1.9}
         clusterAround={26}
+        pointer={pointer}
+        reactive={interactive}
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[9] h-[52%] brightness-[0.55]"
       />
 
-      {heavy && <Octopus pointer={pointer} />}
+      {creaturesOn && <Octopus pointer={pointer} />}
     </div>
   );
 }

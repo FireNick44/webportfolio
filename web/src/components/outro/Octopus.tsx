@@ -28,6 +28,8 @@ const HIDE_MIN = 8000;
 const HIDE_RAND = 5000;
 const MAX_SPEED = 1100;
 const CAPTURE_COOLDOWN = 22000;
+const IDLE_MS = 1400; // a cursor still this long lures the octopus in
+const APPROACH_K = 1.6;
 
 export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }) {
   const elRef = useRef<HTMLDivElement>(null);
@@ -95,35 +97,51 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       if (cursorActive && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
       else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
       st.anger = Math.max(0, st.anger - ANGER_DECAY * dt);
+      // A cursor that sits still long enough makes the octopus curious (it sneaks
+      // up) rather than scared (it flees).
+      const idle = !!p && p.active && now - p.movedAt > IDLE_MS;
 
       let ax = 0;
       let ay = 0;
 
       if (st.mode === "wander") {
-        ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
-        ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
-        // Continuous, smooth avoidance — eases away well before contact.
-        if (cursorActive && dist < AVOID_R) {
-          const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
-          ax += dirX * f;
-          ay += dirY * f;
-        }
-        if (now >= st.nextAt) {
-          st.tx = W * (0.45 + Math.random() * 0.4);
-          st.ty = H * (0.45 + Math.random() * 0.4);
-          st.nextAt = now + 2600 + Math.random() * 3200;
-        }
-        if (st.scare >= SCARE_TRIGGER) {
-          if (cursorActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt) {
-            st.mode = "grab";
-            st.grabUntil = now + 2600;
-          } else {
-            st.mode = "hide";
-            st.anger += 1;
-            st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
-            const goRight = cursorActive ? p.x < st.x : Math.random() < 0.5;
-            st.hideX = goRight ? W + 280 : -280;
-            st.hideY = H * (0.7 + Math.random() * 0.25);
+        if (idle && p) {
+          // Curious: sneak up on the still cursor and steal it.
+          ax = (p.x - st.x) * APPROACH_K - st.vx * DAMP;
+          ay = (p.y - st.y) * APPROACH_K - st.vy * DAMP;
+          if (dist < 46 && now >= st.captureReadyAt) {
+            st.mode = "carry";
+            cursorCapture.held = true;
+            const goRight = st.x < W / 2;
+            st.carryX = goRight ? W + 360 : -360;
+            st.carryY = H * (0.5 + Math.random() * 0.3);
+          }
+        } else {
+          ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
+          ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
+          // Continuous, smooth avoidance — eases away well before contact.
+          if (cursorActive && dist < AVOID_R) {
+            const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
+            ax += dirX * f;
+            ay += dirY * f;
+          }
+          if (now >= st.nextAt) {
+            st.tx = W * (0.45 + Math.random() * 0.4);
+            st.ty = H * (0.45 + Math.random() * 0.4);
+            st.nextAt = now + 2600 + Math.random() * 3200;
+          }
+          if (st.scare >= SCARE_TRIGGER) {
+            if (cursorActive && st.anger >= ANGER_CAPTURE && now >= st.captureReadyAt) {
+              st.mode = "grab";
+              st.grabUntil = now + 2600;
+            } else {
+              st.mode = "hide";
+              st.anger += 1;
+              st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
+              const goRight = cursorActive ? p.x < st.x : Math.random() < 0.5;
+              st.hideX = goRight ? W + 280 : -280;
+              st.hideY = H * (0.7 + Math.random() * 0.25);
+            }
           }
         }
       } else if (st.mode === "grab") {
@@ -180,8 +198,9 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       st.x += st.vx * dt;
       st.y += st.vy * dt;
 
-      // Top limit only while calm — during grab/carry it may reach the cursor anywhere.
-      if (st.mode === "wander" || st.mode === "hide") st.y = Math.max(H * 0.4, st.y);
+      // Top limit only while calmly wandering — it may reach the cursor anywhere
+      // while curious (idle), grabbing or carrying.
+      if (st.mode === "hide" || (st.mode === "wander" && !idle)) st.y = Math.max(H * 0.4, st.y);
 
       const rot = Math.max(-25, Math.min(25, st.vx * 0.045));
       el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-50%, -50%) rotate(${rot}deg)`;

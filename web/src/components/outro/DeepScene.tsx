@@ -23,8 +23,9 @@ export function DeepScene() {
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
   const animated = tier !== "off";
-  const heavy = atLeast(tier, "medium") && active; // canvas + creatures
-  const interactive = atLeast(tier, "high") && active; // cursor effects
+  const creaturesOn = atLeast(tier, "low") && active; // ambient octopus (mobile too)
+  const canvasOn = atLeast(tier, "medium") && active;
+  const interactive = atLeast(tier, "high") && active;
   const pointer = usePointerField(containerRef, interactive);
 
   return (
@@ -39,8 +40,7 @@ export function DeepScene() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#04121f]/70 via-[#062436]/80 to-[#01243a]/90" />
 
-      {/* Canvas bubbles + octopus only from Medium up (Low falls back to the SVG). */}
-      {heavy && (
+      {canvasOn && (
         <WaterCanvas
           active={active}
           bubbleCount={BUBBLE_COUNT[tier]}
@@ -48,9 +48,9 @@ export function DeepScene() {
           enableCursor={interactive}
         />
       )}
-      <Kelp animated={animated} />
+      <Kelp animated={animated} pointer={pointer} reactive={interactive} />
       <SandFloor />
-      {heavy && <Octopus pointer={pointer} />}
+      {creaturesOn && <Octopus pointer={pointer} />}
       {atLeast(tier, "high") && <PixelSignoff />}
     </div>
   );
