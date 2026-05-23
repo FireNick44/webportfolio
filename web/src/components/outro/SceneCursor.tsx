@@ -6,10 +6,9 @@ import { cursorCapture } from "@/lib/outro/cursorCapture";
 
 /**
  * The animate-ui arrow cursor, spring-following the mouse while over the outro
- * (High tier; native cursor hidden). The octopus can pin it (held) or relocate
- * it via an offset — it then tracks the mouse from the dropped spot. The offset
- * fades to 0 as the pointer nears the scene edge, so the arrow converges onto the
- * real cursor before the native cursor takes over (no jump at the boundary).
+ * (High tier; native cursor hidden). The octopus can briefly grab it (held) and
+ * drag it around; on release the spring glides it back to the real pointer. We
+ * never relocate it persistently — the OS cursor can't be moved.
  */
 export function SceneCursor() {
   const x = useSpring(0, { stiffness: 900, damping: 40, mass: 0.3 });
@@ -26,37 +25,20 @@ export function SceneCursor() {
       mouse.current.x = e.clientX;
       mouse.current.y = e.clientY;
       const r = footer.getBoundingClientRect();
-      const inside =
+      overRef.current =
         e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-      overRef.current = inside;
-      // Leaving the outro drops the relocation entirely so re-entry is clean.
-      if (!inside) {
-        cursorCapture.baseOffsetX = 0;
-        cursorCapture.baseOffsetY = 0;
-        cursorCapture.offsetX = 0;
-        cursorCapture.offsetY = 0;
-      }
     };
     window.addEventListener("pointermove", onMove, { passive: true });
 
     const tick = () => {
       if (cursorCapture.held) {
+        // Octopus is dragging the cursor.
         x.set(cursorCapture.x);
         y.set(cursorCapture.y);
       } else {
-        // Fade the relocation offset toward 0 as the REAL pointer nears any edge
-        // of the outro. Margin is sized to the offset so the arrow never has to
-        // outpace the cursor while converging.
-        const r = footer.getBoundingClientRect();
-        const m = mouse.current;
-        const baseMag = Math.hypot(cursorCapture.baseOffsetX, cursorCapture.baseOffsetY);
-        const margin = Math.max(200, baseMag + 80);
-        const edge = Math.min(m.x - r.left, r.right - m.x, m.y - r.top, r.bottom - m.y);
-        const factor = Math.max(0, Math.min(1, edge / margin));
-        cursorCapture.offsetX = cursorCapture.baseOffsetX * factor;
-        cursorCapture.offsetY = cursorCapture.baseOffsetY * factor;
-        x.set(m.x + cursorCapture.offsetX);
-        y.set(m.y + cursorCapture.offsetY);
+        // Follow the real pointer — after a release the spring glides it back.
+        x.set(mouse.current.x);
+        y.set(mouse.current.y);
       }
       op.set(cursorCapture.held || overRef.current ? 1 : 0);
       rafRef.current = requestAnimationFrame(tick);
