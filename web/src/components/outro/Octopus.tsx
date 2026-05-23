@@ -50,7 +50,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       // Re-pick a wander target every few seconds (upper ~two-thirds of water).
       if (now >= st.nextAt) {
         st.tx = W * (0.15 + Math.random() * 0.7);
-        st.ty = H * (0.44 + Math.random() * 0.34);
+        st.ty = H * (0.45 + Math.random() * 0.4);
         st.nextAt = now + 2600 + Math.random() * 3200;
       }
 
@@ -82,10 +82,9 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       st.y += st.vy * dt;
 
       // Keep it in the water, above the floor.
-      const m = 44;
-      st.x = Math.max(m, Math.min(W - m, st.x));
-      // Keep it down in the water — never up near the heading text.
-      st.y = Math.max(H * 0.4, Math.min(H * 0.82, st.y));
+      // No side/bottom clamp → it can flee off-screen to "hide" instead of
+      // being cornered; only a top limit keeps it from drifting over the text.
+      st.y = Math.max(H * 0.4, st.y);
 
       el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-50%, -50%)`;
       rafRef.current = requestAnimationFrame(frame);
@@ -98,7 +97,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
     <div
       ref={elRef}
       aria-hidden
-      className="pointer-events-none absolute left-0 top-0 z-[7] select-none leading-none transition-opacity duration-700"
+      className="pointer-events-none absolute left-0 top-0 z-[8] select-none leading-none transition-opacity duration-700"
       style={{ willChange: "transform", opacity: 0 }}
     >
       {failed ? (
