@@ -70,8 +70,8 @@ export function ReefScene() {
       )}
       {creaturesOn && <Rook />}
 
-      {/* Floor: waves (z2) → bg kelp (z4) → sand (z5) → coral-behind (z5) → crab
-          (z6) → coral-front (z7) → octopus (z8) → front kelp (z9). */}
+      {/* Floor: waves (z2) → bg kelp (z4) → sand (z5) → corals (z5) → crab
+          (z6, in front of both corals) → octopus (z8) → front kelp (z9). */}
       <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(110px,14vw,185px)] w-full opacity-95" />
       <Kelp
         animated={animated}
@@ -83,8 +83,8 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={132} bottomPx={18} z={5} animated={animated} />
-      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} z={5} animated={animated} />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={178} bottomPx={34} z={5} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={152} flip delay={1.4} bottomPx={34} z={5} animated={animated} />
       {creaturesOn && <Crab />}
 
       <Kelp
