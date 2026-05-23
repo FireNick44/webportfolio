@@ -2,127 +2,108 @@
 
 import { useEffect, useRef } from "react";
 
-type Member = { size: number; dx: number; bob: number };
+const SOLO_SIZE = 140;
+const SOLO_DUR = 16000; // ms for one left → right crossing (loops continuously)
 
-const SOLO: Member[] = [{ size: 140, dx: 0, bob: 0 }];
-const FAMILY: Member[] = [
-  { size: 140, dx: 0, bob: 0 },
-  { size: 96, dx: -120, bob: 0.2 },
-  { size: 82, dx: -212, bob: 0.4 },
+// Family: lead crab + two trailing little ones (size, x-offset from lead, bob phase).
+const FAMILY = [
+  { size: 140, dx: 0, phase: 0 },
+  { size: 96, dx: -120, phase: 0.7 },
+  { size: 82, dx: -212, phase: 1.4 },
 ];
+const FAM_DUR = 18000; // one crossing
+const FAM_GAP_MIN = 14000;
+const FAM_GAP_RAND = 12000;
+const FAM_START_DELAY = 3000;
 
-type WalkerProps = {
-  members: Member[];
-  groupWidth: number;
-  durMin: number;
-  durRand: number;
-  /** continuous: loops across with no gap; otherwise it strolls, waits, repeats. */
-  continuous?: boolean;
-  gapMin?: number;
-  gapRand?: number;
-  startDelay?: number;
-};
-
-/** One crab "event" — a group that walks left → right along the sand. */
-function CrabWalker({
-  members,
-  groupWidth,
-  durMin,
-  durRand,
-  continuous = false,
-  gapMin = 0,
-  gapRand = 0,
-  startDelay = 0,
-}: WalkerProps) {
-  const groupRef = useRef<HTMLDivElement>(null);
+/**
+ * Two independent crab events, each animated as a directly-transformed <img>
+ * (the approach that actually renders):
+ *  - a solo crab looping continuously across the sand;
+ *  - a separate family (lead + two trailing) that strolls by periodically.
+ */
+export function Crab() {
+  const soloRef = useRef<HTMLImageElement>(null);
+  const famRefs = useRef<(HTMLImageElement | null)[]>([]);
   const rafRef = useRef(0);
-  const st = useRef({ startAt: 0, dur: 0, init: false });
-  const offLeft = -(groupWidth + 60);
+  const t0 = useRef(0);
+  const fam = useRef({ startAt: 0, dur: FAM_DUR });
 
   useEffect(() => {
-    const group = groupRef.current;
-    if (!group) return;
-    const scene = group.parentElement;
+    const solo = soloRef.current;
+    if (!solo) return;
+    const scene = solo.parentElement;
+    solo.style.opacity = "1";
 
     const frame = (now: number) => {
-      const s = st.current;
-      if (!s.init) {
-        s.init = true;
-        s.startAt = now + startDelay;
-        s.dur = durMin + Math.random() * durRand;
+      if (!t0.current) {
+        t0.current = now;
+        fam.current.startAt = now + FAM_START_DELAY;
       }
       const W = scene?.getBoundingClientRect().width || 1000;
-      const endX = W + groupWidth;
-      const elapsed = now - s.startAt;
-      let x = offLeft;
 
-      if (continuous) {
-        const p = elapsed <= 0 ? 0 : (elapsed / s.dur) % 1; // wraps off-screen
-        x = offLeft + (endX - offLeft) * p;
-      } else if (elapsed >= 0) {
-        const p = elapsed / s.dur;
+      // Solo: continuous loop.
+      const sgw = SOLO_SIZE + 60;
+      const sp = ((now - t0.current) % SOLO_DUR) / SOLO_DUR;
+      const sx = -sgw + (W + sgw * 2) * sp;
+      solo.style.transform = `translate(${sx}px, ${Math.sin(now / 280) * 4}px)`;
+
+      // Family: periodic crossings, hidden off-screen during the gap between.
+      const fgw = FAMILY[0].size + 260;
+      const f = fam.current;
+      const elapsed = now - f.startAt;
+      let visible = elapsed >= 0;
+      let fx = -fgw;
+      if (elapsed >= 0) {
+        const p = elapsed / f.dur;
         if (p >= 1) {
-          // Finished a pass — wait off-screen, then schedule the next stroll.
-          s.startAt = now + gapMin + Math.random() * gapRand;
-          s.dur = durMin + Math.random() * durRand;
+          f.startAt = now + FAM_GAP_MIN + Math.random() * FAM_GAP_RAND;
+          f.dur = FAM_DUR;
+          visible = false;
         } else {
-          x = offLeft + (endX - offLeft) * p;
+          fx = -fgw + (W + fgw * 2) * p;
         }
       }
+      FAMILY.forEach((m, i) => {
+        const el = famRefs.current[i];
+        if (!el) return;
+        el.style.transform = `translate(${fx + m.dx}px, ${Math.sin(now / 280 + m.phase) * 4}px)`;
+        el.style.opacity = visible ? "1" : "0";
+      });
 
-      group.style.transform = `translateX(${x}px)`;
       rafRef.current = requestAnimationFrame(frame);
     };
     rafRef.current = requestAnimationFrame(frame);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [continuous, durMin, durRand, gapMin, gapRand, offLeft, startDelay]);
+  }, []);
 
   return (
-    <div
-      ref={groupRef}
-      aria-hidden
-      className="pointer-events-none absolute bottom-[10px] left-0 z-[6]"
-      style={{ transform: `translateX(${offLeft}px)`, willChange: "transform" }}
-    >
-      {members.map((m, i) => (
+    <>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        ref={soloRef}
+        src="/underwater/crab.gif"
+        alt=""
+        aria-hidden
+        draggable={false}
+        className="pointer-events-none absolute bottom-[10px] left-0 z-[6]"
+        style={{ width: SOLO_SIZE, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
+      />
+      {FAMILY.map((m, i) => (
         // eslint-disable-next-line @next/next/no-img-element
         <img
           key={i}
+          ref={(el) => {
+            famRefs.current[i] = el;
+          }}
           src="/underwater/crab.gif"
           alt=""
+          aria-hidden
           draggable={false}
-          className="absolute bottom-0"
-          style={{
-            left: m.dx,
-            width: m.size,
-            height: "auto",
-            imageRendering: "pixelated",
-            animation: `crab-bob 0.55s ease-in-out ${m.bob}s infinite`,
-          }}
+          className="pointer-events-none absolute bottom-[10px] left-0 z-[6]"
+          style={{ width: m.size, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
         />
       ))}
-    </div>
-  );
-}
-
-/**
- * Two independent crab events strolling the sand:
- *  - a solo crab, always around (continuous loop);
- *  - a separate crab family (big + two trailing), passing by periodically.
- */
-export function Crab() {
-  return (
-    <>
-      <CrabWalker members={SOLO} groupWidth={140} durMin={16000} durRand={6000} continuous />
-      <CrabWalker
-        members={FAMILY}
-        groupWidth={260}
-        durMin={17000}
-        durRand={6000}
-        gapMin={14000}
-        gapRand={12000}
-        startDelay={4000}
-      />
     </>
   );
 }
