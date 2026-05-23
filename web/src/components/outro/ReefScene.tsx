@@ -13,8 +13,6 @@ import { Rook } from "./Rook";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
 
-// "Reef" = Classic + The Deep combined: SVG bubble backdrop + canvas bubbles,
-// kelp, pixel-sand texture, the colourful ByeSand waves, coral and a rare cruiser.
 const BUBBLE_COUNT: Record<GraphicsTier, number> = {
   off: 0,
   low: 26,
@@ -26,35 +24,41 @@ export function ReefScene() {
   const containerRef = useRef<HTMLDivElement>(null);
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
-  const animated = tier !== "off";
-  const cursorOn = atLeast(tier, "medium") && active;
-  const pointer = usePointerField(containerRef, cursorOn);
+
+  // Tier budget:
+  //  - off: fully static.
+  //  - low: SVG bg + static floor + cheap CSS sway. NO canvas, NO creatures.
+  //  - medium: + canvas bubbles + creatures (octopus wanders, rook cruises).
+  //  - high: + cursor interaction (octopus flees, bubbles scatter).
+  const animated = tier !== "off"; // cheap CSS sway (kelp/coral)
+  const heavy = atLeast(tier, "medium") && active; // canvas + creatures (rAF)
+  const interactive = atLeast(tier, "high") && active; // cursor effects
+  const pointer = usePointerField(containerRef, interactive);
 
   return (
     <div ref={containerRef} aria-hidden className="absolute inset-0 -z-10 overflow-hidden">
-      {/* Back: the bubble SVG, kept bright so it reads through the canvas. */}
+      {/* Back: the bubble SVG, darkened/graded to read as the deep bottom. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src="/svg/intro-bg.svg"
         alt=""
         className="absolute inset-0 h-full w-full object-cover"
-        style={{ filter: "saturate(1.2) brightness(0.8)" }}
+        style={{ filter: "saturate(1.25) brightness(0.58) hue-rotate(8deg)" }}
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#0b2a3a]/35 via-[#0e3346]/40 to-[#06212f]/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#05151f]/55 via-[#06212e]/66 to-[#010d16]/88" />
 
-      {/* Canvas bubbles (z1). */}
-      <WaterCanvas
-        active={active && animated}
-        bubbleCount={BUBBLE_COUNT[tier]}
-        pointer={pointer}
-        enableCursor={cursorOn}
-      />
+      {/* Canvas bubbles + creatures only from Medium up (Low falls back to the SVG). */}
+      {heavy && (
+        <WaterCanvas
+          active={active}
+          bubbleCount={BUBBLE_COUNT[tier]}
+          pointer={pointer}
+          enableCursor={interactive}
+        />
+      )}
+      {heavy && <Rook />}
 
-      {/* Rare creature cruising left → right on a randomized, undulating path. */}
-      {atLeast(tier, "medium") && <Rook />}
-
-      {/* Floor stack, back → front: ByeSand waves (z3) → background kelp (z4,
-          behind the sand but in front of the waves) → pixel sand (z5) → coral. */}
+      {/* Floor: ByeSand waves (z3) → background kelp (z4) → pixel sand (z5) → coral. */}
       <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[3] block h-[clamp(90px,12vw,150px)] w-full opacity-95" />
       <Kelp
         animated={animated}
@@ -63,8 +67,8 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={42} widthPx={132} />
-      <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={42} widthPx={132} animated={animated} />
+      <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} animated={animated} />
 
       {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp
@@ -76,7 +80,7 @@ export function ReefScene() {
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[52%] brightness-[0.55]"
       />
 
-      {cursorOn && <Octopus pointer={pointer} />}
+      {heavy && <Octopus pointer={pointer} />}
     </div>
   );
 }

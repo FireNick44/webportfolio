@@ -86,7 +86,9 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       // being cornered; only a top limit keeps it from drifting over the text.
       st.y = Math.max(H * 0.4, st.y);
 
-      el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-50%, -50%)`;
+      // Lean into the swim direction — tilt toward where it's moving.
+      const rot = Math.max(-25, Math.min(25, st.vx * 0.045));
+      el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-50%, -50%) rotate(${rot}deg)`;
       rafRef.current = requestAnimationFrame(frame);
     };
     rafRef.current = requestAnimationFrame(frame);

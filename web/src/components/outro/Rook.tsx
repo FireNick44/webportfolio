@@ -44,7 +44,7 @@ export function Rook() {
 
       if (!s.init) {
         s.init = true;
-        s.nextAt = now + 1500 + Math.random() * 3500;
+        s.nextAt = now + 6000 + Math.random() * 9000;
         el.style.opacity = "1";
       }
       if (!s.active && now >= s.nextAt) begin(now, H);
@@ -53,7 +53,7 @@ export function Rook() {
         const p = (now - s.t0) / s.dur;
         if (p >= 1) {
           s.active = false;
-          s.nextAt = now + 12000 + Math.random() * 22000; // long random gap (rare)
+          s.nextAt = now + 30000 + Math.random() * 45000; // long random gap (rare: ~30–75s)
           el.style.transform = "translate(-99999px,0)";
         } else {
           const ww = el.offsetWidth || 240;
@@ -80,7 +80,7 @@ export function Rook() {
       aria-hidden
       draggable={false}
       className="pointer-events-none absolute left-0 top-0 z-[2]"
-      style={{ width: "clamp(180px, 24vw, 320px)", opacity: 0, willChange: "transform" }}
+      style={{ width: "clamp(240px, 32vw, 440px)", opacity: 0, willChange: "transform" }}
     />
   );
 }

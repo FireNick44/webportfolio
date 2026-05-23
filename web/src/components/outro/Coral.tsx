@@ -9,18 +9,20 @@ export function Coral({
   widthPx,
   flip = false,
   delay = 0,
+  animated = true,
 }: {
   src: string;
   leftPct: number;
   widthPx: number;
   flip?: boolean;
   delay?: number;
+  animated?: boolean;
 }) {
   const wrap: CSSProperties = {
     left: `${leftPct}%`,
     width: widthPx,
     transformOrigin: "bottom center",
-    animation: `coral-sway 7s ease-in-out ${delay}s infinite`,
+    animation: animated ? `coral-sway 7s ease-in-out ${delay}s infinite` : "none",
   };
   return (
     <div aria-hidden className="pointer-events-none absolute bottom-0 z-[5]" style={wrap}>
