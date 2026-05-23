@@ -164,8 +164,12 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
             cursorCapture.held = false;
             const dropX = ox + (goingRight ? W - 56 : 56);
             const dropY = oy + Math.min(st.y, H * 0.7);
-            cursorCapture.offsetX = dropX - (p ? p.clientX : dropX);
-            cursorCapture.offsetY = dropY - (p ? p.clientY : dropY);
+            cursorCapture.baseOffsetX = dropX - (p ? p.clientX : dropX);
+            cursorCapture.baseOffsetY = dropY - (p ? p.clientY : dropY);
+            // Seed the effective offset so the cursor lands at the drop spot;
+            // SceneCursor fades it near the edges from here.
+            cursorCapture.offsetX = cursorCapture.baseOffsetX;
+            cursorCapture.offsetY = cursorCapture.baseOffsetY;
             st.captureReadyAt = now + CAPTURE_COOLDOWN;
           }
         }
@@ -210,6 +214,8 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
     return () => {
       cancelAnimationFrame(rafRef.current);
       cursorCapture.held = false;
+      cursorCapture.baseOffsetX = 0;
+      cursorCapture.baseOffsetY = 0;
       cursorCapture.offsetX = 0;
       cursorCapture.offsetY = 0;
     };
