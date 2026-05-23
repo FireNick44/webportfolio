@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "
 import { generateKelp } from "@/lib/outro/kelp";
 import type { PointerField } from "@/hooks/usePointerField";
 
-const REACT_R = 150; // px — how near the cursor disturbs a strand
-const MAX_LEAN = 14; // deg — how far it bends away
+const HIT_PAD = 26; // px — slack around a strand's box for the cursor hitbox
+const WOBBLE_AMP = 4; // deg — subtle accent (no left↔right flip)
 
 export function Kelp({
   animated,
@@ -45,23 +45,32 @@ export function Kelp({
     if (!reactive || !pointer) return;
     const cont = containerRef.current;
     if (!cont) return;
-    const tick = () => {
+    const tick = (now: number) => {
       const p = pointer.current;
-      const W = cont.clientWidth || 1;
-      const cx = p && p.active ? p.x : -99999;
+      const cr = cont.getBoundingClientRect();
+      const active = !!p && p.active;
+      // Cursor in container-local coords (offset* boxes below are also local).
+      const cx = active ? p.clientX - cr.left : -99999;
+      const cy = active ? p.clientY - cr.top : -99999;
       for (let i = 0; i < wrapRefs.current.length; i++) {
         const el = wrapRefs.current[i];
         if (!el) continue;
-        const sx = (lefts[i] / 100) * W;
-        const d = Math.abs(cx - sx);
-        const lean = d < REACT_R ? (1 - d / REACT_R) * MAX_LEAN * (cx > sx ? -1 : 1) : 0;
-        el.style.transform = lean ? `rotate(${lean}deg)` : "";
+        // Real hitbox (offsetLeft/Top/W/H are layout values, unaffected by the
+        // transform we set) — only react when the cursor is over the strand.
+        const inside =
+          cx >= el.offsetLeft - HIT_PAD &&
+          cx <= el.offsetLeft + el.offsetWidth + HIT_PAD &&
+          cy >= el.offsetTop - HIT_PAD &&
+          cy <= el.offsetTop + el.offsetHeight + HIT_PAD;
+        el.style.transform = inside
+          ? `rotate(${WOBBLE_AMP * Math.sin(now / 150 + i * 0.7)}deg)`
+          : "";
       }
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafRef.current);
-  }, [reactive, pointer, lefts]);
+  }, [reactive, pointer]);
 
   return (
     <div ref={containerRef} aria-hidden className={className}>

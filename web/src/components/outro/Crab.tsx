@@ -2,19 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// The crab content is only the bottom-center ~56%×40% of the gif frame, so the
-// widths are sized up to compensate.
+// The crab content is the bottom-center ~56%×40% of the gif, so sizes are bumped.
 type CrabSpec = { size: number; dx: number; bob: number };
-const BIG: CrabSpec = { size: 132, dx: 0, bob: 0 };
+const BIG: CrabSpec = { size: 190, dx: 0, bob: 0 };
 const SMALLS: CrabSpec[] = [
-  { size: 86, dx: -98, bob: 0.45 },
-  { size: 76, dx: -170, bob: 0.95 },
+  { size: 122, dx: -140, bob: 0.45 },
+  { size: 108, dx: -244, bob: 0.95 },
 ];
 
+// TEMP (visibility test): raised into the water so it's easy to spot.
+// Set to "14px" to plant the family back on the sand.
+const WALK_BOTTOM = "38%";
+
 /**
- * A crab that frequently strolls left → right along the sand (behind the front
- * kelp). Most strolls are a single crab; occasionally (rare) it's a whole
- * family — the big one with two smaller ones trailing behind.
+ * A crab that frequently strolls left → right. Most strolls are a single crab;
+ * occasionally (rare) it's a family — the big one with two smaller ones trailing.
  */
 export function Crab() {
   const [family, setFamily] = useState(false);
@@ -34,24 +36,24 @@ export function Crab() {
 
       if (!s.init) {
         s.init = true;
-        s.nextAt = now + 1200 + Math.random() * 2500;
+        s.nextAt = now + 300; // appear almost immediately
         group.style.opacity = "1";
       }
       if (!s.active && now >= s.nextAt) {
         s.active = true;
         s.t0 = now;
-        s.dur = 14000 + Math.random() * 8000; // 14–22s stroll
-        setFamily(Math.random() < 0.15); // family is the rare variant
+        s.dur = 14000 + Math.random() * 8000;
+        setFamily(Math.random() < 0.15);
       }
 
       if (s.active) {
         const p = (now - s.t0) / s.dur;
         if (p >= 1) {
           s.active = false;
-          s.nextAt = now + 2500 + Math.random() * 4500; // short gap → a crab is around a lot
+          s.nextAt = now + 800 + Math.random() * 1500; // near-continuous → almost always around
           group.style.transform = "translateX(-9999px)";
         } else {
-          const gw = 280;
+          const gw = 340;
           group.style.transform = `translateX(${-gw + (W + gw * 2) * p}px)`;
         }
       } else {
@@ -85,8 +87,8 @@ export function Crab() {
     <div
       ref={groupRef}
       aria-hidden
-      className="pointer-events-none absolute bottom-[14px] left-0 z-[6]"
-      style={{ opacity: 0, willChange: "transform" }}
+      className="pointer-events-none absolute left-0 z-[6]"
+      style={{ bottom: WALK_BOTTOM, opacity: 0, willChange: "transform" }}
     >
       {crab(BIG, 0)}
       {family && SMALLS.map((c, i) => crab(c, i + 1))}

@@ -15,6 +15,9 @@ export interface PointerField {
   active: boolean;
   /** performance.now() of the last move — lets consumers gate on "is moving". */
   movedAt: number;
+  /** Raw viewport coords (for hitboxes via getBoundingClientRect). */
+  clientX: number;
+  clientY: number;
 }
 
 /**
@@ -26,7 +29,9 @@ export function usePointerField(
   containerRef: RefObject<HTMLElement | null>,
   enabled: boolean,
 ): RefObject<PointerField> {
-  const field = useRef<PointerField>({ x: 0, y: 0, vx: 0, vy: 0, active: false, movedAt: 0 });
+  const field = useRef<PointerField>({
+    x: 0, y: 0, vx: 0, vy: 0, active: false, movedAt: 0, clientX: 0, clientY: 0,
+  });
 
   useEffect(() => {
     if (!enabled) {
@@ -44,6 +49,8 @@ export function usePointerField(
       field.current.vy = y - field.current.y;
       field.current.x = x;
       field.current.y = y;
+      field.current.clientX = e.clientX;
+      field.current.clientY = e.clientY;
       field.current.active = inside;
       field.current.movedAt = performance.now();
     };
