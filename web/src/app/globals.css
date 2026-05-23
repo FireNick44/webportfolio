@@ -217,6 +217,17 @@ html.vt-no-transition * {
   }
 }
 
+/* Underwater outro: crab walking bob. */
+@keyframes crab-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 /* Underwater outro: a rare creature cruising right → left, off-screen most of
    the cycle so it only passes occasionally. */
 @keyframes rook-cruise {

@@ -10,6 +10,7 @@ import { WaterCanvas } from "./WaterCanvas";
 import { Octopus } from "./Octopus";
 import { Coral } from "./Coral";
 import { Rook } from "./Rook";
+import { Crab } from "./Crab";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
 
@@ -79,6 +80,7 @@ export function ReefScene() {
       <SandFloor rows={6} className="absolute inset-x-0 bottom-0 z-[5]" />
       <Coral src="/underwater/coral_red_blue.png" leftPct={82} widthPx={132} bottomPx={18} animated={animated} />
       <Coral src="/underwater/coral_green.png" leftPct={42} widthPx={112} flip delay={1.4} bottomPx={18} animated={animated} />
+      {heavy && <Crab />}
 
       {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
       <Kelp
