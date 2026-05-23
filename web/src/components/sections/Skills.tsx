@@ -1,21 +1,13 @@
 import type { Dictionary } from "@/i18n/types";
 import { Reveal } from "@/components/ui/Reveal";
+import { ParallaxImage } from "@/components/ui/ParallaxImage";
 import PhysicsSceneClient from "@/components/physics/PhysicsSceneClient";
 
-// Just the colourful layered background sits behind the flasks. BOTH waves are
-// rendered inside PhysicsScene, in front of the flasks, so the bottles tuck
-// behind them top and bottom.
+// The colourful layered background sits behind the flasks, with a gentle
+// parallax. BOTH waves are rendered inside PhysicsScene, in front of the flasks,
+// so the bottles tuck behind them top and bottom.
 function FlaskBackdrop() {
-  return (
-    <div className="absolute inset-0 overflow-hidden">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/svg/skill-bg.svg"
-        alt=""
-        className="absolute inset-0 h-full w-full object-cover"
-      />
-    </div>
-  );
+  return <ParallaxImage src="/svg/skill-bg.svg" className="absolute inset-0" />;
 }
 
 export default function Skills({ dict }: { dict: Dictionary }) {
