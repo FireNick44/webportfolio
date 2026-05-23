@@ -9,6 +9,7 @@ import { ByeSand } from "@/components/layout/ByeSand";
 import { WaterCanvas } from "./WaterCanvas";
 import { Octopus } from "./Octopus";
 import { Coral } from "./Coral";
+import { Rook } from "./Rook";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
 
@@ -49,21 +50,8 @@ export function ReefScene() {
         enableCursor={cursorOn}
       />
 
-      {/* Rare creature cruising right → left, behind the floor/kelp (z2). */}
-      {atLeast(tier, "medium") && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src="/underwater/rook.gif"
-          alt=""
-          draggable={false}
-          className="pointer-events-none absolute left-0 z-[2]"
-          style={{
-            top: "18%",
-            width: "clamp(140px, 18vw, 240px)",
-            animation: "rook-cruise 55s linear infinite",
-          }}
-        />
-      )}
+      {/* Rare creature cruising left → right on a randomized, undulating path. */}
+      {atLeast(tier, "medium") && <Rook />}
 
       {/* Floor stack, back → front: ByeSand waves (z3) → background kelp (z4,
           behind the sand but in front of the waves) → pixel sand (z5) → coral. */}
@@ -75,7 +63,7 @@ export function ReefScene() {
         className="absolute inset-x-0 bottom-0 z-[4] h-[55%]"
       />
       <SandFloor rows={5} className="absolute inset-x-0 bottom-0 z-[5]" />
-      <Coral src="/underwater/coral_red_blue.png" leftPct={13} widthPx={132} />
+      <Coral src="/underwater/coral_red_blue.png" leftPct={42} widthPx={132} />
       <Coral src="/underwater/coral_green.png" leftPct={82} widthPx={112} flip delay={1.4} />
 
       {/* Foreground kelp — bigger, darker, in front of everything (z6). */}
