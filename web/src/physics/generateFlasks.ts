@@ -185,25 +185,26 @@ export function generateFlasks(
   // section evenly. Background skeletons sit behind for depth.
   const TOP_ANCHOR = -50;
   const scale0 = config.layerScale[0];
+  const halfFlask0 = (FLASK_HITBOX_HEIGHT * scale0) / 2;
   // Show EVERY skill: one foreground flask per skill (capped by flaskCount).
   // Only maxPhysicsFlasks are physics; the rest are static skill flasks.
   const foreground = Math.max(1, Math.min(skills.length, config.flaskCount));
-  const topGuide = 0.05 * viewport.height;
+  const topGuide = 0.03 * viewport.height;
   const depthSpan = 0.9 * viewport.height;
   for (let i = 0; i < foreground; i++) {
     const frac = foreground > 1 ? i / (foreground - 1) : 0;
-    const targetY = topGuide + frac * depthSpan;
-    const desired = targetY - TOP_ANCHOR - (FLASK_HITBOX_HEIGHT * scale0) / 2;
+    // Spread bodies EVENLY down the section; back-solve the ANCHOR so the body
+    // lands exactly here. (Fixing the anchor and clamping the chain instead
+    // piled shallow flasks at the min-chain depth and left the top empty.)
+    const targetBodyY = topGuide + frac * depthSpan + (rng() - 0.5) * 30;
     const jit = Math.floor(rng() * 3) - 1; // ±1 seg jitter
     const segments = Math.max(
       minSeg,
-      Math.min(maxSeg, segmentsForLength(desired) + jit)
+      Math.min(maxSeg, segmentsForLength(targetBodyY - TOP_ANCHOR) + jit)
     );
-    const anchorY = TOP_ANCHOR + (rng() - 0.5) * 24;
-    const bodyY =
-      anchorY + chainLength(segments) + (FLASK_HITBOX_HEIGHT * scale0) / 2;
-    const xPct = sampleX(0, scale0, bodyY); // random x, no columns
-    placed.push({ xpx: xPct * viewport.width, bodyY, scale: scale0, layer: 0 });
+    const anchorY = targetBodyY - chainLength(segments) - halfFlask0;
+    const xPct = sampleX(0, scale0, targetBodyY);
+    placed.push({ xpx: xPct * viewport.width, bodyY: targetBodyY, scale: scale0, layer: 0 });
     out.push(makeFlask(xPct, 0, anchorY, segments));
   }
   const bgCount = Math.max(0, config.flaskCount - foreground);

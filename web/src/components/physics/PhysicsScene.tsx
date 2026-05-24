@@ -20,6 +20,13 @@ import skills from "@/data/skills.json";
 // the monochrome frame stays consistent — colour lives only in the flask liquids.
 const RACK_SURFACE_COLOR = "var(--background)";
 
+// Idle "bob" for the skill icons (config-gated; on at medium/high). Pure CSS so
+// it's GPU-composited and costs nothing per frame in JS. Per-flask phase delay
+// keeps them from bobbing in lockstep.
+const ICON_BOB_CSS =
+  "@keyframes flask-icon-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}" +
+  ".flask-icon-bob{animation:flask-icon-bob 2.6s ease-in-out infinite;will-change:transform}";
+
 // Module-level so the "drag/stir" hint, once dismissed, stays dismissed for the
 // session even if the scene re-mounts when scrolled in and out of view.
 let hasInteractedWithRack = false;
@@ -81,6 +88,8 @@ export default function PhysicsScene({
   const advanced = useAppStore((s) => s.advanced);
   // Shared site-wide graphics setting (capped by reduced-motion / touch).
   const tier = useGraphicsTier();
+  // Icon idle-bob only on the richer tiers (off on low/off for perf/motion).
+  const animateIcons = tier === "medium" || tier === "high";
 
   // "off" tier (or reduced-motion) → fully static rack, so stop the engine loop.
   const loop = useFrameLoop(engine, active && tier !== "off");
@@ -170,7 +179,7 @@ export default function PhysicsScene({
       ref={containerRef}
       // Mobile: a tall scroll-through rack (room for the 3-per-row grid on long
       // chains). Desktop: the pinned 100vh interactive scene.
-      className="relative h-[170vh] w-full overflow-hidden md:sticky md:top-0 md:h-screen"
+      className="relative h-[150vh] w-full overflow-hidden md:sticky md:top-0 md:h-screen"
       style={{
         userSelect: "none",
         WebkitUserSelect: "none",
@@ -178,6 +187,9 @@ export default function PhysicsScene({
       }}
     >
       {backdrop}
+      {animateIcons && (
+        <style dangerouslySetInnerHTML={{ __html: ICON_BOB_CSS }} />
+      )}
       <FrameLoopContext.Provider value={loop}>
         {dims.width > 0 &&
           flasks.map((cfg, i) => (
@@ -195,6 +207,7 @@ export default function PhysicsScene({
               skillIcon={cfg.skillIcon}
               active={active}
               noFlaskCollision={isMobile}
+              iconBob={animateIcons ? (i * 0.41) % 2.6 : undefined}
             />
           ))}
       </FrameLoopContext.Provider>

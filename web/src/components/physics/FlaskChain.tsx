@@ -31,6 +31,7 @@ interface Props {
   noFlaskCollision?: boolean;
   scale?: number;
   isSkeleton?: boolean;
+  iconBob?: number;
 }
 
 export default function FlaskChain({
@@ -46,6 +47,7 @@ export default function FlaskChain({
   noFlaskCollision = false,
   scale = 1,
   isSkeleton = false,
+  iconBob,
 }: Props) {
   const chainRefs = useRef<(HTMLDivElement | null)[]>([]);
   const flaskRef = useRef<HTMLDivElement | null>(null);
@@ -288,6 +290,7 @@ export default function FlaskChain({
         id={instanceId}
         color={color}
         skillIcon={skillIcon}
+        iconBob={iconBob}
       />
     </>
   );

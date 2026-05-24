@@ -5,10 +5,21 @@ interface Props {
   id: string;
   color?: string;
   skillIcon?: string;
+  /** When set, the skill icon gently bobs; the value is its phase delay (s).
+   *  undefined → no animation (low/off graphics tier). */
+  iconBob?: number;
 }
 
 const FlaskSVG = forwardRef<HTMLDivElement, Props>(
-  ({ id, color = "rgba(255,86,86,0.7)", skillIcon }, ref) => {
+  ({ id, color = "rgba(255,86,86,0.7)", skillIcon, iconBob }, ref) => {
+    // The bob wraps the icon image as a CHILD of icon-wet/icon-dry, because
+    // syncDom REPLACES the transform attribute on those <g>s every frame — a
+    // child wrapper composes (rotate from parent, translateY here) untouched.
+    const bobClass = iconBob !== undefined ? "flask-icon-bob" : undefined;
+    const bobStyle =
+      iconBob !== undefined
+        ? ({ animationDelay: `${iconBob}s` } as const)
+        : undefined;
     const gradId1 = `flask-lg1-${id}`;
     const gradId2 = `flask-lg2-${id}`;
     const gradId3 = `flask-lg3-${id}`;
@@ -156,27 +167,31 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
                   rather than fading into the liquid. */}
               <g clipPath={`url(#${clipId})`} opacity={0.85}>
                 <g id={`icon-wet-${id}`}>
-                  <image
-                    href={skillIcon}
-                    x={34}
-                    y={55}
-                    width={70}
-                    height={70}
-                    preserveAspectRatio="xMidYMid meet"
-                  />
+                  <g className={bobClass} style={bobStyle}>
+                    <image
+                      href={skillIcon}
+                      x={34}
+                      y={55}
+                      width={70}
+                      height={70}
+                      preserveAspectRatio="xMidYMid meet"
+                    />
+                  </g>
                 </g>
               </g>
               {/* Dry portion: everything above the water line */}
               <g clipPath={`url(#${dryClipId})`}>
                 <g id={`icon-dry-${id}`}>
-                  <image
-                    href={skillIcon}
-                    x={34}
-                    y={55}
-                    width={70}
-                    height={70}
-                    preserveAspectRatio="xMidYMid meet"
-                  />
+                  <g className={bobClass} style={bobStyle}>
+                    <image
+                      href={skillIcon}
+                      x={34}
+                      y={55}
+                      width={70}
+                      height={70}
+                      preserveAspectRatio="xMidYMid meet"
+                    />
+                  </g>
                 </g>
               </g>
             </>

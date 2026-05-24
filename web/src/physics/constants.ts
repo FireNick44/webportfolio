@@ -60,7 +60,7 @@ export const MIN_SAME_LAYER_DISTANCE_PCT = 0.07;
 // edge overlap (reads as depth); ≥1 forces a full gap. Cross-layer chains may
 // still cluster at varied x; only the actual bodies are kept apart, so the rack
 // no longer reads as an even comb.
-export const BODY_OVERLAP_PAD = 0.85;
+export const BODY_OVERLAP_PAD = 0.9;
 
 // Desktop "top line" variety. Flask anchors are spread WIDELY across the band
 // below (not clustered on a line) so flasks don't hang in per-layer rows. The

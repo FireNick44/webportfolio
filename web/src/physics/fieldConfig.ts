@@ -33,7 +33,7 @@ export const MOBILE_CONFIG: FieldConfig = {
   maxPhysicsFlasks: 8, // only these are interactive; the rest are static skill flasks
   layerScale: [0.62, 0.4, 0.3], // small so all skills pack densely, randomly scattered
   skeletonBands: 2,
-  segmentRange: [4, 20], // long top-anchored chains; skeleton chains keep them cheap
+  segmentRange: [2, 24], // short top chains (small gap) → long deep ones; skeleton-cheap
   layout: "column",
 };
 
