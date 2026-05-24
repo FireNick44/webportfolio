@@ -10,7 +10,7 @@ import { useAppStore } from "@/store/useAppStore";
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
 import FlaskHint from "./FlaskHint";
-import { WALL_FILTER, MOBILE_BREAKPOINT } from "@/physics/constants";
+import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/physics/constants";
 import FlaskChain from "./FlaskChain";
 import { generateFlasks } from "@/physics/generateFlasks";
 import { fieldConfigFor } from "@/physics/fieldConfig";
@@ -87,13 +87,17 @@ export default function PhysicsScene({
   useMousePhysics(engine, containerRef);
 
   const isMobile = dims.width > 0 && dims.width < MOBILE_BREAKPOINT;
+  // Cap the placement width on ultra-wide screens and centre the band, so the
+  // flasks don't spread edge-to-edge forever. Mobile/normal widths are unaffected.
+  const rackWidth = Math.min(dims.width, MAX_RACK_WIDTH);
+  const rackOffsetX = (dims.width - rackWidth) / 2;
   const flasks = useMemo(() => {
     if (dims.width === 0) return [];
     const config = fieldConfigFor(tier, isMobile);
     const skillPaths = skills.map((s) => s.svgPath);
     return generateFlasks(
       config,
-      { width: dims.width, height: dims.height },
+      { width: Math.min(dims.width, MAX_RACK_WIDTH), height: dims.height },
       skillPaths,
       42
     );
@@ -166,7 +170,7 @@ export default function PhysicsScene({
       ref={containerRef}
       // Mobile: a tall scroll-through rack (room for the 3-per-row grid on long
       // chains). Desktop: the pinned 100vh interactive scene.
-      className="relative h-[170vh] w-full overflow-hidden md:sticky md:top-0 md:h-screen"
+      className="relative h-[130vh] w-full overflow-hidden md:sticky md:top-0 md:h-screen"
       style={{
         userSelect: "none",
         WebkitUserSelect: "none",
@@ -180,7 +184,7 @@ export default function PhysicsScene({
             <FlaskChain
               key={`flask-${i}`}
               engine={engine}
-              anchorX={cfg.xPct * dims.width}
+              anchorX={rackOffsetX + cfg.xPct * rackWidth}
               anchorY={cfg.anchorY}
               instanceId={`flask-${i}`}
               color={cfg.color}

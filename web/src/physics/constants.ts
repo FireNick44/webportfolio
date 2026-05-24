@@ -75,4 +75,7 @@ export const TOP_LINE = {
 } as const;
 
 export const MOBILE_BREAKPOINT = 768;
+// Cap the flask field width on ultra-wide screens so flasks don't spread
+// edge-to-edge forever; beyond this the rack is centred with side margins.
+export const MAX_RACK_WIDTH = 1800;
 export const MAX_LIQUID_TILT_DEG = 25;

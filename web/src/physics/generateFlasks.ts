@@ -180,26 +180,24 @@ export function generateFlasks(
     return out;
   }
 
-  // layout === "column": a mobile GRID — up to COLS bottles per row, rows
-  // staggered down a tall section on long top-anchored chains (skeleton chains
-  // keep the long ropes cheap). Lower rows hang deeper; ±1 segment of jitter
-  // keeps each row from being a flat horizontal line.
+  // layout === "column": a mobile GRID — up to COLS bottles per row, but with a
+  // CONTINUOUS depth (each successive flask hangs a little lower, columns
+  // cycling) so it reads as a dense diagonal stagger, not visible rows. Long
+  // top-anchored chains; skeleton chains keep them cheap.
   const COLS = 3;
   const colX = [0.16, 0.5, 0.84];
   const TOP_ANCHOR = -50;
   const scale0 = config.layerScale[0];
   const foreground = Math.max(1, config.maxPhysicsFlasks);
-  const rows = Math.ceil(foreground / COLS);
-  const topGuide = 0.2 * viewport.height;
-  const depthSpan = 0.68 * viewport.height;
+  const topGuide = 0.14 * viewport.height;
+  const depthSpan = 0.66 * viewport.height;
   for (let i = 0; i < foreground; i++) {
-    const row = Math.floor(i / COLS);
     const col = i % COLS;
     const xPct = colX[col] + (rng() - 0.5) * 0.03;
-    const frac = rows > 1 ? row / (rows - 1) : 0;
+    const frac = foreground > 1 ? i / (foreground - 1) : 0;
     const targetY = topGuide + frac * depthSpan;
     const desired = targetY - TOP_ANCHOR - (FLASK_HITBOX_HEIGHT * scale0) / 2;
-    const jit = Math.floor(rng() * 3) - 1; // ±1 seg so a row isn't a flat line
+    const jit = Math.floor(rng() * 3) - 1; // ±1 seg jitter
     const segments = Math.max(
       minSeg,
       Math.min(maxSeg, segmentsForLength(desired) + jit)
@@ -212,7 +210,8 @@ export function generateFlasks(
     const layer = 1 + (i % Math.max(1, tierCount - 1));
     const xPct = 0.1 + rng() * 0.8;
     const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
-    const anchorY = (0.15 + rng() * 0.7) * viewport.height - chainLength(segments);
+    // Ghosts (background skeletons) hang lower — longer chain before they start.
+    const anchorY = (0.35 + rng() * 0.55) * viewport.height - chainLength(segments);
     out.push(makeFlask(xPct, layer, anchorY, segments));
   }
   out.sort((a, b) => b.layer - a.layer || bodyDepth(b) - bodyDepth(a));
