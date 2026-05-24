@@ -189,8 +189,8 @@ export function generateFlasks(
   // Show EVERY skill: one foreground flask per skill (capped by flaskCount).
   // Only maxPhysicsFlasks are physics; the rest are static skill flasks.
   const foreground = Math.max(1, Math.min(skills.length, config.flaskCount));
-  const topGuide = 0.03 * viewport.height;
-  const depthSpan = 0.8 * viewport.height; // tighter → more compact, less chain whitespace
+  const topGuide = 0.13 * viewport.height; // gap below the top wave so no flask hides under it
+  const depthSpan = 0.7 * viewport.height; // tighter → more compact, less chain whitespace
   for (let i = 0; i < foreground; i++) {
     const frac = foreground > 1 ? i / (foreground - 1) : 0;
     // Spread bodies down the section; back-solve the ANCHOR so the body lands
@@ -215,8 +215,8 @@ export function generateFlasks(
     const xPct = 0.08 + rng() * 0.84;
     // Ghosts (background skeletons) end at WIDELY varied depths (not just
     // middle/bottom); back-solve the anchor so their chains still come from the
-    // top like the foreground.
-    const bodyY = (0.08 + rng() * 0.86) * viewport.height;
+    // top like the foreground. Start below the top wave too.
+    const bodyY = (0.14 + rng() * 0.8) * viewport.height;
     const segments = Math.max(
       minSeg,
       Math.min(maxSeg, segmentsForLength(bodyY - TOP_ANCHOR))
