@@ -190,13 +190,14 @@ export function generateFlasks(
   // Only maxPhysicsFlasks are physics; the rest are static skill flasks.
   const foreground = Math.max(1, Math.min(skills.length, config.flaskCount));
   const topGuide = 0.03 * viewport.height;
-  const depthSpan = 0.9 * viewport.height;
+  const depthSpan = 0.8 * viewport.height; // tighter → more compact, less chain whitespace
   for (let i = 0; i < foreground; i++) {
     const frac = foreground > 1 ? i / (foreground - 1) : 0;
-    // Spread bodies EVENLY down the section; back-solve the ANCHOR so the body
-    // lands exactly here. (Fixing the anchor and clamping the chain instead
-    // piled shallow flasks at the min-chain depth and left the top empty.)
-    const targetBodyY = topGuide + frac * depthSpan + (rng() - 0.5) * 30;
+    // Spread bodies down the section; back-solve the ANCHOR so the body lands
+    // here. (Fixing the anchor and clamping the chain instead piled shallow
+    // flasks at the min-chain depth and left the top empty.) A wide jitter makes
+    // the ending depths varied/organic rather than evenly stepped.
+    const targetBodyY = topGuide + frac * depthSpan + (rng() - 0.5) * 70;
     const jit = Math.floor(rng() * 3) - 1; // ±1 seg jitter
     const segments = Math.max(
       minSeg,
@@ -210,10 +211,18 @@ export function generateFlasks(
   const bgCount = Math.max(0, config.flaskCount - foreground);
   for (let i = 0; i < bgCount; i++) {
     const layer = 1 + (i % Math.max(1, tierCount - 1));
+    const scaleL = config.layerScale[layer];
     const xPct = 0.08 + rng() * 0.84;
-    const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
-    // Ghosts (background skeletons) hang lower — longer chain before they start.
-    const anchorY = (0.3 + rng() * 0.6) * viewport.height - chainLength(segments);
+    // Ghosts (background skeletons) end at WIDELY varied depths (not just
+    // middle/bottom); back-solve the anchor so their chains still come from the
+    // top like the foreground.
+    const bodyY = (0.08 + rng() * 0.86) * viewport.height;
+    const segments = Math.max(
+      minSeg,
+      Math.min(maxSeg, segmentsForLength(bodyY - TOP_ANCHOR))
+    );
+    const anchorY =
+      bodyY - chainLength(segments) - (FLASK_HITBOX_HEIGHT * scaleL) / 2;
     out.push(makeFlask(xPct, layer, anchorY, segments));
   }
   out.sort((a, b) => b.layer - a.layer || bodyDepth(b) - bodyDepth(a));

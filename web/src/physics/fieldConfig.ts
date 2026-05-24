@@ -31,7 +31,7 @@ export const DESKTOP_DEFAULT: FieldConfig = {
 export const MOBILE_CONFIG: FieldConfig = {
   flaskCount: 32, // 22 skill flasks (scatter) + ~10 background decorative skeletons
   maxPhysicsFlasks: 8, // only these are interactive; the rest are static skill flasks
-  layerScale: [0.62, 0.4, 0.3], // small so all skills pack densely, randomly scattered
+  layerScale: [0.56, 0.38, 0.28], // small so all skills pack densely & compactly
   skeletonBands: 2,
   segmentRange: [2, 24], // short top chains (small gap) → long deep ones; skeleton-cheap
   layout: "column",
