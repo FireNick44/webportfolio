@@ -49,10 +49,12 @@ export const WALL_FILTER = {
 export const LAYER_SCALE = [1.0, 0.82, 0.66, 0.5, 0.36] as const;
 
 export const MIN_SAME_LAYER_DISTANCE_PCT = 0.07;
-// Min horizontal gap (fraction of width) between flasks on DIFFERENT depth
-// layers — keeps a long back flask from hanging directly behind a flask above
-// it. Smaller than the same-layer gap since depth/scale already separates them.
-export const MIN_CROSS_LAYER_DISTANCE_PCT = 0.03;
+// Flasks are kept from stacking by a 2D check on their (scaled) body boxes —
+// this padding scales the required centre-to-centre gap. <1 tolerates a little
+// edge overlap (reads as depth); ≥1 forces a full gap. Cross-layer chains may
+// still cluster at varied x; only the actual bodies are kept apart, so the rack
+// no longer reads as an even comb.
+export const BODY_OVERLAP_PAD = 0.85;
 
 // Desktop "top line" variety. Flask anchors are spread WIDELY across the band
 // below (not clustered on a line) so flasks don't hang in per-layer rows. The

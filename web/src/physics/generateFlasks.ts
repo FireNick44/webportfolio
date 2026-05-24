@@ -1,9 +1,11 @@
 import type { FieldConfig } from "./fieldConfig";
 import {
   getSegmentHeight,
+  FLASK_WIDTH,
+  FLASK_HEIGHT,
   FLASK_HITBOX_HEIGHT,
   MIN_SAME_LAYER_DISTANCE_PCT,
-  MIN_CROSS_LAYER_DISTANCE_PCT,
+  BODY_OVERLAP_PAD,
   TOP_LINE,
 } from "./constants";
 
@@ -36,7 +38,7 @@ export function mulberry32(seed: number) {
 
 /** Sum of (unscaled) segment heights for a chain of `segments` links. Chain
  *  length is independent of depth-scale (only width/thickness scales). */
-function chainLength(segments: number): number {
+export function chainLength(segments: number): number {
   let s = 0;
   for (let k = 0; k < segments; k++) s += getSegmentHeight(k);
   return s;
@@ -83,12 +85,13 @@ export function generateFlasks(
   };
 
   // Chain length grows with depth: front tier ≈ minSeg (short), back tier ≈
-  // maxSeg (way longer), interpolated across tiers, with ±1 jitter for variety.
+  // maxSeg (way longer), interpolated across tiers, with ±2 jitter so chains
+  // within a layer hang at varied depths (not a single row).
   const tierSegments = (layer: number): number => {
     const t = tierCount > 1 ? layer / (tierCount - 1) : 0;
     const base = Math.round(minSeg + (maxSeg - minSeg) * t);
-    const jitter = Math.floor(rng() * 3) - 1; // -1..+1
-    return Math.max(minSeg, base + jitter);
+    const jitter = Math.floor(rng() * 5) - 2; // -2..+2
+    return Math.max(minSeg, Math.min(maxSeg, base + jitter));
   };
 
   // Vertical "top line" variety: spread anchors WIDELY (not on a line) across
@@ -106,41 +109,54 @@ export function generateFlasks(
   if (config.layout === "field") {
     const perTier = Math.ceil(config.flaskCount / tierCount);
     const PLACE_TRIES = 40;
-    const placedXL: { x: number; layer: number }[] = [];
-    const requiredGap = (a: number, b: number) =>
-      a === b ? MIN_SAME_LAYER_DISTANCE_PCT : MIN_CROSS_LAYER_DISTANCE_PCT;
+    const sameLayerGapPx = MIN_SAME_LAYER_DISTANCE_PCT * viewport.width;
+    type Placed = { xpx: number; bodyY: number; scale: number; layer: number };
+    const placed: Placed[] = [];
 
-    // Best-effort horizontal placement: try random x's and take the first that
-    // clears every placed flask by its required gap (wider within a layer, a
-    // smaller cross-layer gap so nothing hangs directly behind a flask above
-    // it). Front layers are placed first, so a long back flask is pushed off
-    // any column already claimed above it. If nothing clears within the budget
-    // (dense fields), keep the most-spread candidate — pack evenly, never drop.
-    const sampleX = (layer: number): number => {
-      let best = 0.5;
-      let bestScore = -Infinity;
+    // Two flasks conflict if same-layer columns sit too close, OR their
+    // (scaled) body boxes overlap in BOTH axes. The 2D body test lets chains
+    // cluster at varied x — so the rack reads organically, not as an even comb —
+    // while the actual bodies never stack in front of one another.
+    const conflicts = (a: Placed, p: Placed): boolean => {
+      if (a.layer === p.layer && Math.abs(a.xpx - p.xpx) < sameLayerGapPx)
+        return true;
+      const minDx =
+        ((FLASK_WIDTH * a.scale + FLASK_WIDTH * p.scale) / 2) * BODY_OVERLAP_PAD;
+      const minDy =
+        ((FLASK_HEIGHT * a.scale + FLASK_HEIGHT * p.scale) / 2) * BODY_OVERLAP_PAD;
+      return (
+        Math.abs(a.xpx - p.xpx) < minDx && Math.abs(a.bodyY - p.bodyY) < minDy
+      );
+    };
+
+    // Take the first random x with no conflicts; if the field is too dense to
+    // clear, keep the candidate with the fewest — never drop a flask.
+    const sampleX = (layer: number, scale: number, bodyY: number): number => {
+      let bestX = 0.5;
+      let bestConflicts = Infinity;
       for (let t = 0; t < PLACE_TRIES; t++) {
-        const x = 0.03 + placeRng() * 0.94;
-        let score = Infinity;
-        for (const p of placedXL) {
-          const norm = Math.abs(x - p.x) / requiredGap(layer, p.layer);
-          if (norm < score) score = norm;
-        }
-        if (score >= 1) return x; // clears every required gap — take it
-        if (score > bestScore) {
-          bestScore = score;
-          best = x;
+        const xPct = 0.03 + placeRng() * 0.94;
+        const cand: Placed = { xpx: xPct * viewport.width, bodyY, scale, layer };
+        let n = 0;
+        for (const p of placed) if (conflicts(cand, p)) n++;
+        if (n === 0) return xPct;
+        if (n < bestConflicts) {
+          bestConflicts = n;
+          bestX = xPct;
         }
       }
-      return best;
+      return bestX;
     };
 
     for (let i = 0; i < config.flaskCount; i++) {
       const layer = Math.min(Math.floor(i / perTier), tierCount - 1);
-      const xPct = sampleX(layer);
-      placedXL.push({ x: xPct, layer });
       const segments = tierSegments(layer);
       const anchorY = topLineY();
+      const scale = config.layerScale[layer];
+      const bodyY =
+        anchorY + chainLength(segments) + (FLASK_HITBOX_HEIGHT * scale) / 2;
+      const xPct = sampleX(layer, scale, bodyY);
+      placed.push({ xpx: xPct * viewport.width, bodyY, scale, layer });
       out.push(makeFlask(xPct, layer, anchorY, segments));
     }
     out.sort((a, b) => b.layer - a.layer);

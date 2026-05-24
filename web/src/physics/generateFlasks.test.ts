@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { generateFlasks } from "./generateFlasks";
+import { generateFlasks, chainLength } from "./generateFlasks";
 import type { FieldConfig } from "./fieldConfig";
 import {
   TOP_LINE,
-  MIN_CROSS_LAYER_DISTANCE_PCT,
   MIN_SAME_LAYER_DISTANCE_PCT,
+  FLASK_HITBOX_WIDTH,
+  FLASK_HITBOX_HEIGHT,
 } from "./constants";
 
 const FIELD: FieldConfig = {
@@ -117,19 +118,36 @@ describe("generateFlasks (field randomness)", () => {
     expect(f.length).toBe(10);
   });
 
-  it("keeps flasks off each other's column across layers (sparse field)", () => {
-    const sparse: FieldConfig = { ...FIELD, flaskCount: 10, maxPhysicsFlasks: 10 };
+  it("never overlaps flask bodies; same-layer columns stay apart (sparse)", () => {
+    const sparse: FieldConfig = { ...FIELD, flaskCount: 12, maxPhysicsFlasks: 12 };
     const f = generateFlasks(sparse, vp, skills, 42);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     for (let i = 0; i < f.length; i++) {
       for (let j = i + 1; j < f.length; j++) {
-        const need =
-          f[i].layer === f[j].layer
-            ? MIN_SAME_LAYER_DISTANCE_PCT
-            : MIN_CROSS_LAYER_DISTANCE_PCT;
-        expect(Math.abs(f[i].xPct - f[j].xPct)).toBeGreaterThanOrEqual(
-          need - 1e-9
-        );
+        const a = f[i];
+        const b = f[j];
+        if (a.layer === b.layer) {
+          expect(Math.abs(a.xPct - b.xPct)).toBeGreaterThanOrEqual(
+            MIN_SAME_LAYER_DISTANCE_PCT - 1e-9
+          );
+        }
+        // Physical bodies (hitboxes) must not overlap in BOTH axes — a property
+        // independent of the looser visual BODY_OVERLAP_PAD the impl tunes.
+        const dx = Math.abs(a.xPct - b.xPct) * vp.width;
+        const dy = Math.abs(bodyY(a) - bodyY(b));
+        const minDx = (FLASK_HITBOX_WIDTH * a.scale + FLASK_HITBOX_WIDTH * b.scale) / 2;
+        const minDy = (FLASK_HITBOX_HEIGHT * a.scale + FLASK_HITBOX_HEIGHT * b.scale) / 2;
+        expect(dx >= minDx || dy >= minDy).toBe(true);
       }
     }
+  });
+
+  it("varies chain length within a layer", () => {
+    const big: FieldConfig = { ...FIELD, flaskCount: 200, maxPhysicsFlasks: 200 };
+    const f = generateFlasks(big, vp, skills, 42);
+    const layer2 = f.filter((x) => x.layer === 2).map((x) => x.segments);
+    const range = Math.max(...layer2) - Math.min(...layer2);
+    expect(range).toBeGreaterThanOrEqual(4);
   });
 });
