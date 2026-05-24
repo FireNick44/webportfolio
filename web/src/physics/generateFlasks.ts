@@ -97,7 +97,10 @@ export function generateFlasks(
     const isSkeleton = bandSkeleton || overBudget;
     if (!isSkeleton) physicsCount++;
     let skillIcon: string | undefined;
-    if (!isSkeleton && skillIdx < skills.length) skillIcon = skills[skillIdx++];
+    // Foreground-tier flasks show a skill even when static (over the physics
+    // budget) — only the decorative back-tier skeletons stay icon-less. This is
+    // how EVERY skill stays visible while only a few flasks are interactive.
+    if (!bandSkeleton && skillIdx < skills.length) skillIcon = skills[skillIdx++];
     return { xPct, anchorY, segments, color, scale, isSkeleton, layer, skillIcon };
   };
 
@@ -188,9 +191,12 @@ export function generateFlasks(
   const colX = [0.16, 0.5, 0.84];
   const TOP_ANCHOR = -50;
   const scale0 = config.layerScale[0];
-  const foreground = Math.max(1, config.maxPhysicsFlasks);
-  const topGuide = 0.14 * viewport.height;
-  const depthSpan = 0.66 * viewport.height;
+  // Show EVERY skill: one foreground flask per skill (capped by flaskCount).
+  // Only maxPhysicsFlasks of them are physics; the rest are static skill flasks
+  // (still iconed). Remaining flaskCount slots become background skeletons.
+  const foreground = Math.max(1, Math.min(skills.length, config.flaskCount));
+  const topGuide = 0.06 * viewport.height;
+  const depthSpan = 0.88 * viewport.height;
   for (let i = 0; i < foreground; i++) {
     const col = i % COLS;
     const xPct = colX[col] + (rng() - 0.5) * 0.03;

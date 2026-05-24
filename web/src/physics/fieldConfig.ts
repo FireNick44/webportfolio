@@ -29,9 +29,9 @@ export const DESKTOP_DEFAULT: FieldConfig = {
 // Mobile: tier 0 = interactive column; tiers 1..2 = background skeleton planes.
 // A denser column with longer chains so there's plenty to grab/swing.
 export const MOBILE_CONFIG: FieldConfig = {
-  flaskCount: 13, // ~7 foreground (grid) + ~6 background skeletons
-  maxPhysicsFlasks: 7,
-  layerScale: [0.9, 0.5, 0.36], // foreground 0.9 so 3 fit per row on narrow phones
+  flaskCount: 28, // 22 skill flasks (grid) + ~6 background decorative skeletons
+  maxPhysicsFlasks: 8, // only these are interactive; the rest are static skill flasks
+  layerScale: [0.62, 0.4, 0.3], // small so all skills pack densely, 3 per row
   skeletonBands: 2,
   segmentRange: [4, 18], // long top-anchored chains; skeleton chains keep them cheap
   layout: "column",

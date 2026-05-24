@@ -75,17 +75,25 @@ describe("generateFlasks (field)", () => {
 
 describe("generateFlasks (column / mobile)", () => {
   const COLUMN: FieldConfig = {
-    flaskCount: 8, maxPhysicsFlasks: 4,
-    layerScale: [0.9, 0.5, 0.36], skeletonBands: 2,
-    segmentRange: [4, 14], layout: "column",
+    flaskCount: 28, maxPhysicsFlasks: 4,
+    layerScale: [0.62, 0.4, 0.3], skeletonBands: 2,
+    segmentRange: [4, 18], layout: "column",
   };
-  it("foreground (tier 0) is interactive, others are background skeletons", () => {
-    const f = generateFlasks(COLUMN, { width: 390, height: 844 }, skills, 42);
+  it("shows a skill on every foreground flask; back tiers are icon-less", () => {
+    const f = generateFlasks(COLUMN, { width: 390, height: 1800 }, skills, 42);
     const fg = f.filter((x) => x.layer === 0);
     const bg = f.filter((x) => x.layer > 0);
-    expect(fg.length).toBeGreaterThan(0);
-    expect(fg.every((x) => !x.isSkeleton)).toBe(true);
-    expect(bg.every((x) => x.isSkeleton)).toBe(true);
+    expect(fg.length).toBe(skills.length); // one foreground flask per skill
+    expect(fg.every((x) => x.skillIcon !== undefined)).toBe(true);
+    expect(bg.length).toBeGreaterThan(0);
+    expect(bg.every((x) => x.isSkeleton && x.skillIcon === undefined)).toBe(true);
+  });
+
+  it("caps interactive (physics) foreground flasks at maxPhysicsFlasks", () => {
+    const f = generateFlasks(COLUMN, { width: 390, height: 1800 }, skills, 42);
+    const physics = f.filter((x) => x.layer === 0 && !x.isSkeleton);
+    expect(physics.length).toBeLessThanOrEqual(COLUMN.maxPhysicsFlasks);
+    expect(physics.length).toBeGreaterThan(0);
   });
   it("lays foreground out in up to 3 columns (mobile grid)", () => {
     const f = generateFlasks(COLUMN, { width: 390, height: 1400 }, skills, 42);
