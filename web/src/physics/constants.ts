@@ -4,6 +4,12 @@ export const CHAIN_SEGMENT_HEIGHT = 60;
 export const CHAIN_STIFFNESS = 0.92;
 export const CHAIN_DAMPING = 0.45;
 
+// Skeleton chains: only the bottom MAX_PHYSICS_SEGMENTS links of a chain are
+// simulated; any links above that are drawn as a static rope down to the pin.
+// Keeps long chains (especially mobile) cheap — a 20-link chain costs ~6 bodies,
+// and only the bottom near the flask swings.
+export const MAX_PHYSICS_SEGMENTS = 6;
+
 // Top segments are taller to reduce body count
 export const CHAIN_HEIGHT_MULTIPLIERS = [2.0, 2.0, 1.5, 1.5];
 

@@ -14,6 +14,7 @@ import {
   FLASK_HEIGHT,
   FLASK_HITBOX_HEIGHT,
   MAX_LIQUID_TILT_DEG,
+  MAX_PHYSICS_SEGMENTS,
   getSegmentHeight,
 } from "@/physics/constants";
 
@@ -65,13 +66,20 @@ export default function FlaskChain({
 
   const opacity = 1;
   const isStatic = isSkeleton;
+  // Skeleton chains: only the bottom MAX_PHYSICS_SEGMENTS links are simulated;
+  // links above that form a static rope. A fully-static (skeleton) flask is all
+  // static; a short physics chain (≤ cap) has no static top.
+  const staticCount = isStatic
+    ? segmentCount
+    : Math.max(0, segmentCount - MAX_PHYSICS_SEGMENTS);
 
-  // Static positioning for layer 2 (no physics)
+  // Static rope: lay out the top `staticCount` links (drawn once, no physics).
+  // For a fully-static (skeleton) flask staticCount === segmentCount, so this
+  // positions the whole chain + flask; for a physics flask it lays out just the
+  // rigid top and the swinging remainder is driven by the frame loop.
   useEffect(() => {
-    if (!isStatic) return;
-
     let currentY = anchorY;
-    for (let i = 0; i < segmentCount; i++) {
+    for (let i = 0; i < staticCount; i++) {
       // Height is unscaled (full); only width thins with depth — matches the
       // dynamic path and the physics bodies.
       const h = getSegmentHeight(i);
@@ -85,6 +93,8 @@ export default function FlaskChain({
       currentY += h;
     }
 
+    if (!isStatic) return; // physics flask: body + bottom links drive the rest
+
     const flaskEl = flaskRef.current;
     if (flaskEl) {
       const x = anchorX - FLASK_WIDTH / 2;
@@ -95,7 +105,7 @@ export default function FlaskChain({
       flaskEl.style.transformOrigin = `${FLASK_WIDTH / 2}px ${FLASK_HEIGHT / 2}px`;
       flaskEl.style.opacity = String(opacity);
     }
-  }, [isStatic, anchorX, anchorY, segmentCount, scale, opacity]);
+  }, [isStatic, anchorX, anchorY, staticCount, scale, opacity]);
 
   // Physics body creation for layers 0 & 1 — runs once on mount
   useEffect(() => {
@@ -104,7 +114,7 @@ export default function FlaskChain({
     const ax = anchorRef.current.x;
     const ay = anchorRef.current.y;
 
-    const chain = createChainBodies(ax, ay, segmentCount, scale);
+    const chain = createChainBodies(ax, ay, segmentCount, scale, staticCount);
     const lastH = chain.segmentHeights[chain.segmentHeights.length - 1];
     const flask = createFlaskBody(
       chain.segments[chain.segments.length - 1],
@@ -153,6 +163,7 @@ export default function FlaskChain({
   }, [
     engine,
     segmentCount,
+    staticCount,
     layer,
     instanceId,
     isStatic,
@@ -173,8 +184,8 @@ export default function FlaskChain({
 
     const { chain, flask } = bodiesRef.current;
 
-    // Update the world-space anchor point
-    chain.anchorConstraint.pointA = { x: anchorX, y: anchorY };
+    // Update the world-space pin (below the static top for skeleton chains)
+    chain.anchorConstraint.pointA = { x: anchorX, y: anchorY + chain.staticHeight };
 
     // Translate all bodies and zero velocity
     for (const seg of chain.segments) {
@@ -200,9 +211,11 @@ export default function FlaskChain({
     // Skip DOM sync when flask body is sleeping — nothing moved
     if (flask.body.isSleeping) return;
 
-    // Chain links: only scale X (width) so segments stay touching vertically
+    // Chain links: only scale X (width) so segments stay touching vertically.
+    // Physics body i maps to chain-link (staticCount + i) — the static top
+    // occupies the earlier refs and is positioned once, not per frame.
     for (let i = 0; i < chain.segments.length; i++) {
-      const el = chainRefs.current[i];
+      const el = chainRefs.current[staticCount + i];
       if (!el) continue;
       const seg = chain.segments[i];
       const h = chain.segmentHeights[i];
@@ -246,7 +259,7 @@ export default function FlaskChain({
       iconWetRef.current?.setAttribute("transform", iconRotate);
       iconDryRef.current?.setAttribute("transform", iconRotate);
     }
-  }, [scale, opacity]);
+  }, [scale, opacity, staticCount]);
 
   // Subscribe to the shared frame loop only for physics layers while active
   useEffect(() => {

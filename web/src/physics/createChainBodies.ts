@@ -13,24 +13,36 @@ export interface ChainResult {
   segmentHeights: number[];
   constraints: Matter.Constraint[];
   anchorConstraint: Matter.Constraint;
+  /** Length of the static (non-physics) top portion. The physics sub-chain is
+   *  pinned at anchorY + staticHeight; 0 when the whole chain is physics. */
+  staticHeight: number;
 }
 
 export function createChainBodies(
   anchorX: number,
   anchorY: number,
   segmentCount: number = CHAIN_SEGMENT_COUNT,
-  scale: number = 1
+  scale: number = 1,
+  staticCount: number = 0
 ): ChainResult {
   const segments: Matter.Body[] = [];
   const segmentHeights: number[] = [];
   const constraints: Matter.Constraint[] = [];
-  let currentY = anchorY;
 
-  for (let i = 0; i < segmentCount; i++) {
+  // The top `staticCount` links are drawn as a static rope (no bodies); physics
+  // begins below them, pinned to the fixed point at anchorY + staticHeight.
+  let staticHeight = 0;
+  for (let i = 0; i < staticCount; i++) staticHeight += getSegmentHeight(i);
+
+  const pinY = anchorY + staticHeight;
+  let currentY = pinY;
+
+  for (let idx = staticCount; idx < segmentCount; idx++) {
     // Width scales with depth (perspective/thickness); height does NOT — chain
-    // LENGTH is driven by segment count per tier, so back tiers can hang far
-    // longer than front tiers instead of the scale cancelling the extra links.
-    const h = getSegmentHeight(i);
+    // LENGTH is driven by segment count per tier. Heights stay indexed by the
+    // link's position in the full chain so a partial chain lines up under its
+    // static top.
+    const h = getSegmentHeight(idx);
     segmentHeights.push(h);
 
     const y = currentY + h / 2;
@@ -44,7 +56,7 @@ export function createChainBodies(
         density: 0.001,
         frictionAir: 0.03,
         sleepThreshold: 30,
-        label: `chain-segment-${i}`,
+        label: `chain-segment-${idx}`,
       }
     );
     segments.push(segment);
@@ -68,7 +80,7 @@ export function createChainBodies(
   }
 
   const anchorConstraint = Matter.Constraint.create({
-    pointA: { x: anchorX, y: anchorY },
+    pointA: { x: anchorX, y: pinY },
     bodyB: segments[0],
     pointB: { x: 0, y: -segmentHeights[0] / 2 },
     stiffness: 1,
@@ -77,5 +89,5 @@ export function createChainBodies(
     render: { visible: false },
   });
 
-  return { segments, segmentHeights, constraints, anchorConstraint };
+  return { segments, segmentHeights, constraints, anchorConstraint, staticHeight };
 }
