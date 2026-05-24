@@ -49,5 +49,25 @@ export const WALL_FILTER = {
 export const LAYER_SCALE = [1.0, 0.82, 0.66, 0.5, 0.36] as const;
 
 export const MIN_SAME_LAYER_DISTANCE_PCT = 0.07;
+// Min horizontal gap (fraction of width) between flasks on DIFFERENT depth
+// layers — keeps a long back flask from hanging directly behind a flask above
+// it. Smaller than the same-layer gap since depth/scale already separates them.
+export const MIN_CROSS_LAYER_DISTANCE_PCT = 0.03;
+
+// Desktop "top line" variety. Most field flasks hang near baseY with a subtle
+// ±jitter; ~popChance of them pop further. Pops are biased upward (more
+// negative → higher → tucked behind the top WaveDivider, which only masks the
+// top ~50-70px); the ceil/floor clamp keeps chain-tops hidden either way.
+export const TOP_LINE = {
+  baseY: -84,
+  jitter: 16,
+  popChance: 0.18,
+  popMin: 22,
+  popMax: 62,
+  upBias: 0.65,
+  ceilY: -160, // highest anchor (most negative / most hidden)
+  floorY: -64, // lowest anchor (least negative; keeps chain-top masked)
+} as const;
+
 export const MOBILE_BREAKPOINT = 768;
 export const MAX_LIQUID_TILT_DEG = 25;
