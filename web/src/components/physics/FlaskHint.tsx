@@ -25,7 +25,9 @@ export default function FlaskHint({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.45, ease: [0.76, 0, 0.24, 1] }}
-          className="pointer-events-none absolute inset-0 z-[26] flex items-center justify-center bg-background/45 backdrop-blur-[2px]"
+          // Mobile rack is tall (170vh); keep the hint in the first screen
+          // (top-aligned) instead of centering ~85vh down. Desktop centers.
+          className="pointer-events-none absolute inset-0 z-[26] flex items-start justify-center bg-background/45 pt-[38vh] backdrop-blur-[2px] md:items-center md:pt-0"
         >
           <motion.div
             initial={{ y: 10, opacity: 0 }}

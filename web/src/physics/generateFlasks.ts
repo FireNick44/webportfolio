@@ -44,6 +44,23 @@ export function chainLength(segments: number): number {
   return s;
 }
 
+/** Smallest segment count whose chain reaches at least `len` px. */
+function segmentsForLength(len: number): number {
+  let n = 0;
+  let s = 0;
+  while (s < len) {
+    s += getSegmentHeight(n);
+    n++;
+  }
+  return Math.max(1, n);
+}
+
+/** Hanging depth of a flask's body — used for back-to-front z-ordering so a
+ *  lower flask (and its long chain) renders behind the flasks above it. */
+function bodyDepth(f: FlaskConfig): number {
+  return f.anchorY + chainLength(f.segments);
+}
+
 export function generateFlasks(
   config: FieldConfig,
   viewport: { width: number; height: number },
@@ -159,31 +176,45 @@ export function generateFlasks(
       placed.push({ xpx: xPct * viewport.width, bodyY, scale, layer });
       out.push(makeFlask(xPct, layer, anchorY, segments));
     }
-    out.sort((a, b) => b.layer - a.layer);
+    out.sort((a, b) => b.layer - a.layer || bodyDepth(b) - bodyDepth(a));
     return out;
   }
 
-  // layout === "column"
-  const colJitter = [-0.06, 0.07, -0.04, 0.05, -0.07, 0.04, 0.06];
-  const bodyFrac = [0.26, 0.36, 0.46, 0.56, 0.66, 0.76, 0.84];
+  // layout === "column": a mobile GRID — up to COLS bottles per row, rows
+  // staggered down a tall section on long top-anchored chains (skeleton chains
+  // keep the long ropes cheap). Lower rows hang deeper; ±1 segment of jitter
+  // keeps each row from being a flat horizontal line.
+  const COLS = 3;
+  const colX = [0.16, 0.5, 0.84];
+  const TOP_ANCHOR = -50;
+  const scale0 = config.layerScale[0];
   const foreground = Math.max(1, config.maxPhysicsFlasks);
+  const rows = Math.ceil(foreground / COLS);
+  const topGuide = 0.2 * viewport.height;
+  const depthSpan = 0.68 * viewport.height;
   for (let i = 0; i < foreground; i++) {
-    const xPct = 0.5 + (colJitter[i % colJitter.length] ?? 0);
-    const segments = minSeg + (i % Math.max(1, maxSeg - minSeg + 1));
-    const scale = config.layerScale[0];
-    const anchorY =
-      (bodyFrac[i % bodyFrac.length] ?? 0.5) * viewport.height -
-      chainLength(segments) - (FLASK_HITBOX_HEIGHT * scale) / 2;
+    const row = Math.floor(i / COLS);
+    const col = i % COLS;
+    const xPct = colX[col] + (rng() - 0.5) * 0.03;
+    const frac = rows > 1 ? row / (rows - 1) : 0;
+    const targetY = topGuide + frac * depthSpan;
+    const desired = targetY - TOP_ANCHOR - (FLASK_HITBOX_HEIGHT * scale0) / 2;
+    const jit = Math.floor(rng() * 3) - 1; // ±1 seg so a row isn't a flat line
+    const segments = Math.max(
+      minSeg,
+      Math.min(maxSeg, segmentsForLength(desired) + jit)
+    );
+    const anchorY = TOP_ANCHOR + (rng() - 0.5) * 24;
     out.push(makeFlask(xPct, 0, anchorY, segments));
   }
   const bgCount = Math.max(0, config.flaskCount - foreground);
   for (let i = 0; i < bgCount; i++) {
     const layer = 1 + (i % Math.max(1, tierCount - 1));
-    const xPct = 0.12 + rng() * 0.76;
+    const xPct = 0.1 + rng() * 0.8;
     const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
-    const anchorY = (0.2 + rng() * 0.6) * viewport.height - chainLength(segments);
+    const anchorY = (0.15 + rng() * 0.7) * viewport.height - chainLength(segments);
     out.push(makeFlask(xPct, layer, anchorY, segments));
   }
-  out.sort((a, b) => b.layer - a.layer);
+  out.sort((a, b) => b.layer - a.layer || bodyDepth(b) - bodyDepth(a));
   return out;
 }

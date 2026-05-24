@@ -29,11 +29,11 @@ export const DESKTOP_DEFAULT: FieldConfig = {
 // Mobile: tier 0 = interactive column; tiers 1..2 = background skeleton planes.
 // A denser column with longer chains so there's plenty to grab/swing.
 export const MOBILE_CONFIG: FieldConfig = {
-  flaskCount: 13, // ~7 foreground + ~6 background skeletons
+  flaskCount: 13, // ~7 foreground (grid) + ~6 background skeletons
   maxPhysicsFlasks: 7,
-  layerScale: [1.0, 0.5, 0.36],
+  layerScale: [0.9, 0.5, 0.36], // foreground 0.9 so 3 fit per row on narrow phones
   skeletonBands: 2,
-  segmentRange: [5, 9], // longer chains → more hang + swing to play with
+  segmentRange: [4, 18], // long top-anchored chains; skeleton chains keep them cheap
   layout: "column",
 };
 

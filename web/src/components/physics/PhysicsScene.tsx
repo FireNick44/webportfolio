@@ -164,12 +164,10 @@ export default function PhysicsScene({
   return (
     <div
       ref={containerRef}
+      // Mobile: a tall scroll-through rack (room for the 3-per-row grid on long
+      // chains). Desktop: the pinned 100vh interactive scene.
+      className="relative h-[170vh] w-full overflow-hidden md:sticky md:top-0 md:h-screen"
       style={{
-        position: "sticky",
-        top: 0,
-        width: "100%",
-        height: "100vh",
-        overflow: "hidden",
         userSelect: "none",
         WebkitUserSelect: "none",
         touchAction: "pan-y",

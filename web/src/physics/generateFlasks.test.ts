@@ -60,13 +60,24 @@ describe("generateFlasks (field)", () => {
     expect(avg(0)).toBeLessThan(avg(2));
     expect(avg(2)).toBeLessThan(avg(4));
   });
+
+  it("orders flasks back-to-front by depth (lower bodies render behind)", () => {
+    const f = generateFlasks(FIELD, vp, skills, 42);
+    const depth = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments);
+    // within a layer, earlier (rendered-first / behind) entries hang lower
+    for (let i = 1; i < f.length; i++) {
+      if (f[i].layer !== f[i - 1].layer) continue;
+      expect(depth(f[i - 1])).toBeGreaterThanOrEqual(depth(f[i]) - 1e-6);
+    }
+  });
 });
 
 describe("generateFlasks (column / mobile)", () => {
   const COLUMN: FieldConfig = {
     flaskCount: 8, maxPhysicsFlasks: 4,
-    layerScale: [1.0, 0.5, 0.36], skeletonBands: 2,
-    segmentRange: [4, 5], layout: "column",
+    layerScale: [0.9, 0.5, 0.36], skeletonBands: 2,
+    segmentRange: [4, 14], layout: "column",
   };
   it("foreground (tier 0) is interactive, others are background skeletons", () => {
     const f = generateFlasks(COLUMN, { width: 390, height: 844 }, skills, 42);
@@ -76,11 +87,22 @@ describe("generateFlasks (column / mobile)", () => {
     expect(fg.every((x) => !x.isSkeleton)).toBe(true);
     expect(bg.every((x) => x.isSkeleton)).toBe(true);
   });
-  it("foreground flasks are centered horizontally (column)", () => {
-    const f = generateFlasks(COLUMN, { width: 390, height: 844 }, skills, 42);
-    for (const x of f.filter((x) => x.layer === 0)) {
-      expect(Math.abs(x.xPct - 0.5)).toBeLessThan(0.15);
+  it("lays foreground out in up to 3 columns (mobile grid)", () => {
+    const f = generateFlasks(COLUMN, { width: 390, height: 1400 }, skills, 42);
+    const fg = f.filter((x) => x.layer === 0);
+    const centers = [0.16, 0.5, 0.84];
+    const colOf = (xPct: number) =>
+      centers.reduce(
+        (best, _c, i) =>
+          Math.abs(xPct - centers[i]) < Math.abs(xPct - centers[best]) ? i : best,
+        0
+      );
+    for (const x of fg) {
+      // every foreground flask snaps near one of the 3 column centers
+      expect(Math.abs(x.xPct - centers[colOf(x.xPct)])).toBeLessThan(0.05);
     }
+    // ...and it actually uses more than one column (not a single center stack)
+    expect(new Set(fg.map((x) => colOf(x.xPct))).size).toBeGreaterThan(1);
   });
 });
 

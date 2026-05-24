@@ -7,7 +7,7 @@ import PhysicsSceneClient from "@/components/physics/PhysicsSceneClient";
 // parallax. BOTH waves are rendered inside PhysicsScene, in front of the flasks,
 // so the bottles tuck behind them top and bottom.
 function FlaskBackdrop() {
-  return <ParallaxImage src="/svg/skill-bg.svg" className="absolute inset-0" />;
+  return <ParallaxImage src="/svg/skill-bg.svg" className="absolute inset-0" strength={14} />;
 }
 
 export default function Skills({ dict }: { dict: Dictionary }) {
@@ -37,10 +37,10 @@ export default function Skills({ dict }: { dict: Dictionary }) {
         </div>
       </div>
 
-      {/* The real Matter.js flask rack. Height == the sticky scene (100vh) so
-          there's no empty "overhang" under the bottles — they fall as an
-          entering animation and the bottom wave sits right beneath them. */}
-      <div className="relative" style={{ height: "100vh" }}>
+      {/* The real Matter.js flask rack. Desktop: a pinned 100vh scene. Mobile:
+          a taller scroll-through section (170vh) so the 3-per-row grid has room
+          to hang on long chains. Heights match PhysicsScene's container. */}
+      <div className="relative h-[170vh] md:h-screen">
         <PhysicsSceneClient backdrop={<FlaskBackdrop />} hint={dict.skills.hint} />
       </div>
     </section>
