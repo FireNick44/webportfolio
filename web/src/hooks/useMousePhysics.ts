@@ -11,7 +11,8 @@ const REPEL_RADIUS = 22;
  * Two interaction modes, chosen by device:
  *  • Desktop (fine pointer / mouse): an invisible circle follows the cursor and
  *    physically shoves the flasks out of the way — no clicking needed.
- *  • Touch (coarse pointer / no hover, incl. iPad): grab-and-drag a flask.
+ *  • Touch (coarse pointer / no hover, incl. iPad): grab-and-drag a flask, or
+ *    catch a chain link anywhere along the rope and swing it.
  */
 export function useMousePhysics(
   engine: Matter.Engine,
@@ -65,20 +66,28 @@ export function useMousePhysics(
       };
     }
 
-    // ── Touch: drag a flask ───────────────────────────────────────────────
-    const pickFlask = (pos: { x: number; y: number }) => {
+    // ── Touch: grab & drag a flask OR a chain link ───────────────────────
+    const isGrabbable = (b: Matter.Body) =>
+      !b.isStatic &&
+      (b.label === "flask" || b.label.startsWith("chain-segment-"));
+
+    const pickGrabbable = (pos: { x: number; y: number }) => {
       const bodies = Matter.Composite.allBodies(engine.world);
-      const exact = Matter.Query.point(bodies, pos).find(
-        (b) => b.label === "flask" && !b.isStatic
-      );
-      if (exact) return exact;
+      const hits = Matter.Query.point(bodies, pos).filter(isGrabbable);
+      // Prefer a flask directly under the finger, else any link under it.
+      const exactFlask = hits.find((b) => b.label === "flask");
+      if (exactFlask) return exactFlask;
+      if (hits.length) return hits[0];
+      // Otherwise the nearest grabbable within reach, biased toward flasks
+      // (they're the primary target; chains are a bonus catch).
       let nearest: Matter.Body | null = null;
-      let nearestDist = GRAB_RADIUS;
+      let nearestScore = GRAB_RADIUS;
       for (const b of bodies) {
-        if (b.label !== "flask" || b.isStatic) continue;
+        if (!isGrabbable(b)) continue;
         const d = Math.hypot(b.position.x - pos.x, b.position.y - pos.y);
-        if (d < nearestDist) {
-          nearestDist = d;
+        const score = b.label === "flask" ? d * 0.6 : d;
+        if (score < nearestScore) {
+          nearestScore = score;
           nearest = b;
         }
       }
@@ -87,13 +96,17 @@ export function useMousePhysics(
 
     const startDrag = (clientX: number, clientY: number) => {
       const pos = getWorldPos(clientX, clientY);
-      const flask = pickFlask(pos);
-      if (!flask) return;
-      Matter.Sleeping.set(flask, false);
+      const body = pickGrabbable(pos);
+      if (!body) return;
+      // Wake the rack so the grabbed link's neighbours + flask follow (chain
+      // segments share no per-chain id, so we can't cheaply wake just one rope).
+      for (const b of Matter.Composite.allBodies(engine.world)) {
+        if (!b.isStatic) Matter.Sleeping.set(b, false);
+      }
       const constraint = Matter.Constraint.create({
         pointA: pos,
-        bodyB: flask,
-        pointB: { x: pos.x - flask.position.x, y: pos.y - flask.position.y },
+        bodyB: body,
+        pointB: { x: pos.x - body.position.x, y: pos.y - body.position.y },
         stiffness: 0.9,
         damping: 0.2,
         length: 0,
