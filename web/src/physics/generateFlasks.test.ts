@@ -95,22 +95,11 @@ describe("generateFlasks (column / mobile)", () => {
     expect(physics.length).toBeLessThanOrEqual(COLUMN.maxPhysicsFlasks);
     expect(physics.length).toBeGreaterThan(0);
   });
-  it("lays foreground out in up to 3 columns (mobile grid)", () => {
-    const f = generateFlasks(COLUMN, { width: 390, height: 1400 }, skills, 42);
-    const fg = f.filter((x) => x.layer === 0);
-    const centers = [0.16, 0.5, 0.84];
-    const colOf = (xPct: number) =>
-      centers.reduce(
-        (best, _c, i) =>
-          Math.abs(xPct - centers[i]) < Math.abs(xPct - centers[best]) ? i : best,
-        0
-      );
-    for (const x of fg) {
-      // every foreground flask snaps near one of the 3 column centers
-      expect(Math.abs(x.xPct - centers[colOf(x.xPct)])).toBeLessThan(0.05);
-    }
-    // ...and it actually uses more than one column (not a single center stack)
-    expect(new Set(fg.map((x) => colOf(x.xPct))).size).toBeGreaterThan(1);
+  it("scatters foreground across varied x (no rigid columns)", () => {
+    const f = generateFlasks(COLUMN, { width: 390, height: 1800 }, skills, 42);
+    const xs = f.filter((x) => x.layer === 0).map((x) => Math.round(x.xPct * 100));
+    // random placement → many distinct x positions, not a few fixed columns
+    expect(new Set(xs).size).toBeGreaterThan(8);
   });
 });
 

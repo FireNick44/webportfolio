@@ -126,48 +126,44 @@ export function generateFlasks(
     return Math.max(TOP_LINE.ceilY, Math.min(TOP_LINE.floorY, y));
   };
 
+  // Shared body-aware placement: pick a random x that doesn't overlap any placed
+  // flask (same-layer column gap OR a 2D body-box overlap). Random x → no rigid
+  // columns; the 2D test keeps bodies from stacking. Used by BOTH the desktop
+  // field and the mobile scatter.
+  const PLACE_TRIES = 40;
+  const sameLayerGapPx = MIN_SAME_LAYER_DISTANCE_PCT * viewport.width;
+  type Placed = { xpx: number; bodyY: number; scale: number; layer: number };
+  const placed: Placed[] = [];
+  const conflicts = (a: Placed, p: Placed): boolean => {
+    if (a.layer === p.layer && Math.abs(a.xpx - p.xpx) < sameLayerGapPx)
+      return true;
+    const minDx =
+      ((FLASK_WIDTH * a.scale + FLASK_WIDTH * p.scale) / 2) * BODY_OVERLAP_PAD;
+    const minDy =
+      ((FLASK_HEIGHT * a.scale + FLASK_HEIGHT * p.scale) / 2) * BODY_OVERLAP_PAD;
+    return (
+      Math.abs(a.xpx - p.xpx) < minDx && Math.abs(a.bodyY - p.bodyY) < minDy
+    );
+  };
+  const sampleX = (layer: number, scale: number, bodyY: number): number => {
+    let bestX = 0.5;
+    let bestConflicts = Infinity;
+    for (let t = 0; t < PLACE_TRIES; t++) {
+      const xPct = 0.03 + placeRng() * 0.94;
+      const cand: Placed = { xpx: xPct * viewport.width, bodyY, scale, layer };
+      let n = 0;
+      for (const p of placed) if (conflicts(cand, p)) n++;
+      if (n === 0) return xPct;
+      if (n < bestConflicts) {
+        bestConflicts = n;
+        bestX = xPct;
+      }
+    }
+    return bestX;
+  };
+
   if (config.layout === "field") {
     const perTier = Math.ceil(config.flaskCount / tierCount);
-    const PLACE_TRIES = 40;
-    const sameLayerGapPx = MIN_SAME_LAYER_DISTANCE_PCT * viewport.width;
-    type Placed = { xpx: number; bodyY: number; scale: number; layer: number };
-    const placed: Placed[] = [];
-
-    // Two flasks conflict if same-layer columns sit too close, OR their
-    // (scaled) body boxes overlap in BOTH axes. The 2D body test lets chains
-    // cluster at varied x — so the rack reads organically, not as an even comb —
-    // while the actual bodies never stack in front of one another.
-    const conflicts = (a: Placed, p: Placed): boolean => {
-      if (a.layer === p.layer && Math.abs(a.xpx - p.xpx) < sameLayerGapPx)
-        return true;
-      const minDx =
-        ((FLASK_WIDTH * a.scale + FLASK_WIDTH * p.scale) / 2) * BODY_OVERLAP_PAD;
-      const minDy =
-        ((FLASK_HEIGHT * a.scale + FLASK_HEIGHT * p.scale) / 2) * BODY_OVERLAP_PAD;
-      return (
-        Math.abs(a.xpx - p.xpx) < minDx && Math.abs(a.bodyY - p.bodyY) < minDy
-      );
-    };
-
-    // Take the first random x with no conflicts; if the field is too dense to
-    // clear, keep the candidate with the fewest — never drop a flask.
-    const sampleX = (layer: number, scale: number, bodyY: number): number => {
-      let bestX = 0.5;
-      let bestConflicts = Infinity;
-      for (let t = 0; t < PLACE_TRIES; t++) {
-        const xPct = 0.03 + placeRng() * 0.94;
-        const cand: Placed = { xpx: xPct * viewport.width, bodyY, scale, layer };
-        let n = 0;
-        for (const p of placed) if (conflicts(cand, p)) n++;
-        if (n === 0) return xPct;
-        if (n < bestConflicts) {
-          bestConflicts = n;
-          bestX = xPct;
-        }
-      }
-      return bestX;
-    };
-
     for (let i = 0; i < config.flaskCount; i++) {
       const layer = Math.min(Math.floor(i / perTier), tierCount - 1);
       const segments = tierSegments(layer);
@@ -183,23 +179,18 @@ export function generateFlasks(
     return out;
   }
 
-  // layout === "column": a mobile GRID — up to COLS bottles per row, but with a
-  // CONTINUOUS depth (each successive flask hangs a little lower, columns
-  // cycling) so it reads as a dense diagonal stagger, not visible rows. Long
-  // top-anchored chains; skeleton chains keep them cheap.
-  const COLS = 3;
-  const colX = [0.16, 0.5, 0.84];
+  // layout === "column" (mobile): a random, dense SCATTER (no rigid columns) of
+  // one foreground flask per skill, on long top-anchored chains. Random x with
+  // 2D anti-overlap (shared with the field); continuous depth fills the tall
+  // section evenly. Background skeletons sit behind for depth.
   const TOP_ANCHOR = -50;
   const scale0 = config.layerScale[0];
   // Show EVERY skill: one foreground flask per skill (capped by flaskCount).
-  // Only maxPhysicsFlasks of them are physics; the rest are static skill flasks
-  // (still iconed). Remaining flaskCount slots become background skeletons.
+  // Only maxPhysicsFlasks are physics; the rest are static skill flasks.
   const foreground = Math.max(1, Math.min(skills.length, config.flaskCount));
-  const topGuide = 0.06 * viewport.height;
-  const depthSpan = 0.88 * viewport.height;
+  const topGuide = 0.05 * viewport.height;
+  const depthSpan = 0.9 * viewport.height;
   for (let i = 0; i < foreground; i++) {
-    const col = i % COLS;
-    const xPct = colX[col] + (rng() - 0.5) * 0.03;
     const frac = foreground > 1 ? i / (foreground - 1) : 0;
     const targetY = topGuide + frac * depthSpan;
     const desired = targetY - TOP_ANCHOR - (FLASK_HITBOX_HEIGHT * scale0) / 2;
@@ -209,15 +200,19 @@ export function generateFlasks(
       Math.min(maxSeg, segmentsForLength(desired) + jit)
     );
     const anchorY = TOP_ANCHOR + (rng() - 0.5) * 24;
+    const bodyY =
+      anchorY + chainLength(segments) + (FLASK_HITBOX_HEIGHT * scale0) / 2;
+    const xPct = sampleX(0, scale0, bodyY); // random x, no columns
+    placed.push({ xpx: xPct * viewport.width, bodyY, scale: scale0, layer: 0 });
     out.push(makeFlask(xPct, 0, anchorY, segments));
   }
   const bgCount = Math.max(0, config.flaskCount - foreground);
   for (let i = 0; i < bgCount; i++) {
     const layer = 1 + (i % Math.max(1, tierCount - 1));
-    const xPct = 0.1 + rng() * 0.8;
+    const xPct = 0.08 + rng() * 0.84;
     const segments = minSeg + Math.floor(rng() * (maxSeg - minSeg + 1));
     // Ghosts (background skeletons) hang lower — longer chain before they start.
-    const anchorY = (0.35 + rng() * 0.55) * viewport.height - chainLength(segments);
+    const anchorY = (0.3 + rng() * 0.6) * viewport.height - chainLength(segments);
     out.push(makeFlask(xPct, layer, anchorY, segments));
   }
   out.sort((a, b) => b.layer - a.layer || bodyDepth(b) - bodyDepth(a));
