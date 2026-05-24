@@ -98,15 +98,17 @@ describe("generateFlasks (field randomness)", () => {
     }
   });
 
-  it("pops roughly 10-20% of flasks beyond the subtle jitter band", () => {
+  it("spreads anchorY widely instead of clustering on a line", () => {
     const big: FieldConfig = { ...FIELD, flaskCount: 240, maxPhysicsFlasks: 240 };
     const f = generateFlasks(big, vp, skills, 42);
-    const popped = f.filter(
-      (x) => Math.abs(x.anchorY - TOP_LINE.baseY) > TOP_LINE.jitter
-    ).length;
-    const frac = popped / f.length;
-    expect(frac).toBeGreaterThan(0.08);
-    expect(frac).toBeLessThan(0.28);
+    const ys = f.map((x) => x.anchorY).sort((a, b) => a - b);
+    const median = ys[Math.floor(ys.length / 2)];
+    // The bulk must NOT sit within a narrow band around the median (that would
+    // be a visible row); a wide spread keeps far fewer than half near it.
+    const nearMedian = ys.filter((y) => Math.abs(y - median) <= 20).length;
+    expect(nearMedian / ys.length).toBeLessThan(0.5);
+    // ...and the overall range is wide.
+    expect(ys[ys.length - 1] - ys[0]).toBeGreaterThan(80);
   });
 
   it("returns every flask (no silent drops) when the field has room", () => {

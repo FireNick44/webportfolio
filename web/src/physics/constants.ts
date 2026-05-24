@@ -54,19 +54,16 @@ export const MIN_SAME_LAYER_DISTANCE_PCT = 0.07;
 // it. Smaller than the same-layer gap since depth/scale already separates them.
 export const MIN_CROSS_LAYER_DISTANCE_PCT = 0.03;
 
-// Desktop "top line" variety. Most field flasks hang near baseY with a subtle
-// ±jitter; ~popChance of them pop further. Pops are biased upward (more
-// negative → higher → tucked behind the top WaveDivider, which only masks the
-// top ~50-70px); the ceil/floor clamp keeps chain-tops hidden either way.
+// Desktop "top line" variety. Flask anchors are spread WIDELY across the band
+// below (not clustered on a line) so flasks don't hang in per-layer rows. The
+// spread is upward-biased (more negative → higher → tucked behind the top
+// WaveDivider, which only masks the top ~50-70px) since there's far more safe
+// room above the wave than below it.
 export const TOP_LINE = {
-  baseY: -84,
-  jitter: 16,
-  popChance: 0.18,
-  popMin: 22,
-  popMax: 62,
-  upBias: 0.65,
-  ceilY: -160, // highest anchor (most negative / most hidden)
-  floorY: -64, // lowest anchor (least negative; keeps chain-top masked)
+  spreadSkew: 0.85, // <1 leans the spread upward (toward the hidden ceiling)
+  jitter: 14, // fine wobble on top of the spread
+  ceilY: -180, // highest anchor (most negative / most hidden)
+  floorY: -64, // lowest anchor (keeps chain-top behind the wave)
 } as const;
 
 export const MOBILE_BREAKPOINT = 768;

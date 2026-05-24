@@ -91,20 +91,15 @@ export function generateFlasks(
     return Math.max(minSeg, base + jitter);
   };
 
-  // Vertical "top line" variety: a subtle jitter on every flask plus an
-  // occasional bigger pop (biased upward so chain-tops stay behind the wave).
-  // Always draws a fixed number of rng() values so tuning the magnitudes never
-  // reshuffles the rest of the stream.
+  // Vertical "top line" variety: spread anchors WIDELY (not on a line) across
+  // the safe band so flasks don't hang in per-layer rows. Upward-biased via
+  // spreadSkew (more safe room above the wave) plus a fine wobble.
   const topLineY = (): number => {
-    const rPop = rng();
-    const rDir = rng();
-    const rMag = rng();
-    const rJit = rng();
-    let y = TOP_LINE.baseY + (rJit - 0.5) * 2 * TOP_LINE.jitter;
-    if (rPop < TOP_LINE.popChance) {
-      const sign = rDir < TOP_LINE.upBias ? -1 : 1;
-      y += sign * (TOP_LINE.popMin + rMag * (TOP_LINE.popMax - TOP_LINE.popMin));
-    }
+    const u = rng();
+    const wob = rng();
+    const t = Math.pow(u, TOP_LINE.spreadSkew); // 0..1, leaned upward
+    let y = TOP_LINE.floorY + t * (TOP_LINE.ceilY - TOP_LINE.floorY);
+    y += (wob - 0.5) * 2 * TOP_LINE.jitter;
     return Math.max(TOP_LINE.ceilY, Math.min(TOP_LINE.floorY, y));
   };
 
