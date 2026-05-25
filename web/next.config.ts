@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
+import { computeBuildEnv } from "./src/lib/buildEnv";
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  env: computeBuildEnv(),
   async rewrites() {
     // Array rewrites run AFTER the filesystem/public check, so
     // /v/2024/<asset> is served from public directly; only the bare
