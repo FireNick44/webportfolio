@@ -41,9 +41,32 @@ describe("generateFlasks (field)", () => {
     for (const x of f) if (x.isSkeleton) expect(x.skillIcon).toBeUndefined();
   });
 
-  it("caps physics flasks at maxPhysicsFlasks (overflow → skeleton)", () => {
+  it("makes every icon flask interactive (no physics cap on icons in field)", () => {
     const f = generateFlasks(FIELD, vp, skills, 42);
-    expect(f.filter((x) => !x.isSkeleton).length).toBeLessThanOrEqual(FIELD.maxPhysicsFlasks);
+    // every flask that shows an icon is a physics flask…
+    for (const x of f) if (x.skillIcon) expect(x.isSkeleton).toBe(false);
+    // …and every physics flask carries an icon (icon-less foreground → skeleton)
+    for (const x of f) if (!x.isSkeleton) expect(x.skillIcon).toBeDefined();
+  });
+
+  it("keeps the whole field static when motion is off (icons stay, no physics)", () => {
+    const off: FieldConfig = { ...FIELD, maxPhysicsFlasks: 0 };
+    const f = generateFlasks(off, vp, skills, 42);
+    expect(f.every((x) => x.isSkeleton)).toBe(true);
+    expect(f.some((x) => x.skillIcon)).toBe(true); // icons still shown, just static
+  });
+
+  it("adds bgSkeletons as extra icon-less ghosts that reach the upper band", () => {
+    const base = generateFlasks(FIELD, vp, skills, 42);
+    const withBg = generateFlasks({ ...FIELD, bgSkeletons: 14 }, vp, skills, 42);
+    expect(withBg.length).toBe(base.length + 14);
+    const firstSkelTier = FIELD.layerScale.length - FIELD.skeletonBands;
+    const ghosts = withBg.filter((x) => x.layer >= firstSkelTier);
+    expect(ghosts.every((x) => x.isSkeleton && x.skillIcon === undefined)).toBe(true);
+    // background depth now reaches the top, not just the deep bottom.
+    const depth = (x: (typeof withBg)[number]) =>
+      x.anchorY + chainLength(x.segments);
+    expect(ghosts.some((x) => depth(x) < 0.45 * vp.height)).toBe(true);
   });
 
   it("assigns icons only up to the skill count", () => {
@@ -51,14 +74,16 @@ describe("generateFlasks (field)", () => {
     expect(f.filter((x) => x.skillIcon).length).toBeLessThanOrEqual(skills.length);
   });
 
-  it("chain length (segments) grows from front tier to back tier", () => {
-    const f = generateFlasks(FIELD, vp, skills, 42);
-    const avg = (layer: number) => {
-      const xs = f.filter((x) => x.layer === layer);
-      return xs.reduce((s, x) => s + x.segments, 0) / Math.max(1, xs.length);
-    };
-    expect(avg(0)).toBeLessThan(avg(2));
-    expect(avg(2)).toBeLessThan(avg(4));
+  it("chain length grows with how deep the flask body hangs (depth, not tier)", () => {
+    const big: FieldConfig = { ...FIELD, flaskCount: 200, maxPhysicsFlasks: 200 };
+    const f = generateFlasks(big, vp, skills, 42);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+    const avg = (xs: typeof f) =>
+      xs.reduce((s, x) => s + x.segments, 0) / Math.max(1, xs.length);
+    const shallow = f.filter((x) => bodyY(x) < 0.4 * vp.height);
+    const deep = f.filter((x) => bodyY(x) > 0.7 * vp.height);
+    expect(avg(shallow)).toBeLessThan(avg(deep));
   });
 
   it("orders flasks back-to-front by depth (lower bodies render behind)", () => {
@@ -110,25 +135,85 @@ describe("generateFlasks (field randomness)", () => {
     expect(uniq.size).toBeGreaterThan(5);
   });
 
-  it("clamps anchorY to the safe (wave-masked) band", () => {
-    const f = generateFlasks(FIELD, vp, skills, 42);
-    for (const x of f) {
-      expect(x.anchorY).toBeGreaterThanOrEqual(TOP_LINE.ceilY);
-      expect(x.anchorY).toBeLessThanOrEqual(TOP_LINE.floorY);
+  it("keeps every chain top hidden behind the wave — no mid-air chains", () => {
+    // incl. bg skeletons, and on a TALL viewport where the old clamp let deep
+    // skeleton chains start in mid-air (anchorY went positive). Regression guard.
+    for (const view of [vp, { width: 1440, height: 1440 }]) {
+      const f = generateFlasks({ ...FIELD, bgSkeletons: 14 }, view, skills, 42);
+      for (const x of f) expect(x.anchorY).toBeLessThanOrEqual(TOP_LINE.floorY);
     }
   });
 
-  it("spreads anchorY widely instead of clustering on a line", () => {
+  it("spreads flask bodies widely down the section (not one row)", () => {
     const big: FieldConfig = { ...FIELD, flaskCount: 240, maxPhysicsFlasks: 240 };
     const f = generateFlasks(big, vp, skills, 42);
-    const ys = f.map((x) => x.anchorY).sort((a, b) => a - b);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+    const ys = f.map(bodyY).sort((a, b) => a - b);
     const median = ys[Math.floor(ys.length / 2)];
-    // The bulk must NOT sit within a narrow band around the median (that would
-    // be a visible row); a wide spread keeps far fewer than half near it.
+    // The bulk must NOT sit within a narrow band around the median (a visible
+    // row); a wide vertical spread keeps far fewer than half near it.
     const nearMedian = ys.filter((y) => Math.abs(y - median) <= 20).length;
     expect(nearMedian / ys.length).toBeLessThan(0.5);
-    // ...and the overall range is wide.
-    expect(ys[ys.length - 1] - ys[0]).toBeGreaterThan(80);
+    // ...and bodies span most of the section height.
+    expect(ys[ys.length - 1] - ys[0]).toBeGreaterThan(0.5 * vp.height);
+  });
+
+  it("fills the lower third of the section (no wasted bottom)", () => {
+    const f = generateFlasks({ ...FIELD, bgSkeletons: 14 }, vp, skills, 42);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+    expect(f.some((x) => bodyY(x) > 0.66 * vp.height)).toBe(true);
+  });
+
+  it("mixes flask sizes across heights — big flasks hang high AND low", () => {
+    const f = generateFlasks(FIELD, vp, skills, 42);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+    const big = f.filter((x) => x.scale >= 0.82); // front (large) tiers
+    expect(big.some((x) => bodyY(x) < 0.4 * vp.height)).toBe(true);
+    expect(big.some((x) => bodyY(x) > 0.6 * vp.height)).toBe(true);
+  });
+
+  it("keeps flask bodies clear of the top & bottom wave bands (given a wave height)", () => {
+    const waveH = 130;
+    const f = generateFlasks(FIELD, vp, skills, 42, undefined, waveH);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+    for (const x of f) {
+      expect(bodyY(x)).toBeGreaterThanOrEqual(waveH); // below the top wave
+      expect(bodyY(x)).toBeLessThanOrEqual(vp.height - waveH + 1e-6); // above bottom wave
+    }
+  });
+
+  it("paints higher physics flasks in front, all skeletons behind them", () => {
+    const f = generateFlasks({ ...FIELD, bgSkeletons: 10 }, vp, skills, 42);
+    const bodyY = (x: (typeof f)[number]) =>
+      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+    const firstPhysics = f.findIndex((x) => !x.isSkeleton);
+    expect(firstPhysics).toBeGreaterThan(0); // skeletons lead (painted behind)
+    expect(f.slice(0, firstPhysics).every((x) => x.isSkeleton)).toBe(true);
+    // no coverSkeletons here → nothing skeletal after the physics block
+    expect(f.slice(firstPhysics).some((x) => x.isSkeleton)).toBe(false);
+    const physics = f.filter((x) => !x.isSkeleton);
+    for (let i = 1; i < physics.length; i++) {
+      // later in DOM = painted on top = higher on screen (smaller bodyY)
+      expect(bodyY(physics[i])).toBeLessThanOrEqual(bodyY(physics[i - 1]) + 1e-6);
+    }
+  });
+
+  it("adds coverSkeletons as icon-less flasks BEHIND the physics flasks", () => {
+    const base = generateFlasks(FIELD, vp, skills, 42);
+    const f = generateFlasks({ ...FIELD, coverSkeletons: 6 }, vp, skills, 42);
+    expect(f.length).toBe(base.length + 6);
+    // covers are the only layer-0 skeletons (foreground tier, no icon)
+    const covers = f.filter((x) => x.isSkeleton && x.layer === 0);
+    expect(covers.length).toBe(6);
+    for (const c of covers) expect(c.skillIcon).toBeUndefined();
+    // every cover paints before every physics flask (i.e. behind them)
+    const lastCoverIdx = Math.max(...covers.map((c) => f.indexOf(c)));
+    const firstPhysicsIdx = f.findIndex((x) => !x.isSkeleton);
+    expect(lastCoverIdx).toBeLessThan(firstPhysicsIdx);
   });
 
   it("returns every flask (no silent drops) when the field has room", () => {

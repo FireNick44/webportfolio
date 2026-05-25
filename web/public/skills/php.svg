@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <ellipse cx="64" cy="64" rx="64" ry="40" fill="#777bb4"/>
-  <text x="64" y="72" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="38" fill="#fff">php</text>
+<svg width="64" height="73" viewBox="0 0 64 73" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M5.815 65.222L0 0H63.9L58.076 65.212L31.91 72.461L5.815 65.222Z" fill="#6C7DB7"/>
+  <path d="M31.9492 66.921L53.0932 61.059L58.0682 5.33301H31.9492V66.921Z" fill="#9A9FC5"/>
+  <path d="M23.6048 56.7179L15.5608 54.3389L11.9048 13.3269H51.9918L49.8178 37.6609H22.0548L23.6048 56.7219V56.7179ZM20.6548 21.5719L21.4078 29.7719H42.5928L43.3328 21.5719H20.6548Z" fill="#EBEBEB"/>
+  <path d="M31.9492 37.6559V29.7669H42.5932L43.3332 21.5669H31.9492V13.3269H51.9932L49.8182 37.6559H31.9492Z" fill="white"/>
 </svg>

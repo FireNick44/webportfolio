@@ -1,8 +1,10 @@
 export const CHAIN_SEGMENT_COUNT = 8;
 export const CHAIN_SEGMENT_WIDTH = 26;
 export const CHAIN_SEGMENT_HEIGHT = 60;
-export const CHAIN_STIFFNESS = 0.92;
-export const CHAIN_DAMPING = 0.45;
+// Stiff, lightly-damped joints — matter-js's smooth "ropeC" feel (stiffness 1,
+// length 0). The old 0.92 / 0.45 read as a chompy, over-damped zig-zag.
+export const CHAIN_STIFFNESS = 1;
+export const CHAIN_DAMPING = 0.1;
 
 // Skeleton chains: only the bottom MAX_PHYSICS_SEGMENTS links of a chain are
 // simulated; any links above that are drawn as a static rope down to the pin.
@@ -20,13 +22,44 @@ export function getSegmentHeight(index: number): number {
   return CHAIN_SEGMENT_HEIGHT;
 }
 
+// --- Chain geometry (overlap-aware), single source of truth -----------------
+// Where each joint connects, as a fraction of a segment's height from its centre:
+//   0.5  = links touch end-to-end
+//   <0.5 = links overlap (hides joints; reads as a continuous rope)
+//   >0.5 = a visible GAP between links (reads as a distinct-link chain)
+// Stiffness 1 + low damping (above) keep it from zig-zagging at any spacing.
+export const JOINT_INSET = 0.53;
+
+/** Centre-to-centre advance from link i to i+1 (variable heights, overlap-aware). */
+export function segmentAdvance(i: number): number {
+  return JOINT_INSET * (getSegmentHeight(i) + getSegmentHeight(i + 1));
+}
+
+/** Vertical centre of chain link i, measured down from the chain's top anchor. */
+export function linkCenterOffset(i: number): number {
+  let y = getSegmentHeight(0) / 2;
+  for (let k = 0; k < i; k++) y += segmentAdvance(k);
+  return y;
+}
+
+/** Anchor → bottom of the last segment (where the flask attaches), overlap-aware. */
+export function chainLength(segments: number): number {
+  if (segments <= 0) return 0;
+  return linkCenterOffset(segments - 1) + getSegmentHeight(segments - 1) / 2;
+}
+
+/** Smallest segment count whose chain reaches at least `len` px. */
+export function segmentsForLength(len: number): number {
+  let n = 1;
+  while (n < 128 && chainLength(n) < len) n++;
+  return n;
+}
+
 // Visual flask size vs physics hitbox
 export const FLASK_WIDTH = 120;
 export const FLASK_HEIGHT = 192;
 export const FLASK_HITBOX_WIDTH = 75;
 export const FLASK_HITBOX_HEIGHT = 145;
-
-export const MOUSE_BODY_RADIUS = 15;
 
 // Depth layers
 export const DEPTH_LAYERS = 3;
@@ -42,8 +75,6 @@ export function layerFilter(layer: number) {
   const cat = CAT_LAYER[idx];
   return { category: cat, mask: cat | CAT_MOUSE | CAT_WALL };
 }
-
-export const MOUSE_MASK = CAT_LAYER[0] | CAT_LAYER[1] | CAT_LAYER[2];
 
 export const WALL_FILTER = {
   category: CAT_WALL,
@@ -62,16 +93,11 @@ export const MIN_SAME_LAYER_DISTANCE_PCT = 0.07;
 // no longer reads as an even comb.
 export const BODY_OVERLAP_PAD = 0.9;
 
-// Desktop "top line" variety. Flask anchors are spread WIDELY across the band
-// below (not clustered on a line) so flasks don't hang in per-layer rows. The
-// spread is upward-biased (more negative → higher → tucked behind the top
-// WaveDivider, which only masks the top ~50-70px) since there's far more safe
-// room above the wave than below it.
+// The lowest a chain's TOP anchor may sit and still tuck behind the top
+// WaveDivider (which masks ~the top 50-70px). generateFlasks keeps every chain
+// top at/above this (see solveChain → HIDDEN_TOP) so no chain starts in mid-air.
 export const TOP_LINE = {
-  spreadSkew: 0.85, // <1 leans the spread upward (toward the hidden ceiling)
-  jitter: 14, // fine wobble on top of the spread
-  ceilY: -180, // highest anchor (most negative / most hidden)
-  floorY: -64, // lowest anchor (keeps chain-top behind the wave)
+  floorY: -64, // chain-top ceiling: at/above this stays hidden behind the wave
 } as const;
 
 export const MOBILE_BREAKPOINT = 768;

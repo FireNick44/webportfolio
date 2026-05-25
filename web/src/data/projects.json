@@ -1,5 +1,12 @@
 [
   {
+    "name": "FOREVR",
+    "subtitle": "iOS · React Native",
+    "tech": [],
+    "url": "https://apps.apple.com/app/id6761362473",
+    "size": "large"
+  },
+  {
     "name": "Im.ProveYou",
     "subtitle": "IMS Thesis",
     "tech": ["Laravel"],
@@ -12,9 +19,10 @@
     "url": "https://github.com/FireNick44/webportfolio"
   },
   {
-    "name": "Login Frontend",
-    "tech": ["HTML/CSS", "JS"],
-    "url": "https://github.com/FireNick44/LoginFrontend"
+    "name": "GitHub Profile",
+    "subtitle": "README",
+    "tech": ["Markdown", "SVG"],
+    "url": "https://github.com/FireNick44/FireNick44"
   },
   {
     "name": "Swiss Transport",

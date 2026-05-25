@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Noel Studer",
-    short_name: "Noel Studer",
+    name: "Yannic Studer",
+    short_name: "Yannic Studer",
     description: "Software developer & digital tinkerer.",
     start_url: "/",
     display: "standalone",

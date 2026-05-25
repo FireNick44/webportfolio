@@ -5,9 +5,10 @@ import { Pointer } from "lucide-react";
 
 /**
  * First-run interaction hint for the flask rack: a soft dimming scrim with an
- * animated "drag" pointer so visitors realise the bottles are physically
- * interactive. Purely visual (pointer-events-none) — it doesn't block the drag;
- * the scene dismisses it on the first real pointer-down.
+ * animated "drag" cursor so visitors realise they can grab a bottle and drag it.
+ * One demo flask is lifted bright above the scrim (see PhysicsScene) as the thing
+ * to grab. Purely visual (pointer-events-none); the scene dismisses it on the
+ * first press.
  */
 export default function FlaskHint({
   show,
@@ -39,12 +40,13 @@ export default function FlaskHint({
               {/* ghost pulse */}
               <motion.span
                 className="absolute inset-0 rounded-full border border-foreground/20"
-                animate={{ scale: [1, 1.18, 1], opacity: [0.5, 0, 0.5] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ scale: [1, 1.15, 1], opacity: [0.45, 0, 0.45] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
+              {/* cursor grabbing + dragging side to side */}
               <motion.span
-                animate={{ x: [-18, 18, -18], rotate: [-8, 8, -8] }}
-                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+                animate={{ x: [-16, 16, -16], rotate: [-6, 6, -6] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               >
                 <Pointer size={24} className="text-foreground" />
               </motion.span>

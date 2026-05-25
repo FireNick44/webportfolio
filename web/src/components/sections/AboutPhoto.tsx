@@ -39,7 +39,7 @@ export function AboutPhoto() {
         <div className="relative h-full w-full overflow-hidden rounded-full ring-1 ring-border">
           <Image
             src="/img/pic.webp"
-            alt="Noel Studer"
+            alt="Yannic Studer"
             fill
             sizes="(max-width: 1024px) 70vw, 320px"
             className="object-cover transition-transform duration-700 group-hover:scale-105"

@@ -1,0 +1,11 @@
+# Netlify config — Next.js portfolio. App lives in web/.
+# Netlify applies its Next.js runtime automatically; no plugin block needed.
+[build]
+  base = "web"
+  # Use the npm script (not bare `next build`) so the `prebuild` step
+  # runs sync:versions and generates public/v/<id> before the build.
+  command = "npm run build"
+
+[build.environment]
+  # Pin an LTS Node for reproducible CI builds (local may be on newer/non-LTS).
+  NODE_VERSION = "22"

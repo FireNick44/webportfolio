@@ -70,6 +70,14 @@ export default function Hero({ dict }: { dict: Dictionary }) {
           initial="hidden"
           animate={ready ? "show" : "hidden"}
           aria-label={name}
+          // The per-letter overflow-hidden masks clip the inherited text-shadow
+          // into hard dark rectangles during the rise. Hold the shadow off until
+          // the letters land (when the masks open to overflow-visible), then ease
+          // it in — so the soft glow appears only once it can't be clipped.
+          style={{
+            textShadow: done ? "0 2px 28px rgba(8,12,40,0.45)" : "none",
+            transition: "text-shadow 0.5s ease-out",
+          }}
           className="font-display text-[clamp(3rem,12vw,11rem)] font-bold leading-[0.92] tracking-tight"
         >
           {chars.map((ch, i) => (

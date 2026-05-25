@@ -1,18 +1,19 @@
 import { useEffect, useRef } from "react";
 import Matter from "matter-js";
-import { CAT_MOUSE, MOUSE_MASK } from "@/physics/constants";
 
+// How near a press must land to grab a flask/chain when it doesn't land directly
+// on one.
 const GRAB_RADIUS = 56;
-// Desktop cursor "shove" circle. Kept near pointer-size so it nudges flasks
-// rather than bulldozing them (the flask hitbox is ~75px wide).
-const REPEL_RADIUS = 22;
 
 /**
- * Two interaction modes, chosen by device:
- *  • Desktop (fine pointer / mouse): an invisible circle follows the cursor and
- *    physically shoves the flasks out of the way — no clicking needed.
- *  • Touch (coarse pointer / no hover, incl. iPad): grab-and-drag a flask, or
- *    catch a chain link anywhere along the rope and swing it.
+ * Drag interaction for the flask rack on BOTH desktop and touch: press a flask
+ * (or catch a chain link anywhere along the rope) and drag it; release to let it
+ * swing. No ambient cursor-repel — just click/tap-and-drag.
+ *
+ * Uses Pointer Events so one path covers mouse + touch and we get `pointercancel`
+ * for free (the browser fires it when it takes a touch over as a scroll — exactly
+ * when we want to drop the drag). The drag is also dropped on tab-switch, window
+ * blur and scroll, so a half-finished drag never "sticks" with weird behaviour.
  */
 export function useMousePhysics(
   engine: Matter.Engine,
@@ -29,44 +30,6 @@ export function useMousePhysics(
       return { x: clientX - rect.left, y: clientY - rect.top };
     };
 
-    const pointerFine =
-      typeof window !== "undefined" &&
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-
-    // ── Desktop: cursor-repel circle ──────────────────────────────────────
-    if (pointerFine) {
-      const cursor = Matter.Bodies.circle(-3000, -3000, REPEL_RADIUS, {
-        isStatic: true,
-        collisionFilter: { category: CAT_MOUSE, mask: MOUSE_MASK },
-        label: "mouse-repel",
-      });
-      Matter.Composite.add(engine.world, cursor);
-
-      const onMove = (e: MouseEvent) => {
-        const pos = getWorldPos(e.clientX, e.clientY);
-        Matter.Body.setPosition(cursor, pos);
-        // Wake flasks within reach so they react to the cursor.
-        const bodies = Matter.Composite.allBodies(engine.world);
-        for (const b of bodies) {
-          if (b.label !== "flask" || !b.isSleeping) continue;
-          const d = Math.hypot(b.position.x - pos.x, b.position.y - pos.y);
-          if (d < REPEL_RADIUS + 120) Matter.Sleeping.set(b, false);
-        }
-      };
-      const park = () =>
-        Matter.Body.setPosition(cursor, { x: -3000, y: -3000 });
-
-      container.addEventListener("mousemove", onMove);
-      container.addEventListener("mouseleave", park);
-
-      return () => {
-        container.removeEventListener("mousemove", onMove);
-        container.removeEventListener("mouseleave", park);
-        Matter.Composite.remove(engine.world, cursor);
-      };
-    }
-
-    // ── Touch: grab & drag a flask OR a chain link ───────────────────────
     const isGrabbable = (b: Matter.Body) =>
       !b.isStatic &&
       (b.label === "flask" || b.label.startsWith("chain-segment-"));
@@ -74,12 +37,11 @@ export function useMousePhysics(
     const pickGrabbable = (pos: { x: number; y: number }) => {
       const bodies = Matter.Composite.allBodies(engine.world);
       const hits = Matter.Query.point(bodies, pos).filter(isGrabbable);
-      // Prefer a flask directly under the finger, else any link under it.
+      // Prefer a flask directly under the pointer, else any link under it.
       const exactFlask = hits.find((b) => b.label === "flask");
       if (exactFlask) return exactFlask;
       if (hits.length) return hits[0];
-      // Otherwise the nearest grabbable within reach, biased toward flasks
-      // (they're the primary target; chains are a bonus catch).
+      // Otherwise the nearest grabbable within reach, biased toward flasks.
       let nearest: Matter.Body | null = null;
       let nearestScore = GRAB_RADIUS;
       for (const b of bodies) {
@@ -98,8 +60,7 @@ export function useMousePhysics(
       const pos = getWorldPos(clientX, clientY);
       const body = pickGrabbable(pos);
       if (!body) return;
-      // Wake the rack so the grabbed link's neighbours + flask follow (chain
-      // segments share no per-chain id, so we can't cheaply wake just one rope).
+      // Wake the rack so the grabbed link's neighbours + flask follow.
       for (const b of Matter.Composite.allBodies(engine.world)) {
         if (!b.isStatic) Matter.Sleeping.set(b, false);
       }
@@ -131,27 +92,39 @@ export function useMousePhysics(
       }
     };
 
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length > 0)
-        startDrag(e.touches[0].clientX, e.touches[0].clientY);
+    const onPointerDown = (e: PointerEvent) => startDrag(e.clientX, e.clientY);
+    const onPointerMove = (e: PointerEvent) => {
+      if (constraintRef.current) moveDrag(e.clientX, e.clientY);
     };
-    const onTouchMove = (e: TouchEvent) => {
-      if (e.touches.length > 0)
-        moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+    const onVisibility = () => {
+      if (document.visibilityState === "hidden") endDrag();
     };
-    const onTouchEnd = () => endDrag();
+    // Critical: the decorative backdrop is an <img>, which is draggable by
+    // default — without this, pressing it starts a native image drag-and-drop
+    // that fires pointercancel and kills the flask drag before it can follow.
+    const onDragStart = (e: Event) => e.preventDefault();
 
-    container.addEventListener("touchstart", onTouchStart, { passive: true });
-    container.addEventListener("touchmove", onTouchMove, { passive: true });
-    container.addEventListener("touchend", onTouchEnd);
+    container.addEventListener("pointerdown", onPointerDown);
+    container.addEventListener("dragstart", onDragStart);
+    // Track move/end on window so a drag that wanders off the rack still follows
+    // and always releases. scroll/blur/cancel/hidden all drop a stuck drag.
+    window.addEventListener("pointermove", onPointerMove);
+    window.addEventListener("pointerup", endDrag);
+    window.addEventListener("pointercancel", endDrag);
+    window.addEventListener("blur", endDrag);
+    window.addEventListener("scroll", endDrag, { passive: true });
+    document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      container.removeEventListener("touchstart", onTouchStart);
-      container.removeEventListener("touchmove", onTouchMove);
-      container.removeEventListener("touchend", onTouchEnd);
-      if (constraintRef.current) {
-        Matter.Composite.remove(engine.world, constraintRef.current);
-      }
+      container.removeEventListener("pointerdown", onPointerDown);
+      container.removeEventListener("dragstart", onDragStart);
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", endDrag);
+      window.removeEventListener("pointercancel", endDrag);
+      window.removeEventListener("blur", endDrag);
+      window.removeEventListener("scroll", endDrag);
+      document.removeEventListener("visibilitychange", onVisibility);
+      endDrag();
     };
   }, [engine, containerRef]);
 }

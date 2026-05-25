@@ -5,6 +5,8 @@ import {
   CHAIN_STIFFNESS,
   CHAIN_DAMPING,
   getSegmentHeight,
+  linkCenterOffset,
+  JOINT_INSET,
   CHAIN_FILTER,
 } from "./constants";
 
@@ -30,25 +32,21 @@ export function createChainBodies(
   const constraints: Matter.Constraint[] = [];
 
   // The top `staticCount` links are drawn as a static rope (no bodies); physics
-  // begins below them, pinned to the fixed point at anchorY + staticHeight.
-  let staticHeight = 0;
-  for (let i = 0; i < staticCount; i++) staticHeight += getSegmentHeight(i);
-
+  // begins below them. With link overlap the pin sits at the first physics link's
+  // TOP = its overlap-aware centre minus half its height.
+  const firstPhysHeight = getSegmentHeight(staticCount);
+  const staticHeight = linkCenterOffset(staticCount) - firstPhysHeight / 2;
   const pinY = anchorY + staticHeight;
-  let currentY = pinY;
 
   for (let idx = staticCount; idx < segmentCount; idx++) {
-    // Width scales with depth (perspective/thickness); height does NOT — chain
-    // LENGTH is driven by segment count per tier. Heights stay indexed by the
-    // link's position in the full chain so a partial chain lines up under its
-    // static top.
+    // Width scales with depth (perspective/thickness); height does NOT. Centre is
+    // the overlap-aware position so links sit packed/overlapping, not end-to-end.
     const h = getSegmentHeight(idx);
     segmentHeights.push(h);
 
-    const y = currentY + h / 2;
     const segment = Matter.Bodies.rectangle(
       anchorX,
-      y,
+      anchorY + linkCenterOffset(idx),
       CHAIN_SEGMENT_WIDTH * scale,
       h,
       {
@@ -60,17 +58,18 @@ export function createChainBodies(
       }
     );
     segments.push(segment);
-    currentY += h;
   }
 
+  // Joints connected INSET from each segment's centre (not the edge) → adjacent
+  // links overlap, hiding the joint and smoothing the curve (matter-js "ropeC").
   for (let i = 0; i < segments.length - 1; i++) {
     const hA = segmentHeights[i];
     const hB = segmentHeights[i + 1];
     const constraint = Matter.Constraint.create({
       bodyA: segments[i],
-      pointA: { x: 0, y: hA / 2 },
+      pointA: { x: 0, y: JOINT_INSET * hA },
       bodyB: segments[i + 1],
-      pointB: { x: 0, y: -hB / 2 },
+      pointB: { x: 0, y: -JOINT_INSET * hB },
       stiffness: CHAIN_STIFFNESS,
       damping: CHAIN_DAMPING,
       length: 0,

@@ -1,15 +1,16 @@
 "use client";
 
-// A small "NS" (Noel Studer) rendered as a hand-built HTML pixel grid — the
+// A small "YS" (Yannic Studer) rendered as a hand-built HTML pixel grid — the
 // "made it in markup, no image" flourish. 7 rows × 11 cols; 1 = lit cell.
+// Cols 0-4 = Y, col 5 = gap, cols 6-10 = S.
 const GRID: number[][] = [
   [1, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1],
-  [1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-  [1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0],
-  [1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0],
-  [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1],
-  [1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0],
+  [1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0],
+  [0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0],
+  [0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0],
+  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+  [0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 0],
 ];
 
 const COLS = 11;
@@ -38,7 +39,7 @@ export function PixelSignoff() {
               background: LIT,
               boxShadow: `0 0 ${CELL}px ${LIT}`,
               // gentle column-staggered glow; paused tabs simply rest lit.
-              animation: `ns-glow 2.4s ease-in-out ${(i % COLS) * 0.08}s infinite`,
+              animation: `ys-glow 2.4s ease-in-out ${(i % COLS) * 0.08}s infinite`,
             }}
           />
         ) : (

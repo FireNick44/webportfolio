@@ -10,9 +10,9 @@ import { useAppStore } from "@/store/useAppStore";
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
 import FlaskHint from "./FlaskHint";
-import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/physics/constants";
+import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH, FLASK_HITBOX_HEIGHT } from "@/physics/constants";
 import FlaskChain from "./FlaskChain";
-import { generateFlasks } from "@/physics/generateFlasks";
+import { generateFlasks, chainLength } from "@/physics/generateFlasks";
 import { fieldConfigFor } from "@/physics/fieldConfig";
 import skills from "@/data/skills.json";
 
@@ -22,10 +22,11 @@ const RACK_SURFACE_COLOR = "var(--background)";
 
 // Idle "bob" for the skill icons (config-gated; on at medium/high). Pure CSS so
 // it's GPU-composited and costs nothing per frame in JS. Per-flask phase delay
-// keeps them from bobbing in lockstep.
+// AND period (set inline) keep them from ever bobbing in lockstep. The shared
+// duration here is just a fallback; FlaskSVG overrides it per flask.
 const ICON_BOB_CSS =
-  "@keyframes flask-icon-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}" +
-  ".flask-icon-bob{animation:flask-icon-bob 2.6s ease-in-out infinite;will-change:transform}";
+  "@keyframes flask-icon-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}" +
+  ".flask-icon-bob{animation:flask-icon-bob 2.4s ease-in-out infinite;will-change:transform}";
 
 // Module-level so the "drag/stir" hint, once dismissed, stays dismissed for the
 // session even if the scene re-mounts when scrolled in and out of view.
@@ -107,14 +108,45 @@ export default function PhysicsScene({
     if (dims.width === 0) return [];
     const config = fieldConfigFor(tier, isMobile);
     const skillPaths = skills.map((s) => s.svgPath);
+    // svgPath → dominant icon colour, so flask water is picked to contrast.
+    const colorByPath = Object.fromEntries(
+      skills.map((s) => [s.svgPath, s.color])
+    );
+    // Mirror the WaveDivider's CSS height clamp(56px, 8vw, 130px) so flasks keep
+    // clear of the top + bottom wave bands.
+    const waveHeight = Math.max(56, Math.min(130, 0.08 * dims.width));
     return generateFlasks(
       config,
       { width: Math.min(dims.width, MAX_RACK_WIDTH), height: dims.height },
       skillPaths,
-      layoutSeed
+      layoutSeed,
+      colorByPath,
+      waveHeight
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed]);
+
+  // While the hint is up, lift ONE physics flask near the centre bright above the
+  // scrim as the "drag me" demo. Pick one whose body sits comfortably between the
+  // wave bands so the spotlight can't expose a cork the top wave was hiding.
+  const demoIndex = useMemo(() => {
+    if (!flasks.length || dims.height === 0) return -1;
+    let best = -1;
+    let bestScore = Infinity;
+    flasks.forEach((f, i) => {
+      if (f.isSkeleton || !f.skillIcon) return;
+      const bodyY =
+        f.anchorY + chainLength(f.segments) + (FLASK_HITBOX_HEIGHT * f.scale) / 2;
+      const yFrac = bodyY / dims.height;
+      if (yFrac < 0.22 || yFrac > 0.6) return; // keep clear of the wave bands
+      const score = Math.abs(f.xPct - 0.5) + Math.abs(yFrac - 0.4) * 0.8;
+      if (score < bestScore) {
+        bestScore = score;
+        best = i;
+      }
+    });
+    return best;
+  }, [flasks, dims.height]);
 
   useEffect(() => {
     if (dims.width === 0) return;
@@ -155,8 +187,10 @@ export default function PhysicsScene({
     return () => io.disconnect();
   }, []);
 
-  // Dismiss the interaction hint on the first interaction — a press (touch) or
-  // a cursor move through the rack (desktop repel).
+  // Dismiss the interaction hint on the first PRESS (click / tap) — the hint now
+  // prompts a click (which sets flasks swinging), so a mere hover or a scroll
+  // (which fires mousemove as content slides under the cursor) must NOT dismiss
+  // it, or the prompt would vanish before the visitor ever clicks.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -168,12 +202,10 @@ export default function PhysicsScene({
     el.addEventListener("pointerdown", onFirst, opts);
     el.addEventListener("mousedown", onFirst, opts);
     el.addEventListener("touchstart", onFirst, opts);
-    el.addEventListener("mousemove", onFirst, opts);
     return () => {
       el.removeEventListener("pointerdown", onFirst);
       el.removeEventListener("mousedown", onFirst);
       el.removeEventListener("touchstart", onFirst);
-      el.removeEventListener("mousemove", onFirst);
     };
   }, []);
 
@@ -210,7 +242,12 @@ export default function PhysicsScene({
               skillIcon={cfg.skillIcon}
               active={active}
               noFlaskCollision={isMobile}
-              iconBob={animateIcons ? (i * 0.41) % 2.6 : undefined}
+              elevated={active && !interacted && i === demoIndex}
+              iconBob={
+                animateIcons
+                  ? { delay: (i * 0.41) % 2.6, dur: 2.0 + ((i * 0.29) % 1.3) }
+                  : undefined
+              }
             />
           ))}
       </FrameLoopContext.Provider>

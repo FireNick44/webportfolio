@@ -16,6 +16,8 @@ import {
   MAX_LIQUID_TILT_DEG,
   MAX_PHYSICS_SEGMENTS,
   getSegmentHeight,
+  linkCenterOffset,
+  chainLength,
 } from "@/physics/constants";
 
 interface Props {
@@ -31,7 +33,9 @@ interface Props {
   noFlaskCollision?: boolean;
   scale?: number;
   isSkeleton?: boolean;
-  iconBob?: number;
+  iconBob?: { delay: number; dur: number };
+  /** Lift just this flask's body bright above the hint scrim (the drag demo). */
+  elevated?: boolean;
 }
 
 export default function FlaskChain({
@@ -48,6 +52,7 @@ export default function FlaskChain({
   scale = 1,
   isSkeleton = false,
   iconBob,
+  elevated = false,
 }: Props) {
   const chainRefs = useRef<(HTMLDivElement | null)[]>([]);
   const flaskRef = useRef<HTMLDivElement | null>(null);
@@ -80,7 +85,6 @@ export default function FlaskChain({
   // positions the whole chain + flask; for a physics flask it lays out just the
   // rigid top and the swinging remainder is driven by the frame loop.
   useEffect(() => {
-    let currentY = anchorY;
     for (let i = 0; i < staticCount; i++) {
       // Height is unscaled (full); only width thins with depth — matches the
       // dynamic path and the physics bodies.
@@ -88,11 +92,13 @@ export default function FlaskChain({
       const el = chainRefs.current[i];
       if (el) {
         const x = anchorX - CHAIN_SEGMENT_WIDTH / 2;
-        el.style.transform = `translate(${x}px, ${currentY}px) scaleX(${scale})`;
+        // Overlap-aware top: the link's centre (down from the anchor) minus half
+        // its height, so static links overlap exactly like the physics ones.
+        const top = anchorY + linkCenterOffset(i) - h / 2;
+        el.style.transform = `translate(${x}px, ${top}px) scaleX(${scale})`;
         el.style.transformOrigin = `${CHAIN_SEGMENT_WIDTH / 2}px ${h / 2}px`;
         el.style.opacity = String(opacity);
       }
-      currentY += h;
     }
 
     if (!isStatic) return; // physics flask: body + bottom links drive the rest
@@ -100,14 +106,14 @@ export default function FlaskChain({
     const flaskEl = flaskRef.current;
     if (flaskEl) {
       const x = anchorX - FLASK_WIDTH / 2;
-      // Match the dynamic path: visual is centered on the (scaled) flask body
-      // center, which sits half a scaled hitbox below the chain bottom.
-      const flaskCenterY = currentY + (FLASK_HITBOX_HEIGHT * scale) / 2;
+      // Flask attaches at the chain bottom (overlap-aware) + half a scaled hitbox.
+      const flaskCenterY =
+        anchorY + chainLength(segmentCount) + (FLASK_HITBOX_HEIGHT * scale) / 2;
       flaskEl.style.transform = `translate(${x}px, ${flaskCenterY - FLASK_HEIGHT / 2}px) scale(${scale})`;
       flaskEl.style.transformOrigin = `${FLASK_WIDTH / 2}px ${FLASK_HEIGHT / 2}px`;
       flaskEl.style.opacity = String(opacity);
     }
-  }, [isStatic, anchorX, anchorY, staticCount, scale, opacity]);
+  }, [isStatic, anchorX, anchorY, staticCount, segmentCount, scale, opacity]);
 
   // Physics body creation for layers 0 & 1 — runs once on mount
   useEffect(() => {
@@ -291,6 +297,7 @@ export default function FlaskChain({
         color={color}
         skillIcon={skillIcon}
         iconBob={iconBob}
+        elevated={elevated}
       />
     </>
   );

@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { createChainBodies } from "./createChainBodies";
-import { CHAIN_SEGMENT_WIDTH, getSegmentHeight } from "./constants";
+import {
+  CHAIN_SEGMENT_WIDTH,
+  getSegmentHeight,
+  linkCenterOffset,
+} from "./constants";
 
 describe("createChainBodies scale", () => {
   it("scales segment WIDTH by scale but keeps HEIGHT (length) independent", () => {
@@ -27,8 +31,10 @@ describe("createChainBodies skeleton (partial physics)", () => {
     // only the bottom (segmentCount - staticCount) links become physics bodies
     expect(chain.segments.length).toBe(segmentCount - staticCount); // 5
 
+    // Overlap-aware: pin sits at the first physics link's TOP = its overlapped
+    // centre minus half its height (NOT the end-to-end sum of the static links).
     const staticHeight =
-      getSegmentHeight(0) + getSegmentHeight(1) + getSegmentHeight(2);
+      linkCenterOffset(staticCount) - getSegmentHeight(staticCount) / 2;
     expect(chain.staticHeight).toBeCloseTo(staticHeight, 5);
 
     // physics sub-chain is pinned at anchorY + staticHeight...

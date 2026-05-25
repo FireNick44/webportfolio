@@ -66,9 +66,9 @@ export default function Header({
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
           className="font-display text-xl font-bold tracking-tight transition-opacity hover:opacity-70"
-          aria-label="Noel Studer — home"
+          aria-label="Yannic Studer — home"
         >
-          NS
+          YS
           <span className="text-accent">.</span>
         </a>
 

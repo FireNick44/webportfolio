@@ -8,7 +8,7 @@
   },
   "hero": {
     "greeting": "Hello World, I'm",
-    "name": "Noel Studer",
+    "name": "Yannic Studer",
     "tagline": "Software developer & digital tinkerer.",
     "scroll": "Scroll"
   },
@@ -16,7 +16,7 @@
     "label": "01 / Me",
     "title": "A bit about the person behind the flasks",
     "bio": [
-      "I'm Noel — a software developer who likes turning fuzzy ideas into things that actually run.",
+      "I'm Yannic — a software developer who likes turning fuzzy ideas into things that actually run.",
       "I move comfortably between front end and back end, care about details, and enjoy the moment a clunky workflow finally feels effortless."
     ],
     "columns": [
@@ -84,7 +84,7 @@
   "footer": {
     "thanks": "Thanks for stopping by.",
     "note": "This corner of the web is still brewing — like everything worth building. ;)",
-    "rights": "© 2026 Noel Studer",
+    "rights": "© 2026 Yannic Studer",
     "builtWith": "Built with Next.js, Matter.js & a lot of caffeine.",
     "backToTop": "Back to top"
   },

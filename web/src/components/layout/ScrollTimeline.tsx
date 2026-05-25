@@ -15,7 +15,9 @@ const SECTIONS = [
  * overall page progress — basically a custom scrollbar (the native one is
  * hidden on desktop in globals.css). A single label sits next to it and just
  * swaps its text to the current section as you scroll, instead of four labels
- * jumping between positions. Hidden on touch / small screens.
+ * jumping between positions. Shown on mobile too, sitting on top of the flask
+ * rack (high z) so the right edge stays a scroll-safe lane over the draggable
+ * bottles.
  */
 export default function ScrollTimeline({
   labels,
@@ -54,12 +56,12 @@ export default function ScrollTimeline({
   return (
     <nav
       aria-label="Sections"
-      className="fixed right-4 top-1/2 z-[150] hidden -translate-y-1/2 lg:block xl:right-6"
+      className="fixed right-4 top-1/2 z-[150] -translate-y-1/2 xl:right-6"
     >
-      <div className="relative flex h-[88vh] items-center justify-end">
+      <div className="relative flex h-[88vh] w-8 items-center justify-end lg:w-auto">
         {/* single label, vertically centred, to the left of the line. The
             labels cross-fade in place (no mode="wait" gap) as you scroll. */}
-        <div className="absolute right-5 top-1/2 h-4 w-40 -translate-y-1/2">
+        <div className="pointer-events-none absolute right-5 top-1/2 h-4 w-40 -translate-y-1/2">
           <AnimatePresence initial={false}>
             <motion.span
               key={active}

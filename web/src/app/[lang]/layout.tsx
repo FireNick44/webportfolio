@@ -29,19 +29,19 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
-  const title = "Noel Studer — Software Developer";
+  const title = "Yannic Studer — Software Developer";
   const description = dict.hero.tagline;
 
   return {
     metadataBase: new URL("https://noelstuder.dev"),
-    title: { default: title, template: "%s · Noel Studer" },
+    title: { default: title, template: "%s · Yannic Studer" },
     description,
     manifest: "/manifest.webmanifest",
     openGraph: {
       title,
       description,
       url: `/${lang}`,
-      siteName: "Noel Studer",
+      siteName: "Yannic Studer",
       locale: lang,
       type: "website",
     },

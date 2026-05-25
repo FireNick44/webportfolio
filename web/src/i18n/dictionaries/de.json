@@ -8,7 +8,7 @@
   },
   "hero": {
     "greeting": "Hallo Welt, ich bin",
-    "name": "Noel Studer",
+    "name": "Yannic Studer",
     "tagline": "Softwareentwickler & digitaler Tüftler.",
     "scroll": "Scrollen"
   },
@@ -16,7 +16,7 @@
     "label": "01 / Über mich",
     "title": "Ein bisschen zur Person hinter den Kolben",
     "bio": [
-      "Ich bin Noel — ein Softwareentwickler, der vage Ideen gerne in Dinge verwandelt, die tatsächlich laufen.",
+      "Ich bin Yannic — ein Softwareentwickler, der vage Ideen gerne in Dinge verwandelt, die tatsächlich laufen.",
       "Ich bewege mich sicher zwischen Front- und Backend, achte auf Details und liebe den Moment, in dem ein umständlicher Ablauf endlich mühelos wird."
     ],
     "columns": [
@@ -84,7 +84,7 @@
   "footer": {
     "thanks": "Danke fürs Vorbeischauen.",
     "note": "Diese Ecke des Webs köchelt noch — wie alles, das es wert ist. ;)",
-    "rights": "© 2026 Noel Studer",
+    "rights": "© 2026 Yannic Studer",
     "builtWith": "Gebaut mit Next.js, Matter.js & viel Koffein.",
     "backToTop": "Nach oben"
   },

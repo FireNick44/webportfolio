@@ -7,7 +7,7 @@ import PhysicsSceneClient from "@/components/physics/PhysicsSceneClient";
 // parallax. BOTH waves are rendered inside PhysicsScene, in front of the flasks,
 // so the bottles tuck behind them top and bottom.
 function FlaskBackdrop() {
-  return <ParallaxImage src="/svg/skill-bg.svg" className="absolute inset-0" strength={14} />;
+  return <ParallaxImage src="/svg/skill-bg.svg" className="pointer-events-none absolute inset-0" strength={14} />;
 }
 
 export default function Skills({ dict }: { dict: Dictionary }) {

@@ -5,20 +5,26 @@ interface Props {
   id: string;
   color?: string;
   skillIcon?: string;
-  /** When set, the skill icon gently bobs; the value is its phase delay (s).
+  /** When set, the skill icon bobs up/down; `delay` is its phase offset and
+   *  `dur` its period (s) — both varied per flask so they never bob in lockstep.
    *  undefined → no animation (low/off graphics tier). */
-  iconBob?: number;
+  iconBob?: { delay: number; dur: number };
+  /** Lift this flask above the hint scrim (z > scrim) — the bright "drag me" demo. */
+  elevated?: boolean;
 }
 
 const FlaskSVG = forwardRef<HTMLDivElement, Props>(
-  ({ id, color = "rgba(255,86,86,0.7)", skillIcon, iconBob }, ref) => {
+  ({ id, color = "rgba(255,86,86,0.7)", skillIcon, iconBob, elevated }, ref) => {
     // The bob wraps the icon image as a CHILD of icon-wet/icon-dry, because
     // syncDom REPLACES the transform attribute on those <g>s every frame — a
     // child wrapper composes (rotate from parent, translateY here) untouched.
     const bobClass = iconBob !== undefined ? "flask-icon-bob" : undefined;
     const bobStyle =
       iconBob !== undefined
-        ? ({ animationDelay: `${iconBob}s` } as const)
+        ? ({
+            animationDelay: `${iconBob.delay}s`,
+            animationDuration: `${iconBob.dur}s`,
+          } as const)
         : undefined;
     const gradId1 = `flask-lg1-${id}`;
     const gradId2 = `flask-lg2-${id}`;
@@ -37,6 +43,9 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
           height: FLASK_HEIGHT,
           willChange: "transform",
           pointerEvents: "none",
+          // Above the hint scrim (z-26) so the demo flask stays bright while the
+          // rest dims; only the body is lifted, the chain stays wave-masked.
+          zIndex: elevated ? 27 : undefined,
         }}
       >
         <svg
@@ -147,25 +156,13 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
             fill={`url(#${gradId2})`}
           />
 
-          {/* 6. Glass reflections (top layer) */}
-          <path
-            d="M62.567,71.2s4.588-43.336-11.624-60.058S0,1.481,0,1.481,23.391,6.4,40.481,22.282C47.368,28.682,56.959,42.241,62.567,71.2Z"
-            transform="translate(125.448, 109.577) rotate(90)"
-            fill="rgba(255,255,255,0.17)"
-          />
-          <path
-            d="M68.132,24.612c1.4-6.2-12.111-5.589-35.888-3.41s-47.7,4.728-46.834,10.69S66.734,30.813,68.132,24.612Z"
-            transform="translate(49.692, 66.147) rotate(96)"
-            fill={`url(#${gradId3})`}
-          />
-
-          {/* Skill icon — split into submerged part (clipped by water) and dry part */}
+          {/* Skill icon — split into submerged part (clipped by water) and dry
+              part. Rendered UNDER the glass reflections below, so it sits one
+              layer back (behind the front-glass sheen) instead of pasted on top. */}
           {skillIcon && (
             <>
-              {/* Submerged portion: clipped by same liquid clip, tinted by water.
-                  Kept fairly opaque so the icon reads up-front through the glass
-                  rather than fading into the liquid. */}
-              <g clipPath={`url(#${clipId})`} opacity={0.85}>
+              {/* Submerged portion: clipped by the liquid line. */}
+              <g clipPath={`url(#${clipId})`}>
                 <g id={`icon-wet-${id}`}>
                   <g className={bobClass} style={bobStyle}>
                     <image
@@ -196,6 +193,18 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
               </g>
             </>
           )}
+
+          {/* Glass reflections — top layer, a sheen drawn over the icon */}
+          <path
+            d="M62.567,71.2s4.588-43.336-11.624-60.058S0,1.481,0,1.481,23.391,6.4,40.481,22.282C47.368,28.682,56.959,42.241,62.567,71.2Z"
+            transform="translate(125.448, 109.577) rotate(90)"
+            fill="rgba(255,255,255,0.17)"
+          />
+          <path
+            d="M68.132,24.612c1.4-6.2-12.111-5.589-35.888-3.41s-47.7,4.728-46.834,10.69S66.734,30.813,68.132,24.612Z"
+            transform="translate(49.692, 66.147) rotate(96)"
+            fill={`url(#${gradId3})`}
+          />
         </svg>
       </div>
     );
