@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PointerField } from "@/hooks/usePointerField";
 import { useAppStore } from "@/store/useAppStore";
+import type { InkHandle } from "./InkCloud";
+import { classifyTap, annoyForTap, ANNOY_INK, ANNOY_DECAY, INK_DROP } from "@/lib/outro/ink";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):
@@ -61,7 +63,15 @@ function pickSpot(W: number, H: number): { x: number; y: number } {
   };
 }
 
-export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }) {
+export function Octopus({
+  pointer,
+  tapRef,
+  inkRef,
+}: {
+  pointer: RefObject<PointerField | null>;
+  tapRef: RefObject<{ x: number; y: number; t: number } | null>;
+  inkRef: RefObject<InkHandle | null>;
+}) {
   const elRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const rafRef = useRef(0);
@@ -75,6 +85,7 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
     goalX: 0, goalY: 0,
     noiseX: 0, noiseY: 0, noiseTX: 0, noiseTY: 0, noiseAt: 0,
     trail: [] as number[],
+    annoy: 0, inkCooldownUntil: 0, lastTapT: 0,
   });
 
   useEffect(() => {
@@ -109,6 +120,22 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       const idle = cActive && now - cMovedAt > IDLE_MS;
       if (cActive && !idle && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
       else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
+
+      // Mobile taps feed the same scare/ink machinery (no cursor on touch).
+      const tap = tapRef.current;
+      if (tap && tap.t > st.lastTapT) {
+        st.lastTapT = tap.t;
+        const tdist = Math.hypot(tap.x - st.x, tap.y - st.y) || 0.01;
+        const cls = classifyTap(tdist);
+        if (cls !== "miss") {
+          st.annoy += annoyForTap(cls);
+          // Dart away from the tap: direct velocity impulse + scare bump.
+          st.vx += ((st.x - tap.x) / tdist) * 900;
+          st.vy += ((st.y - tap.y) / tdist) * 900;
+          st.scare += cls === "on" ? 0.8 : 0.4;
+        }
+      }
+      st.annoy = Math.max(0, st.annoy - ANNOY_DECAY * dt);
 
       let ax = 0, ay = 0;
       let cap = SPEED_WARY;
@@ -168,7 +195,13 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
             st.nextAt = now + 2200 + Math.random() * 3400;
           }
           st.goalX = st.tx; st.goalY = st.ty;
-          if (st.scare >= SCARE_TRIGGER) {
+          if (st.scare >= SCARE_TRIGGER || st.annoy >= ANNOY_INK) {
+            // Harassed enough → ink (cooldown-gated) at his underside, then bolt.
+            if (now >= st.inkCooldownUntil) {
+              inkRef.current?.emit(st.x, st.y + INK_DROP);
+              st.inkCooldownUntil = now + HIDE_MIN;
+            }
+            st.annoy = 0;
             st.mode = "hide";
             st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
             const goRight = cActive ? cx < st.x : Math.random() < 0.5;
@@ -198,10 +231,6 @@ export function Octopus({ pointer }: { pointer: RefObject<PointerField | null> }
       if (sp > cap) { st.vx = (st.vx / sp) * cap; st.vy = (st.vy / sp) * cap; }
       st.x += st.vx * dt;
       st.y += st.vy * dt;
-
-      // Only keep it from leaving the top of the scene — it renders behind the
-      // heading (lower z), so it's free to roam the whole water column.
-      st.y = Math.max(H * 0.12, st.y);
 
       // Never touch the cursor — hold a fair gap and only ever swim around it.
       if (cActive) {
