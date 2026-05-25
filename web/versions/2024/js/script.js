@@ -42,7 +42,6 @@ function themeKlick(){
    let cover = document.getElementById("cover");
    let moon = document.getElementById("moon");
    let sun = document.getElementById("sun");
-   let hContact = document.getElementById("headContact");
    let github = document.getElementById("github");
    let me = document.getElementById("me");
    let wave1 = document.getElementById("wave1");
@@ -53,14 +52,12 @@ function themeKlick(){
    let projects = document.getElementById("projects");
    let fix1 = document.getElementById("fix1");
    let fix2 = document.getElementById("fix2");
-   let fix3 = document.getElementById("fix3");
    let byeWave = document.getElementById("byeWave");
 
    toggle.classList.toggle("toggleWrapperOpen");
    cover.classList.toggle("coverOpen");
    moon.classList.toggle("colorLightFill");
    sun.classList.toggle("colorDarkFill");//
-   hContact.classList.toggle("colorDark");
    github.classList.toggle("colorDarkFill");//
    me.classList.toggle("colorDarkBG");
    wave1.classList.toggle("colorLightFill");
@@ -71,7 +68,6 @@ function themeKlick(){
    projects.classList.toggle("colorDarkBG");//
    fix1.classList.toggle("colorDarkBG");
    fix2.classList.toggle("colorDarkBG");
-   fix3.classList.toggle("colorBlack");//
    byeWave.classList.toggle("byeWaveLight");
 }
 
