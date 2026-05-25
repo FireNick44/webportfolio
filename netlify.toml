@@ -5,7 +5,16 @@
   # Use the npm script (not bare `next build`) so the `prebuild` step
   # runs sync:versions and generates public/v/<id> before the build.
   command = "npm run build"
+  # Next build output. Path is relative to the repo root (not base), so it
+  # must include the web/ subdir. Required for the runtime to find the output.
+  publish = "web/.next"
 
 [build.environment]
   # Pin an LTS Node for reproducible CI builds (local may be on newer/non-LTS).
   NODE_VERSION = "22"
+
+# Next.js runtime adapter. Netlify auto-applies this on its cloud build, but
+# declaring it explicitly is the canonical config and makes local `netlify
+# build`/`deploy` work too (otherwise SSR/API output is served as static -> 404).
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
