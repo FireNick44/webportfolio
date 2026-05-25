@@ -14,6 +14,9 @@ import {
   type TokenName,
 } from "@/lib/themePresets";
 import { cn } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import { versions, currentVersionId } from "@/lib/versions";
+import { buildInfo } from "@/lib/buildInfo";
 
 type Row = [string, string];
 
@@ -116,6 +119,9 @@ export default function TechnicalPanel({
   const setHasShownLoader = useAppStore((s) => s.setHasShownLoader);
   const graphicsTier = useAppStore((s) => s.graphicsTier);
   const setGraphicsTier = useAppStore((s) => s.setGraphicsTier);
+
+  const pathname = usePathname();
+  const activeVersion = currentVersionId(pathname ?? "/");
 
   const [mounted, setMounted] = useState(false);
   const [tab, setTab] = useState<Tab>("appearance");
@@ -421,6 +427,7 @@ export default function TechnicalPanel({
           </div>
         </div>
       ) : tab === "diagnostics" ? (
+        <>
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <Section
             title="Device"
@@ -435,6 +442,50 @@ export default function TechnicalPanel({
           <Section title="Preferences" rows={media} />
           <Section title="Hardware" rows={hardware} />
         </div>
+
+          <div className="mt-4 space-y-4">
+            <div className="border border-border">
+              <PanelHead>Versions</PanelHead>
+              <ul className="divide-y divide-border">
+                {versions.map((v) => {
+                  const active = v.id === activeVersion;
+                  return (
+                    <li
+                      key={v.id}
+                      className="flex items-center justify-between gap-4 px-4 py-2.5"
+                    >
+                      <span className="flex items-center gap-2">
+                        <span className="text-sm">{v.label}</span>
+                        {v.isLatest && (
+                          <span className="lab-label text-accent">latest</span>
+                        )}
+                        {active && <Check size={14} className="text-accent" />}
+                      </span>
+                      <a
+                        href={v.path}
+                        className="font-mono text-xs uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {v.path}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            <Section
+              title="Build"
+              rows={[
+                ["Version", buildInfo.version],
+                ["Commit", buildInfo.gitSha],
+                ["Built", buildInfo.buildDate.slice(0, 19).replace("T", " ")],
+                ["Next.js", buildInfo.stack.next],
+                ["React", buildInfo.stack.react],
+                ["Tailwind", buildInfo.stack.tailwind],
+              ]}
+            />
+          </div>
+        </>
       ) : (
         <div className="mt-8 border border-border">
           <PanelHead>Store state</PanelHead>

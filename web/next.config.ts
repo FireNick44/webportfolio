@@ -11,13 +11,12 @@ const nextConfig: NextConfig = {
     return [{ source: "/v/2024", destination: "/v/2024/index.html" }];
   },
   async redirects() {
-    // Old /settings path renamed to /technical. permanent:false (307) while
-    // iterating — flip to true (308, cached forever) once finalized.
+    // Old /settings path renamed to /technical (308, permanent).
     return [
       {
         source: "/:lang/settings",
         destination: "/:lang/technical",
-        permanent: false,
+        permanent: true,
       },
     ];
   },
