@@ -76,7 +76,7 @@ export function ReefScene() {
 
       {/* Floor: waves (z2) → bg kelp (z4) → sand (z5) → corals (z5) → crab
           (z6, in front of both corals) → octopus (z8) → front kelp (z9). */}
-      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(135px,17vw,195px)] w-full opacity-95" />
+      <ByeSand className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] block h-[clamp(135px,17vw,195px)] w-full translate-y-[14px] opacity-95 sm:translate-y-0" />
       <Kelp
         animated={animated}
         clusterAround={70}

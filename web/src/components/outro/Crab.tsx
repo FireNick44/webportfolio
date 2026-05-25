@@ -119,7 +119,7 @@ export function Crab() {
         alt=""
         aria-hidden
         draggable={false}
-        className="pointer-events-none absolute bottom-[44px] left-0 z-[6]"
+        className="pointer-events-none absolute bottom-[24px] sm:bottom-[44px] left-0 z-[6]"
         style={{ width: SOLO_SIZE, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
       />
       {FAMILY.map((m, i) => (
@@ -133,7 +133,7 @@ export function Crab() {
           alt=""
           aria-hidden
           draggable={false}
-          className="pointer-events-none absolute bottom-[44px] left-0 z-[6]"
+          className="pointer-events-none absolute bottom-[24px] sm:bottom-[44px] left-0 z-[6]"
           style={{ width: m.size, height: "auto", imageRendering: "pixelated", opacity: 0, willChange: "transform" }}
         />
       ))}
