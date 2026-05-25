@@ -21,6 +21,8 @@ const DAMP = 2.4;
 const SPRING = 1.8;
 const AVOID_R = 340;
 const AVOID_FORCE = 5200;
+const PERSONAL_R = 180; // always keep this comfortable gap (gentle deflect, not a flee)
+const PERSONAL_FORCE = 3200;
 const SCARE_GAIN = 0.9; // scare/sec accrued while actively fleeing → panic-hide
 const SCARE_DECAY = 0.6;
 const SCARE_TRIGGER = 1.4;
@@ -29,7 +31,7 @@ const HIDE_RAND = 4000;
 const ORBIT_R = 130;
 const ORBIT_SPEED = 2.0;
 const ORBIT_K = 3.2;
-const MIN_GAP = 105; // hard floor: the octopus never gets closer than this to the cursor
+const MIN_GAP = 118; // hard floor: the octopus never gets closer than this to the cursor
 // Mood-based speed caps (px/s): calm orbit < wary avoid < panicked flee.
 const SPEED_ORBIT = 540;
 const SPEED_WARY = 700;
@@ -233,8 +235,14 @@ export function Octopus({
           if (cActive) st.orbitAngle = Math.atan2(st.y - cy, st.x - cx);
           ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
           ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
+          // Always hold personal space: a gentle deflection so he steers AROUND
+          // the cursor and never swims over it (this is NOT a flee — calm).
+          if (cActive && dist < PERSONAL_R) {
+            const f = Math.pow(1 - dist / PERSONAL_R, 1.8) * PERSONAL_FORCE;
+            ax += dirX * f; ay += dirY * f;
+          }
           if (st.cmode === "flee" && cActive && dist < AVOID_R) {
-            // Only a genuine lunge pushes him away — mere presence doesn't.
+            // A genuine lunge adds the bigger panic push on top.
             const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
             ax += dirX * f; ay += dirY * f;
             cap = SPEED_WARY + st.scare * 220; // more scared → quicker getaway
