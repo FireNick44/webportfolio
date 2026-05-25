@@ -5,7 +5,7 @@ import type { PointerField } from "@/hooks/usePointerField";
 import { useAppStore } from "@/store/useAppStore";
 import type { InkHandle } from "./InkCloud";
 import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP, INK_DASH_DELAY } from "@/lib/outro/ink";
-import { smoothSpeed, nextMode, FLEE_EXIT_SPEED, type OctoMode } from "@/lib/outro/octopusMotion";
+import { smoothSpeed, nextMode, FLEE_EXIT_SPEED, SPOOK_MS, type OctoMode } from "@/lib/outro/octopusMotion";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):
@@ -18,7 +18,7 @@ import { smoothSpeed, nextMode, FLEE_EXIT_SPEED, type OctoMode } from "@/lib/out
  * In advanced mode it draws its target trail so the motion is easy to debug.
  */
 const DAMP = 2.4;
-const SPRING = 1.8;
+const SPRING = 1.5; // gentler pull to the spot → eases in, doesn't dart
 const AVOID_R = 340;
 const AVOID_FORCE = 5200;
 const PERSONAL_R = 185; // approach this close and he backs off (every mood, calm)
@@ -34,7 +34,7 @@ const ORBIT_K = 3.2;
 const MIN_GAP = 118; // hard floor: the octopus never gets closer than this to the cursor
 // Mood-based speed caps (px/s): calm orbit < wary avoid < panicked flee.
 const SPEED_ORBIT = 540;
-const SPEED_WARY = 700;
+const SPEED_WARY = 520; // roam travel cap — calmer, no zipping side-to-side
 const SPEED_FLEE = 1040;
 const SPEED_DASH = 1320; // brief burst when he jumps away after inking
 const TAU = Math.PI * 2;
@@ -91,7 +91,7 @@ export function Octopus({
     lastTapX: 0, lastTapY: 0, inkDashAt: 0, dashDirX: 0, dashDirY: 0, dashUntil: 0,
     cspeed: 0, prevCx: 0, prevCy: 0, prevDist: Infinity, calmMs: 0,
     cmode: "roam" as OctoMode, prevCmode: "roam" as OctoMode, rot: 0,
-    paceSeed: 0, meanderSeed: 0, meanderSeed2: 0,
+    paceSeed: 0, meanderSeed: 0, meanderSeed2: 0, spookedUntil: 0,
   });
 
   useEffect(() => {
@@ -138,8 +138,15 @@ export function Octopus({
       const closing = cActive && dist < st.prevDist;
       st.prevDist = dist;
       st.calmMs = cspeed < FLEE_EXIT_SPEED ? st.calmMs + dt * 1000 : 0;
-      // He's always cursor-aware; this only decides his mood toward it.
-      st.cmode = nextMode(st.cmode, { cActive, cspeed, dist, closing, calmMs: st.calmMs });
+      // He's always cursor-aware; this only decides his mood toward it. After a
+      // knock/flee he stays "spooked" and won't warm back to curious until the
+      // cursor settles (handled in nextMode via spooked + the calm delay).
+      st.cmode = nextMode(st.cmode, {
+        cActive, cspeed, dist, closing,
+        calmMs: st.calmMs,
+        spooked: now < st.spookedUntil,
+      });
+      if (st.cmode === "flee") st.spookedUntil = now + SPOOK_MS; // stay wary after
       void cMovedAt;
 
       // Scare builds only while actively fleeing → sustained harassment = panic-hide.
@@ -156,6 +163,7 @@ export function Octopus({
         const cls = classifyTap(tdist);
         if (cls !== "miss") {
           st.lastTapX = tap.x; st.lastTapY = tap.y;
+          st.spookedUntil = now + SPOOK_MS; // knocked → stay wary, don't rush back
           // "around" → dart off (scared). "on" → only a small flinch so he stays
           // put to receive the next tap; the big move is the post-ink dash.
           const push = cls === "on" ? 230 : 820;

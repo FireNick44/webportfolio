@@ -6,12 +6,14 @@ import {
   type ModeInput,
 } from "./octopusMotion";
 
+// Default: cursor present, still, settled long enough, not spooked.
 const base: ModeInput = {
   cActive: true,
   cspeed: 0,
   dist: 200,
   closing: false,
-  calmMs: 0,
+  calmMs: 2000,
+  spooked: false,
 };
 
 describe("smoothSpeed (EMA)", () => {
@@ -25,24 +27,29 @@ describe("smoothSpeed (EMA)", () => {
   });
 });
 
-describe("nextMode hysteresis", () => {
+describe("nextMode hysteresis + spook delay", () => {
   const go = (mode: OctoMode, patch: Partial<ModeInput>) =>
     nextMode(mode, { ...base, ...patch });
 
-  it("calm cursor nearby → curious", () => {
-    expect(go("roam", { cspeed: 80, dist: 200 })).toBe("curious");
+  it("calm + settled + not spooked → curious", () => {
+    expect(go("roam", { cspeed: 80 })).toBe("curious");
+  });
+  it("calm but NOT settled long enough → roam (waits for the delay)", () => {
+    expect(go("roam", { cspeed: 80, calmMs: 500 })).toBe("roam");
+  });
+  it("recently spooked → stays roam even if calm+settled", () => {
+    expect(go("roam", { cspeed: 80, spooked: true })).toBe("roam");
+  });
+  it("a knock while curious kicks him out (spooked)", () => {
+    expect(go("curious", { cspeed: 80, spooked: true })).toBe("roam");
   });
   it("lunge (fast + closing, near) → flee", () => {
-    expect(go("roam", { cspeed: 1200, closing: true, dist: 200 })).toBe("flee");
+    expect(go("roam", { cspeed: 1200, closing: true })).toBe("flee");
   });
   it("far cursor → roam", () => {
     expect(go("roam", { cspeed: 80, dist: 999 })).toBe("roam");
   });
-  it("placed cursor (just moved there, not closing) does not flee", () => {
-    expect(go("roam", { cspeed: 80, closing: false, dist: 150 })).toBe("curious");
-  });
-  it("small nudge while curious does NOT shatter it (raised threshold)", () => {
-    // between LUNGE_SPEED (900) and LUNGE_SPEED*1.3 (1170)
+  it("small nudge while curious does NOT shatter it", () => {
     expect(go("curious", { cspeed: 1000, closing: true, dist: 150 })).toBe("curious");
   });
   it("a real lunge while curious still flees", () => {
@@ -51,8 +58,8 @@ describe("nextMode hysteresis", () => {
   it("stays fleeing while cursor still fast", () => {
     expect(go("flee", { cspeed: 800, calmMs: 1000 })).toBe("flee");
   });
-  it("leaves flee only after the cursor calms for long enough", () => {
-    expect(go("flee", { cspeed: 100, calmMs: 500, dist: 200 })).toBe("curious");
+  it("leaves flee to ROAM (never straight to curious) once calmed", () => {
+    expect(go("flee", { cspeed: 100, calmMs: 500 })).toBe("roam");
     expect(go("flee", { cspeed: 100, calmMs: 100 })).toBe("flee");
   });
   it("cursor gone → settle to roam", () => {

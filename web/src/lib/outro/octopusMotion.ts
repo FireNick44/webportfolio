@@ -1,5 +1,7 @@
 // Cursor-reaction model for the outro octopus: he is always cursor-aware, but
-// only *flees* a genuine lunge — a calm/placed cursor makes him curious instead.
+// only *flees* a genuine lunge — a calm/placed cursor makes him curious. After
+// being disturbed (knocked/poked/fleeing) he stays wary and only warms back up
+// to curiosity once the cursor has actually settled for a beat.
 
 export type OctoMode = "roam" | "curious" | "flee";
 
@@ -9,11 +11,8 @@ export const FLEE_EXIT_SPEED = 300; // must drop below this to consider leaving 
 export const FLEE_EXIT_MS = 400; // ...and stay below it this long
 export const CURIOUS_R = 360; // a calm cursor within this radius → curious
 export const COMFORT_R = 135; // orbit radius he keeps while curious
-
-/** EMA-smooth a noisy per-frame speed sample so a placed cursor decays to ~0. */
-export function smoothSpeed(prev: number, sample: number, alpha = 0.2): number {
-  return prev + (sample - prev) * alpha;
-}
+export const CURIOUS_DELAY = 1400; // ms the cursor must stay calm before he warms up
+export const SPOOK_MS = 2600; // ms he stays wary after a knock/flee before re-approaching
 
 export interface ModeInput {
   cActive: boolean; // pointer present in the scene
@@ -21,29 +20,42 @@ export interface ModeInput {
   dist: number; // distance octopus→cursor (px)
   closing: boolean; // cursor getting closer this frame
   calmMs: number; // how long cspeed has stayed below FLEE_EXIT_SPEED
+  spooked: boolean; // recently knocked/fleeing → not ready to be curious
+}
+
+/** EMA-smooth a noisy per-frame speed sample so a placed cursor decays to ~0. */
+export function smoothSpeed(prev: number, sample: number, alpha = 0.2): number {
+  return prev + (sample - prev) * alpha;
 }
 
 /** Hysteresis state machine — separate enter/exit thresholds so he never
  *  chatters at a boundary. While already curious he's harder to spook (a small
  *  nudge during the "courtship" shouldn't shatter it), so the lunge threshold
- *  is raised 30%. */
+ *  is raised 30%. After a disturbance (spooked) he keeps his distance and only
+ *  warms back to curious once the cursor has been calm for CURIOUS_DELAY. */
 export function nextMode(mode: OctoMode, i: ModeInput): OctoMode {
-  if (!i.cActive) return mode === "flee" ? "roam" : mode === "curious" ? "roam" : mode;
+  if (!i.cActive) return mode === "roam" ? "roam" : "roam";
 
   if (mode === "flee") {
-    if (i.cspeed < FLEE_EXIT_SPEED && i.calmMs >= FLEE_EXIT_MS) {
-      return i.dist < CURIOUS_R && i.cspeed < CALM_SPEED ? "curious" : "roam";
-    }
+    // Leave flee only once the cursor has calmed; he goes wary (roam) first,
+    // never straight back to curious.
+    if (i.cspeed < FLEE_EXIT_SPEED && i.calmMs >= FLEE_EXIT_MS) return "roam";
     return "flee";
   }
 
   const lungeT = mode === "curious" ? LUNGE_SPEED * 1.3 : LUNGE_SPEED;
   if (i.closing && i.cspeed > lungeT && i.dist < CURIOUS_R) return "flee";
-  if (mode === "curious") {
-    // Sticky: stay curious while the cursor lingers in range — a moderate nudge
-    // shouldn't break it. Only a lunge (above) or the cursor leaving range drops it.
-    return i.dist < CURIOUS_R ? "curious" : "roam";
+
+  // Recently knocked → keep your distance, don't come back yet.
+  if (i.spooked) return "roam";
+
+  // Sticky: stay curious while the cursor lingers in range (a moderate nudge
+  // shouldn't break it); only a lunge or leaving range drops it.
+  if (mode === "curious") return i.dist < CURIOUS_R ? "curious" : "roam";
+
+  // Warm up to curious only once the cursor has actually settled for a beat.
+  if (i.cspeed < CALM_SPEED && i.calmMs >= CURIOUS_DELAY && i.dist < CURIOUS_R) {
+    return "curious";
   }
-  if (i.cspeed < CALM_SPEED && i.dist < CURIOUS_R) return "curious";
   return "roam";
 }
