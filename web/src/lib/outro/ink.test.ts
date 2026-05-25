@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isTap, classifyTap, annoyForTap, ANNOY_INK } from "./ink";
+import { isTap, classifyTap, enoughOnTaps, INK_WINDOW } from "./ink";
 
 describe("isTap (tap vs scroll)", () => {
   it("brief + still = tap", () => expect(isTap(200, 5)).toBe(true));
@@ -20,11 +20,12 @@ describe("classifyTap", () => {
   it("miss beyond scare radius", () => expect(classifyTap(300)).toBe("miss"));
 });
 
-describe("annoyForTap", () => {
-  it("two on-taps reach the ink threshold", () =>
-    expect(annoyForTap("on") * 2).toBeGreaterThanOrEqual(ANNOY_INK));
-  it("around < on, miss = 0", () => {
-    expect(annoyForTap("around")).toBeLessThan(annoyForTap("on"));
-    expect(annoyForTap("miss")).toBe(0);
-  });
+describe("enoughOnTaps (deterministic 2-in-window)", () => {
+  it("one tap is not enough", () => expect(enoughOnTaps([1000], 1000)).toBe(false));
+  it("two taps within the window inks", () =>
+    expect(enoughOnTaps([1000, 1500], 1500)).toBe(true));
+  it("two taps too far apart do not (first expired)", () =>
+    expect(enoughOnTaps([0, INK_WINDOW + 100], INK_WINDOW + 100)).toBe(false));
+  it("counts only taps inside the trailing window", () =>
+    expect(enoughOnTaps([0, 100, 5000, 5400], 5400)).toBe(true));
 });

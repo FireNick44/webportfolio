@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PointerField } from "@/hooks/usePointerField";
 import { useAppStore } from "@/store/useAppStore";
 import type { InkHandle } from "./InkCloud";
-import { classifyTap, annoyForTap, ANNOY_INK, ANNOY_DECAY, INK_DROP } from "@/lib/outro/ink";
+import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP } from "@/lib/outro/ink";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):
@@ -85,7 +85,7 @@ export function Octopus({
     goalX: 0, goalY: 0,
     noiseX: 0, noiseY: 0, noiseTX: 0, noiseTY: 0, noiseAt: 0,
     trail: [] as number[],
-    annoy: 0, inkCooldownUntil: 0, lastTapT: 0,
+    onTaps: [] as number[], inkCooldownUntil: 0, lastTapT: 0,
   });
 
   useEffect(() => {
@@ -121,24 +121,36 @@ export function Octopus({
       if (cActive && !idle && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
       else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
 
-      // Mobile taps feed the same scare/ink machinery (no cursor on touch).
+      // Taps (mobile tap / desktop click) poke the octopus: "on" builds toward
+      // ink, "around" just makes him dart off (scared). Cursor-chase ink is the
+      // separate scare path below (desktop high tier only).
       const tap = tapRef.current;
       if (tap && tap.t > st.lastTapT) {
         st.lastTapT = tap.t;
         const tdist = Math.hypot(tap.x - st.x, tap.y - st.y) || 0.01;
         const cls = classifyTap(tdist);
         if (cls !== "miss") {
-          st.annoy += annoyForTap(cls);
-          console.log(
-            `[octopus] poke ${cls} dist=${Math.round(tdist)} annoy=${st.annoy.toFixed(2)}/${ANNOY_INK}`,
-          );
-          // Dart away from the tap: direct velocity impulse + scare bump.
-          st.vx += ((st.x - tap.x) / tdist) * 900;
-          st.vy += ((st.y - tap.y) / tdist) * 900;
-          st.scare += cls === "on" ? 0.8 : 0.4;
+          // Dart away from the poke (both cases) — visible "scared" reaction.
+          const push = cls === "on" ? 1100 : 820;
+          st.vx += ((st.x - tap.x) / tdist) * push;
+          st.vy += ((st.y - tap.y) / tdist) * push;
+          if (cls === "on") {
+            st.onTaps.push(now);
+            if (st.onTaps.length > 8) st.onTaps.shift();
+          }
+          const recent = st.onTaps.filter((t) => now - t <= INK_WINDOW).length;
+          console.log(`[octopus] poke ${cls} dist=${Math.round(tdist)} onTaps=${recent}/${INK_TAPS}`);
         }
       }
-      st.annoy = Math.max(0, st.annoy - ANNOY_DECAY * dt);
+      // Enough on-taps in the window → squirt ink (he stays in scene, just startled).
+      if (enoughOnTaps(st.onTaps, now) && now >= st.inkCooldownUntil) {
+        console.log(
+          `[octopus] INK emit (taps) @ (${Math.round(st.x)}, ${Math.round(st.y + INK_DROP)})`,
+        );
+        inkRef.current?.emit(st.x, st.y + INK_DROP);
+        st.inkCooldownUntil = now + INK_COOLDOWN;
+        st.onTaps = [];
+      }
 
       let ax = 0, ay = 0;
       let cap = SPEED_WARY;
@@ -198,16 +210,13 @@ export function Octopus({
             st.nextAt = now + 2200 + Math.random() * 3400;
           }
           st.goalX = st.tx; st.goalY = st.ty;
-          if (st.scare >= SCARE_TRIGGER || st.annoy >= ANNOY_INK) {
-            // Harassed enough → ink (cooldown-gated) at his underside, then bolt.
+          if (st.scare >= SCARE_TRIGGER) {
+            // Cursor harassment (desktop) → panic: squirt ink as he bolts off.
             if (now >= st.inkCooldownUntil) {
-              console.log(
-                `[octopus] INK emit @ (${Math.round(st.x)}, ${Math.round(st.y + INK_DROP)}) scare=${st.scare.toFixed(2)} annoy=${st.annoy.toFixed(2)}`,
-              );
+              console.log(`[octopus] INK emit (panic) scare=${st.scare.toFixed(2)}`);
               inkRef.current?.emit(st.x, st.y + INK_DROP);
-              st.inkCooldownUntil = now + HIDE_MIN;
+              st.inkCooldownUntil = now + INK_COOLDOWN;
             }
-            st.annoy = 0;
             st.mode = "hide";
             st.hideUntil = now + HIDE_MIN + Math.random() * HIDE_RAND;
             const goRight = cActive ? cx < st.x : Math.random() < 0.5;

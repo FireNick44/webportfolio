@@ -16,13 +16,16 @@ const PUFF_MS = 1400; // matches the ink-bloom keyframe duration
 
 // Three offset blobs per puff → an organic, lopsided cloud, not one flat circle.
 const BLOBS = [
-  { dx: 0, dy: 0, size: 150, delay: 0 },
-  { dx: -34, dy: 14, size: 96, delay: 90 },
-  { dx: 30, dy: 20, size: 84, delay: 150 },
+  { dx: 0, dy: 0, size: 190, delay: 0 },
+  { dx: -40, dy: 16, size: 122, delay: 90 },
+  { dx: 34, dy: 24, size: 104, delay: 150 },
 ];
 
+// Dense, slightly indigo black so it reads against the near-black deep-sea bg
+// (a pure teal-black blob would vanish into the gradient). It occludes the
+// kelp/bubbles behind it (z-7) → reads as a cloud of ink.
 const INK_BG =
-  "radial-gradient(circle, rgba(8,12,16,0.7) 0%, rgba(8,12,16,0.45) 45%, rgba(8,12,16,0) 72%)";
+  "radial-gradient(circle, rgba(7,5,16,0.96) 0%, rgba(11,9,22,0.82) 42%, rgba(11,9,22,0) 72%)";
 
 /**
  * Renders short-lived CSS ink puffs behind the octopus (z-7). Imperative: the
