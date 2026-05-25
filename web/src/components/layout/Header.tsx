@@ -101,7 +101,7 @@ export default function Header({
               iconButtonVariants({ variant: "ghost", size: "sm" }),
               "group hidden md:inline-flex",
             )}
-            aria-label={dict.nav.settings}
+            aria-label={dict.nav.technical}
           >
             <Settings
               size={17}
@@ -184,7 +184,7 @@ export default function Header({
                 className={cn(iconButtonVariants({ variant: "outline", size: "sm" }), "gap-2 px-3 w-auto")}
               >
                 <Settings size={16} />
-                <span className="lab-label">{dict.nav.settings}</span>
+                <span className="lab-label">{dict.nav.technical}</span>
               </button>
               <div className="flex items-center gap-5">
                 <LanguageSwitcher lang={lang} />

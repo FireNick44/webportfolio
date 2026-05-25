@@ -4,7 +4,7 @@ export interface Dictionary {
     skills: string;
     projects: string;
     contact: string;
-    settings: string;
+    technical: string;
   };
   hero: {
     greeting: string;

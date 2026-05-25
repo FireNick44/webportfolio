@@ -217,9 +217,9 @@ export default function SettingsPanel({
         <span className="lab-label">{dict.nav.me}</span>
       </button>
 
-      <span className="lab-label">— / {dict.nav.settings}</span>
+      <span className="lab-label">— / {dict.nav.technical}</span>
       <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">
-        {dict.nav.settings}
+        {dict.nav.technical}
       </h1>
 
       {/* Tab nav */}
