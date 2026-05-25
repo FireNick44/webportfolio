@@ -53,7 +53,10 @@ export function ReefScene() {
   const creaturesOn = atLeast(tier, "low") && active;
   const canvasOn = atLeast(tier, "medium") && active;
   const interactive = atLeast(tier, "high") && active;
-  const pointer = usePointerField(containerRef, interactive);
+  // Octopus cursor-awareness (avoid/curious) runs from "medium" up — touch caps
+  // at "low", so medium+ means a real mouse. (High adds kelp/canvas cursor FX.)
+  const cursorAware = atLeast(tier, "medium") && active;
+  const pointer = usePointerField(containerRef, cursorAware);
 
   // Poke the octopus: a tap (mobile) or click (desktop) near it scares it; on it
   // inks it. Pointer events cover mouse + touch + pen uniformly. Document-level
