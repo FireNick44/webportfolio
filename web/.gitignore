@@ -20,6 +20,9 @@
 # production
 /build
 
+# generated version snapshots (source lives in web/versions/<id>)
+/public/v/
+
 # misc
 .DS_Store
 *.pem
