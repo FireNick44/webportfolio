@@ -14,6 +14,8 @@ import { Rook } from "./Rook";
 import { Crab } from "./Crab";
 import { Kelp } from "./Kelp";
 import { SandFloor } from "./SandFloor";
+import { InkCloud, type InkHandle } from "./InkCloud";
+import { isTap } from "@/lib/outro/ink";
 
 const BUBBLE_COUNT: Record<GraphicsTier, number> = {
   off: 0,
@@ -24,6 +26,8 @@ const BUBBLE_COUNT: Record<GraphicsTier, number> = {
 
 export function ReefScene() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const tapRef = useRef<{ x: number; y: number; t: number } | null>(null);
+  const inkRef = useRef<InkHandle | null>(null);
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
 
@@ -50,6 +54,39 @@ export function ReefScene() {
   const canvasOn = atLeast(tier, "medium") && active;
   const interactive = atLeast(tier, "high") && active;
   const pointer = usePointerField(containerRef, interactive);
+
+  // Mobile/touch: tapping near the octopus scares it; tapping on it inks it.
+  // Document-level passive listeners (the scene's children are pointer-events-none),
+  // tap-vs-scroll guarded so scrolling onto this page-bottom scene never triggers it.
+  useEffect(() => {
+    if (!creaturesOn) return;
+    if (typeof window === "undefined") return;
+    if (!window.matchMedia("(any-pointer: coarse)").matches) return;
+    const el = containerRef.current;
+    if (!el) return;
+    let sx = 0, sy = 0, t0 = 0;
+    const onStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      if (!t) return;
+      sx = t.clientX; sy = t.clientY; t0 = performance.now();
+    };
+    const onEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      if (!t) return;
+      if (!isTap(performance.now() - t0, Math.hypot(t.clientX - sx, t.clientY - sy))) return;
+      const rect = el.getBoundingClientRect();
+      const x = t.clientX - rect.left;
+      const y = t.clientY - rect.top;
+      if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+      tapRef.current = { x, y, t: performance.now() };
+    };
+    document.addEventListener("touchstart", onStart, { passive: true });
+    document.addEventListener("touchend", onEnd, { passive: true });
+    return () => {
+      document.removeEventListener("touchstart", onStart);
+      document.removeEventListener("touchend", onEnd);
+    };
+  }, [creaturesOn]);
 
   return (
     <div
@@ -103,7 +140,8 @@ export function ReefScene() {
         className="pointer-events-none absolute inset-x-0 bottom-0 z-[9] h-[52%] brightness-[0.55]"
       />
 
-      {creaturesOn && <Octopus pointer={pointer} />}
+      {creaturesOn && <InkCloud ref={inkRef} />}
+      {creaturesOn && <Octopus pointer={pointer} tapRef={tapRef} inkRef={inkRef} />}
     </div>
   );
 }
