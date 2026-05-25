@@ -173,16 +173,20 @@ export function Octopus({
             st.onTaps.push(now);
             if (st.onTaps.length > 8) st.onTaps.shift();
           }
-          const recent = st.onTaps.filter((t) => now - t <= INK_WINDOW).length;
-          console.log(`[octopus] poke ${cls} dist=${Math.round(tdist)} onTaps=${recent}/${INK_TAPS}`);
+          if (useAppStore.getState().advanced) {
+            const recent = st.onTaps.filter((t) => now - t <= INK_WINDOW).length;
+            console.log(`[octopus] poke ${cls} dist=${Math.round(tdist)} onTaps=${recent}/${INK_TAPS}`);
+          }
         }
       }
       // Enough on-taps → squirt ink at his lower middle NOW, then dash away after
       // it has had a moment to bloom (so the ink isn't left where he already was).
       if (enoughOnTaps(st.onTaps, now) && now >= st.inkCooldownUntil && !st.inkDashAt) {
-        console.log(
-          `[octopus] INK emit (taps) @ (${Math.round(st.x)}, ${Math.round(st.y + INK_DROP)})`,
-        );
+        if (useAppStore.getState().advanced) {
+          console.log(
+            `[octopus] INK emit (taps) @ (${Math.round(st.x)}, ${Math.round(st.y + INK_DROP)})`,
+          );
+        }
         inkRef.current?.emit(st.x, st.y + INK_DROP);
         st.inkCooldownUntil = now + INK_COOLDOWN;
         st.onTaps = [];
@@ -278,7 +282,9 @@ export function Octopus({
           if (st.scare >= SCARE_TRIGGER) {
             // Sustained fleeing → panic: squirt ink as he bolts off-screen.
             if (now >= st.inkCooldownUntil) {
-              console.log(`[octopus] INK emit (panic) scare=${st.scare.toFixed(2)}`);
+              if (useAppStore.getState().advanced) {
+                console.log(`[octopus] INK emit (panic) scare=${st.scare.toFixed(2)}`);
+              }
               inkRef.current?.emit(st.x, st.y + INK_DROP);
               st.inkCooldownUntil = now + INK_COOLDOWN;
             }
