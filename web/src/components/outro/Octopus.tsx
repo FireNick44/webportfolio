@@ -5,6 +5,7 @@ import type { PointerField } from "@/hooks/usePointerField";
 import { useAppStore } from "@/store/useAppStore";
 import type { InkHandle } from "./InkCloud";
 import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP, INK_DASH_DELAY } from "@/lib/outro/ink";
+import { smoothSpeed, nextMode, FLEE_EXIT_SPEED, type OctoMode } from "@/lib/outro/octopusMotion";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):
@@ -20,13 +21,11 @@ const DAMP = 2.4;
 const SPRING = 1.8;
 const AVOID_R = 340;
 const AVOID_FORCE = 5200;
-const SCARE_R = 220;
-const SCARE_GAIN = 2.5;
+const SCARE_GAIN = 0.9; // scare/sec accrued while actively fleeing → panic-hide
 const SCARE_DECAY = 0.6;
 const SCARE_TRIGGER = 1.4;
 const HIDE_MIN = 7000;
 const HIDE_RAND = 4000;
-const IDLE_MS = 800;
 const ORBIT_R = 130;
 const ORBIT_SPEED = 2.0;
 const ORBIT_K = 3.2;
@@ -88,6 +87,8 @@ export function Octopus({
     trail: [] as number[],
     onTaps: [] as number[], inkCooldownUntil: 0, lastTapT: 0,
     lastTapX: 0, lastTapY: 0, inkDashAt: 0, dashDirX: 0, dashDirY: 0, dashUntil: 0,
+    cspeed: 0, prevCx: 0, prevCy: 0, prevDist: Infinity, calmMs: 0,
+    cmode: "roam" as OctoMode, prevCmode: "roam" as OctoMode,
   });
 
   useEffect(() => {
@@ -119,8 +120,24 @@ export function Octopus({
         dist = Math.hypot(dx, dy) || 0.01;
         dirX = dx / dist; dirY = dy / dist;
       }
-      const idle = cActive && now - cMovedAt > IDLE_MS;
-      if (cActive && !idle && dist < SCARE_R) st.scare += (1 - dist / SCARE_R) * SCARE_GAIN * dt;
+      // Cursor speed (px/s), EMA-smoothed — the pointer field only gives
+      // per-event deltas, so derive it; a placed cursor decays this to ~0.
+      let cspeed = 0;
+      if (cActive) {
+        const inst = Math.hypot(cx - st.prevCx, cy - st.prevCy) / Math.max(dt, 0.001);
+        cspeed = smoothSpeed(st.cspeed, inst, 0.2);
+      }
+      st.cspeed = cspeed;
+      st.prevCx = cx; st.prevCy = cy;
+      const closing = cActive && dist < st.prevDist;
+      st.prevDist = dist;
+      st.calmMs = cspeed < FLEE_EXIT_SPEED ? st.calmMs + dt * 1000 : 0;
+      // He's always cursor-aware; this only decides his mood toward it.
+      st.cmode = nextMode(st.cmode, { cActive, cspeed, dist, closing, calmMs: st.calmMs });
+      void cMovedAt;
+
+      // Scare builds only while actively fleeing → sustained harassment = panic-hide.
+      if (st.cmode === "flee") st.scare += SCARE_GAIN * dt;
       else st.scare = Math.max(0, st.scare - SCARE_DECAY * dt);
 
       // Taps (mobile tap / desktop click) poke the octopus: "on" builds toward
@@ -175,16 +192,15 @@ export function Octopus({
       let cap = SPEED_WARY;
 
       if (st.mode === "wander") {
-        if (idle) {
-          if (!st.wasIdle) {
-            // New curious session → reseed the loop wobble so it's never the
+        if (st.cmode === "curious" && cActive) {
+          if (st.prevCmode !== "curious") {
+            // Entering curiosity → reseed the loop wobble so it's never the
             // same shape twice.
             st.wob1 = Math.random() * TAU;
             st.wob2 = Math.random() * TAU;
             st.wob3 = Math.random() * TAU;
           }
-          // Wobbly loop: angular speed AND radius vary as it goes round, so it's
-          // an organic, lopsided lasso rather than a flat circle.
+          // Curious: a wobbly loop AROUND the cursor — he watches and circles it.
           st.orbitAngle += ORBIT_SPEED * (1 + 0.5 * Math.sin(now * 0.0013 + st.wob1)) * dt;
           const rWob =
             ORBIT_R +
@@ -212,10 +228,13 @@ export function Octopus({
           ay = (ty2 - st.y) * ORBIT_K - st.vy * DAMP;
           cap = SPEED_ORBIT;
         } else {
+          // roam (or flee): travel toward a favourite spot. He keeps the orbit
+          // angle synced so slipping into curiosity is seamless.
           if (cActive) st.orbitAngle = Math.atan2(st.y - cy, st.x - cx);
           ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
           ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
-          if (cActive && dist < AVOID_R) {
+          if (st.cmode === "flee" && cActive && dist < AVOID_R) {
+            // Only a genuine lunge pushes him away — mere presence doesn't.
             const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
             ax += dirX * f; ay += dirY * f;
             cap = SPEED_WARY + st.scare * 220; // more scared → quicker getaway
@@ -230,7 +249,7 @@ export function Octopus({
           }
           st.goalX = st.tx; st.goalY = st.ty;
           if (st.scare >= SCARE_TRIGGER) {
-            // Cursor harassment (desktop) → panic: squirt ink as he bolts off.
+            // Sustained fleeing → panic: squirt ink as he bolts off-screen.
             if (now >= st.inkCooldownUntil) {
               console.log(`[octopus] INK emit (panic) scare=${st.scare.toFixed(2)}`);
               inkRef.current?.emit(st.x, st.y + INK_DROP);
@@ -257,7 +276,7 @@ export function Octopus({
           st.nextAt = now + 2500;
         }
       }
-      st.wasIdle = idle;
+      st.prevCmode = st.cmode;
 
       st.vx += ax * dt;
       st.vy += ay * dt;
