@@ -64,9 +64,10 @@ export function ReefScene() {
   const creaturesOn = atLeast(tier, "low") && active;
   const canvasOn = atLeast(tier, "medium") && active;
   const interactive = atLeast(tier, "high") && active;
-  // Octopus cursor-awareness is decoupled from the graphics tier: it runs
-  // whenever he's on screen and there's a real mouse (cheap; not a perf cost).
-  const cursorAware = creaturesOn && hasMouse;
+  // Octopus cursor-awareness is NOT gated by the graphics setting at all — it
+  // runs whenever there's a real mouse (the AI is cheap). The octopus sprite
+  // itself still respects `creaturesOn` (off/reduced-motion).
+  const cursorAware = hasMouse;
   const pointer = usePointerField(containerRef, cursorAware);
 
   // Poke the octopus: a tap (mobile) or click (desktop) near it scares it; on it
