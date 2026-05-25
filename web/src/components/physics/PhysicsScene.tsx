@@ -84,6 +84,9 @@ export default function PhysicsScene({
   const [dims, setDims] = useState({ width: 0, height: 0 });
   const wallsRef = useRef<Matter.Body[]>([]);
   const [active, setActive] = useState(false);
+  // New random flask layout on each page load (stable within the session — the
+  // memo below keeps it across resizes; only a refresh/remount reshuffles).
+  const [layoutSeed] = useState(() => (Math.random() * 0x7fffffff) | 0);
   const [interacted, setInteracted] = useState(hasInteractedWithRack);
   const advanced = useAppStore((s) => s.advanced);
   // Shared site-wide graphics setting (capped by reduced-motion / touch).
@@ -108,10 +111,10 @@ export default function PhysicsScene({
       config,
       { width: Math.min(dims.width, MAX_RACK_WIDTH), height: dims.height },
       skillPaths,
-      42
+      layoutSeed
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dims.width > 0, isMobile, dims.height, tier]);
+  }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed]);
 
   useEffect(() => {
     if (dims.width === 0) return;
