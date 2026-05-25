@@ -32,9 +32,9 @@ const ORBIT_SPEED = 2.0;
 const ORBIT_K = 3.2;
 const MIN_GAP = 105; // hard floor: the octopus never gets closer than this to the cursor
 // Mood-based speed caps (px/s): calm orbit < wary avoid < panicked flee.
-const SPEED_ORBIT = 760;
-const SPEED_WARY = 1080;
-const SPEED_FLEE = 1500;
+const SPEED_ORBIT = 540;
+const SPEED_WARY = 700;
+const SPEED_FLEE = 1040;
 const TAU = Math.PI * 2;
 
 // Favourite hangouts (fractions of the scene) the octopus drifts between when it
@@ -129,6 +129,9 @@ export function Octopus({
         const cls = classifyTap(tdist);
         if (cls !== "miss") {
           st.annoy += annoyForTap(cls);
+          console.log(
+            `[octopus] poke ${cls} dist=${Math.round(tdist)} annoy=${st.annoy.toFixed(2)}/${ANNOY_INK}`,
+          );
           // Dart away from the tap: direct velocity impulse + scare bump.
           st.vx += ((st.x - tap.x) / tdist) * 900;
           st.vy += ((st.y - tap.y) / tdist) * 900;
@@ -158,8 +161,8 @@ export function Octopus({
             Math.sin(st.orbitAngle * 1.3 + st.wob3) * 20;
           // Smoothed random-walk noise so the loop isn't a clean function.
           if (now >= st.noiseAt) {
-            st.noiseTX = (Math.random() - 0.5) * 90;
-            st.noiseTY = (Math.random() - 0.5) * 90;
+            st.noiseTX = (Math.random() - 0.5) * 55;
+            st.noiseTY = (Math.random() - 0.5) * 55;
             st.noiseAt = now + 500 + Math.random() * 800;
           }
           st.noiseX += (st.noiseTX - st.noiseX) * 0.05;
@@ -198,6 +201,9 @@ export function Octopus({
           if (st.scare >= SCARE_TRIGGER || st.annoy >= ANNOY_INK) {
             // Harassed enough → ink (cooldown-gated) at his underside, then bolt.
             if (now >= st.inkCooldownUntil) {
+              console.log(
+                `[octopus] INK emit @ (${Math.round(st.x)}, ${Math.round(st.y + INK_DROP)}) scare=${st.scare.toFixed(2)} annoy=${st.annoy.toFixed(2)}`,
+              );
               inkRef.current?.emit(st.x, st.y + INK_DROP);
               st.inkCooldownUntil = now + HIDE_MIN;
             }

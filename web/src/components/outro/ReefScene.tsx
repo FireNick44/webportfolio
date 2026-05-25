@@ -55,36 +55,38 @@ export function ReefScene() {
   const interactive = atLeast(tier, "high") && active;
   const pointer = usePointerField(containerRef, interactive);
 
-  // Mobile/touch: tapping near the octopus scares it; tapping on it inks it.
-  // Document-level passive listeners (the scene's children are pointer-events-none),
-  // tap-vs-scroll guarded so scrolling onto this page-bottom scene never triggers it.
+  // Poke the octopus: a tap (mobile) or click (desktop) near it scares it; on it
+  // inks it. Pointer events cover mouse + touch + pen uniformly. Document-level
+  // passive listeners (the scene's children are pointer-events-none), tap-vs-scroll
+  // guarded so scrolling onto this page-bottom scene never triggers it. Active at
+  // any tier with creatures (incl. the default "medium"), so clicks work without
+  // switching to "high".
   useEffect(() => {
     if (!creaturesOn) return;
-    if (typeof window === "undefined") return;
-    if (!window.matchMedia("(any-pointer: coarse)").matches) return;
     const el = containerRef.current;
     if (!el) return;
-    let sx = 0, sy = 0, t0 = 0;
-    const onStart = (e: TouchEvent) => {
-      const t = e.touches[0];
-      if (!t) return;
-      sx = t.clientX; sy = t.clientY; t0 = performance.now();
+    let sx = 0, sy = 0, t0 = 0, down = false;
+    const onDown = (e: PointerEvent) => {
+      sx = e.clientX; sy = e.clientY; t0 = performance.now(); down = true;
     };
-    const onEnd = (e: TouchEvent) => {
-      const t = e.changedTouches[0];
-      if (!t) return;
-      if (!isTap(performance.now() - t0, Math.hypot(t.clientX - sx, t.clientY - sy))) return;
+    const onUp = (e: PointerEvent) => {
+      if (!down) return;
+      down = false;
+      if (!isTap(performance.now() - t0, Math.hypot(e.clientX - sx, e.clientY - sy))) return;
       const rect = el.getBoundingClientRect();
-      const x = t.clientX - rect.left;
-      const y = t.clientY - rect.top;
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
       if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
       tapRef.current = { x, y, t: performance.now() };
     };
-    document.addEventListener("touchstart", onStart, { passive: true });
-    document.addEventListener("touchend", onEnd, { passive: true });
+    const onCancel = () => { down = false; };
+    document.addEventListener("pointerdown", onDown, { passive: true });
+    document.addEventListener("pointerup", onUp, { passive: true });
+    document.addEventListener("pointercancel", onCancel, { passive: true });
     return () => {
-      document.removeEventListener("touchstart", onStart);
-      document.removeEventListener("touchend", onEnd);
+      document.removeEventListener("pointerdown", onDown);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onCancel);
     };
   }, [creaturesOn]);
 
