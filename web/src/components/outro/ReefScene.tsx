@@ -31,6 +31,17 @@ export function ReefScene() {
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
 
+  // Real mouse present? The octopus's cursor-awareness keys off this, NOT the
+  // graphics tier — the AI is a few vector ops/frame, not a perf cost.
+  const [hasMouse, setHasMouse] = useState(false);
+  useEffect(() => {
+    const m = window.matchMedia("(any-pointer: fine)");
+    const u = () => setHasMouse(m.matches);
+    u();
+    m.addEventListener("change", u);
+    return () => m.removeEventListener("change", u);
+  }, []);
+
   // Kelp density scales with viewport — lighter on mobile, denser on desktop.
   const [vw, setVw] = useState(1280);
   useEffect(() => {
@@ -44,18 +55,18 @@ export function ReefScene() {
   // Corals shrink on smaller screens so they don't dominate the floor.
   const coralScale = vw < 640 ? 0.62 : vw < 1024 ? 0.8 : 1;
 
-  // Tier budget:
+  // Tier budget (GRAPHICS load only — not the AI):
   //  off    – fully static.
-  //  low    – SVG bg + CSS sway + ambient creatures (no canvas, no cursor) ← mobile.
+  //  low    – SVG bg + CSS sway + ambient creatures (no canvas).
   //  medium – + canvas bubbles.
-  //  high   – + cursor interaction (octopus avoids/flees, kelp reacts; native cursor).
+  //  high   – + kelp/canvas cursor FX + native hunting cursor.
   const animated = tier !== "off";
   const creaturesOn = atLeast(tier, "low") && active;
   const canvasOn = atLeast(tier, "medium") && active;
   const interactive = atLeast(tier, "high") && active;
-  // Octopus cursor-awareness (avoid/curious) runs from "medium" up — touch caps
-  // at "low", so medium+ means a real mouse. (High adds kelp/canvas cursor FX.)
-  const cursorAware = atLeast(tier, "medium") && active;
+  // Octopus cursor-awareness is decoupled from the graphics tier: it runs
+  // whenever he's on screen and there's a real mouse (cheap; not a perf cost).
+  const cursorAware = creaturesOn && hasMouse;
   const pointer = usePointerField(containerRef, cursorAware);
 
   // Poke the octopus: a tap (mobile) or click (desktop) near it scares it; on it
