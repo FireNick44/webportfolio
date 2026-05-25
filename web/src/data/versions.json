@@ -1,0 +1,4 @@
+[
+  { "id": "2026", "label": "Portfolio 2026", "year": 2026, "type": "next", "path": "/", "isLatest": true },
+  { "id": "2024", "label": "Portfolio 2024", "year": 2024, "type": "static", "path": "/v/2024", "isLatest": false }
+]
