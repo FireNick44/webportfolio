@@ -94,7 +94,7 @@ function PanelHead({ children }: { children: React.ReactNode }) {
   );
 }
 
-export default function SettingsPanel({
+export default function TechnicalPanel({
   lang,
   dict,
 }: {

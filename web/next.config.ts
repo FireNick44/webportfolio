@@ -10,6 +10,17 @@ const nextConfig: NextConfig = {
     // directory path needs mapping to its index.html.
     return [{ source: "/v/2024", destination: "/v/2024/index.html" }];
   },
+  async redirects() {
+    // Old /settings path renamed to /technical. permanent:false (307) while
+    // iterating — flip to true (308, cached forever) once finalized.
+    return [
+      {
+        source: "/:lang/settings",
+        destination: "/:lang/technical",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

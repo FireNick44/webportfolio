@@ -96,7 +96,7 @@ export default function Header({
           {/* Settings: desktop only — gear spins on hover */}
           <button
             type="button"
-            onClick={() => navigateTo(`/${lang}/settings`)}
+            onClick={() => navigateTo(`/${lang}/technical`)}
             className={cn(
               iconButtonVariants({ variant: "ghost", size: "sm" }),
               "group hidden md:inline-flex",
@@ -179,7 +179,7 @@ export default function Header({
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  navigateTo(`/${lang}/settings`);
+                  navigateTo(`/${lang}/technical`);
                 }}
                 className={cn(iconButtonVariants({ variant: "outline", size: "sm" }), "gap-2 px-3 w-auto")}
               >
