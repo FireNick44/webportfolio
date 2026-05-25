@@ -21,14 +21,14 @@ const DAMP = 2.4;
 const SPRING = 1.8;
 const AVOID_R = 340;
 const AVOID_FORCE = 5200;
-const PERSONAL_R = 180; // always keep this comfortable gap (gentle deflect, not a flee)
-const PERSONAL_FORCE = 3200;
+const PERSONAL_R = 185; // approach this close and he backs off (every mood, calm)
+const PERSONAL_FORCE = 4600;
 const SCARE_GAIN = 0.9; // scare/sec accrued while actively fleeing → panic-hide
 const SCARE_DECAY = 0.6;
 const SCARE_TRIGGER = 1.4;
 const HIDE_MIN = 7000;
 const HIDE_RAND = 4000;
-const ORBIT_R = 130;
+const ORBIT_R = 200; // curious orbit sits just outside the personal-space gap
 const ORBIT_SPEED = 2.0;
 const ORBIT_K = 3.2;
 const MIN_GAP = 118; // hard floor: the octopus never gets closer than this to the cursor
@@ -235,12 +235,6 @@ export function Octopus({
           if (cActive) st.orbitAngle = Math.atan2(st.y - cy, st.x - cx);
           ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
           ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
-          // Always hold personal space: a gentle deflection so he steers AROUND
-          // the cursor and never swims over it (this is NOT a flee — calm).
-          if (cActive && dist < PERSONAL_R) {
-            const f = Math.pow(1 - dist / PERSONAL_R, 1.8) * PERSONAL_FORCE;
-            ax += dirX * f; ay += dirY * f;
-          }
           if (st.cmode === "flee" && cActive && dist < AVOID_R) {
             // A genuine lunge adds the bigger panic push on top.
             const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
@@ -285,6 +279,14 @@ export function Octopus({
         }
       }
       st.prevCmode = st.cmode;
+
+      // Personal space, every mood: the closer the cursor, the harder he's
+      // pushed directly away — approaching him makes him back off. Calm
+      // gap-keeping (the panic bolt is the separate AVOID/scare flee path).
+      if (cActive && dist < PERSONAL_R) {
+        const f = Math.pow(1 - dist / PERSONAL_R, 1.8) * PERSONAL_FORCE;
+        ax += dirX * f; ay += dirY * f;
+      }
 
       st.vx += ax * dt;
       st.vy += ay * dt;
