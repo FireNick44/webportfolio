@@ -90,7 +90,7 @@ export function Octopus({
     onTaps: [] as number[], inkCooldownUntil: 0, lastTapT: 0,
     lastTapX: 0, lastTapY: 0, inkDashAt: 0, dashDirX: 0, dashDirY: 0, dashUntil: 0,
     cspeed: 0, prevCx: 0, prevCy: 0, prevDist: Infinity, calmMs: 0,
-    cmode: "roam" as OctoMode, prevCmode: "roam" as OctoMode,
+    cmode: "roam" as OctoMode, prevCmode: "roam" as OctoMode, rot: 0,
   });
 
   useEffect(() => {
@@ -315,7 +315,11 @@ export function Octopus({
         }
       }
 
-      const rot = Math.max(-25, Math.min(25, st.vx * 0.045));
+      // Ease the tilt toward the velocity-based target so left↔right turns are
+      // smooth, not abrupt snaps when he reverses (dt-aware, ~framerate stable).
+      const targetRot = Math.max(-25, Math.min(25, st.vx * 0.045));
+      st.rot += (targetRot - st.rot) * Math.min(1, dt * 6);
+      const rot = st.rot;
       // Anchor on the octopus's MASS centre (47%,58% of the gif), not the
       // geometric centre, so the orbit/avoid maths track the creature itself.
       el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-47%, -58%) rotate(${rot}deg)`;
