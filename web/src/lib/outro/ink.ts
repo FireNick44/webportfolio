@@ -5,7 +5,8 @@ export const SCARE_TAP_R = 180; // tap within this (outside INK_HIT_R) = "around
 export const INK_TAPS = 2; // on-taps within the window → ink
 export const INK_WINDOW = 2500; // ms: how long an on-tap counts toward ink
 export const INK_COOLDOWN = 1800; // ms: minimum gap between ink puffs
-export const INK_DROP = 30; // px below mass-centre = ink origin (his underside)
+export const INK_DROP = 44; // px below mass-centre = ink origin (his lower middle)
+export const INK_DASH_DELAY = 220; // ms: let the ink bloom, THEN he dashes away
 export const TAP_MAX_MS = 250; // tap vs scroll: max touch duration
 export const TAP_MAX_MOVE = 10; // px: max movement to still count as a tap
 

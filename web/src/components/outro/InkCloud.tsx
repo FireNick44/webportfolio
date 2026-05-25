@@ -12,7 +12,7 @@ interface Puff {
   y: number;
 }
 
-const PUFF_MS = 1400; // matches the ink-bloom keyframe duration
+const PUFF_MS = 950; // matches the ink-bloom keyframe duration (snappy)
 
 // Three offset blobs per puff → an organic, lopsided cloud, not one flat circle.
 const BLOBS = [

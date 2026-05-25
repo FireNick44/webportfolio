@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PointerField } from "@/hooks/usePointerField";
 import { useAppStore } from "@/store/useAppStore";
 import type { InkHandle } from "./InkCloud";
-import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP } from "@/lib/outro/ink";
+import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP, INK_DASH_DELAY } from "@/lib/outro/ink";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):
@@ -35,6 +35,7 @@ const MIN_GAP = 105; // hard floor: the octopus never gets closer than this to t
 const SPEED_ORBIT = 540;
 const SPEED_WARY = 700;
 const SPEED_FLEE = 1040;
+const SPEED_DASH = 1320; // brief burst when he jumps away after inking
 const TAU = Math.PI * 2;
 
 // Favourite hangouts (fractions of the scene) the octopus drifts between when it
@@ -86,6 +87,7 @@ export function Octopus({
     noiseX: 0, noiseY: 0, noiseTX: 0, noiseTY: 0, noiseAt: 0,
     trail: [] as number[],
     onTaps: [] as number[], inkCooldownUntil: 0, lastTapT: 0,
+    lastTapX: 0, lastTapY: 0, inkDashAt: 0, dashDirX: 0, dashDirY: 0, dashUntil: 0,
   });
 
   useEffect(() => {
@@ -130,8 +132,10 @@ export function Octopus({
         const tdist = Math.hypot(tap.x - st.x, tap.y - st.y) || 0.01;
         const cls = classifyTap(tdist);
         if (cls !== "miss") {
-          // Dart away from the poke (both cases) — visible "scared" reaction.
-          const push = cls === "on" ? 1100 : 820;
+          st.lastTapX = tap.x; st.lastTapY = tap.y;
+          // "around" → dart off (scared). "on" → only a small flinch so he stays
+          // put to receive the next tap; the big move is the post-ink dash.
+          const push = cls === "on" ? 230 : 820;
           st.vx += ((st.x - tap.x) / tdist) * push;
           st.vy += ((st.y - tap.y) / tdist) * push;
           if (cls === "on") {
@@ -142,14 +146,29 @@ export function Octopus({
           console.log(`[octopus] poke ${cls} dist=${Math.round(tdist)} onTaps=${recent}/${INK_TAPS}`);
         }
       }
-      // Enough on-taps in the window → squirt ink (he stays in scene, just startled).
-      if (enoughOnTaps(st.onTaps, now) && now >= st.inkCooldownUntil) {
+      // Enough on-taps → squirt ink at his lower middle NOW, then dash away after
+      // it has had a moment to bloom (so the ink isn't left where he already was).
+      if (enoughOnTaps(st.onTaps, now) && now >= st.inkCooldownUntil && !st.inkDashAt) {
         console.log(
           `[octopus] INK emit (taps) @ (${Math.round(st.x)}, ${Math.round(st.y + INK_DROP)})`,
         );
         inkRef.current?.emit(st.x, st.y + INK_DROP);
         st.inkCooldownUntil = now + INK_COOLDOWN;
         st.onTaps = [];
+        // Dash direction: away from the last poke, with an upward "jump" lean.
+        const ddx = st.x - st.lastTapX;
+        const ddy = st.y - st.lastTapY - 60;
+        const dd = Math.hypot(ddx, ddy) || 1;
+        st.dashDirX = ddx / dd;
+        st.dashDirY = ddy / dd;
+        st.inkDashAt = now + INK_DASH_DELAY;
+      }
+      // Deferred dash: fires once the ink has bloomed.
+      if (st.inkDashAt && now >= st.inkDashAt) {
+        st.vx = st.dashDirX * SPEED_DASH;
+        st.vy = st.dashDirY * SPEED_DASH;
+        st.dashUntil = now + 450;
+        st.inkDashAt = 0;
       }
 
       let ax = 0, ay = 0;
@@ -242,6 +261,8 @@ export function Octopus({
 
       st.vx += ax * dt;
       st.vy += ay * dt;
+      // Allow the brief post-ink dash to exceed the normal mood cap.
+      if (now < st.dashUntil) cap = Math.max(cap, SPEED_DASH);
       const sp = Math.hypot(st.vx, st.vy);
       if (sp > cap) { st.vx = (st.vx / sp) * cap; st.vy = (st.vy / sp) * cap; }
       st.x += st.vx * dt;
