@@ -91,6 +91,7 @@ export function Octopus({
     lastTapX: 0, lastTapY: 0, inkDashAt: 0, dashDirX: 0, dashDirY: 0, dashUntil: 0,
     cspeed: 0, prevCx: 0, prevCy: 0, prevDist: Infinity, calmMs: 0,
     cmode: "roam" as OctoMode, prevCmode: "roam" as OctoMode, rot: 0,
+    paceSeed: 0, meanderSeed: 0, meanderSeed2: 0,
   });
 
   useEffect(() => {
@@ -110,6 +111,9 @@ export function Octopus({
       if (!st.init) {
         st.x = W * 0.5; st.y = H * 0.5; st.tx = st.x; st.ty = st.y;
         st.nextAt = now; st.init = true; el.style.opacity = "1";
+        st.paceSeed = Math.random() * TAU;
+        st.meanderSeed = Math.random() * TAU;
+        st.meanderSeed2 = Math.random() * TAU;
       }
 
       const p = pointer.current;
@@ -207,7 +211,8 @@ export function Octopus({
           const rWob =
             ORBIT_R +
             Math.sin(st.orbitAngle * 2 + st.wob2) * 34 +
-            Math.sin(st.orbitAngle * 1.3 + st.wob3) * 20;
+            Math.sin(st.orbitAngle * 1.3 + st.wob3) * 20 +
+            Math.sin(now * 0.0004 + st.wob1) * 46; // slow lean in/out = investigating
           // Smoothed random-walk noise so the loop isn't a clean function.
           if (now >= st.noiseAt) {
             st.noiseTX = (Math.random() - 0.5) * 55;
@@ -233,8 +238,20 @@ export function Octopus({
           // roam (or flee): travel toward a favourite spot. He keeps the orbit
           // angle synced so slipping into curiosity is seamless.
           if (cActive) st.orbitAngle = Math.atan2(st.y - cy, st.x - cx);
-          ax = (st.tx - st.x) * SPRING - st.vx * DAMP;
-          ay = (st.ty - st.y) * SPRING - st.vy * DAMP;
+          // Organic path: arc toward the spot via a slow perpendicular meander so
+          // it never looks like a straight scripted line. Fleeing stays direct.
+          let gx = st.tx, gy = st.ty;
+          if (st.cmode !== "flee") {
+            const toX = st.tx - st.x, toY = st.ty - st.y;
+            const tl = Math.hypot(toX, toY) || 1;
+            const meander =
+              Math.sin(now * 0.0011 + st.meanderSeed) * 70 +
+              Math.sin(now * 0.0007 + st.meanderSeed2) * 40;
+            gx += (-toY / tl) * meander;
+            gy += (toX / tl) * meander;
+          }
+          ax = (gx - st.x) * SPRING - st.vx * DAMP;
+          ay = (gy - st.y) * SPRING - st.vy * DAMP;
           if (st.cmode === "flee" && cActive && dist < AVOID_R) {
             // A genuine lunge adds the bigger panic push on top.
             const f = Math.pow(1 - dist / AVOID_R, 1.6) * AVOID_FORCE;
@@ -288,6 +305,12 @@ export function Octopus({
         ax += dirX * f; ay += dirY * f;
       }
 
+      // Varied pace: ease the cap up and down slowly so he visibly speeds up and
+      // slows down — not metronomic. Not while fleeing or dashing.
+      if (st.mode === "wander" && st.cmode !== "flee" && now >= st.dashUntil) {
+        cap *= 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(now * 0.0006 + st.paceSeed));
+      }
+
       st.vx += ax * dt;
       st.vy += ay * dt;
       // Allow the brief post-ink dash to exceed the normal mood cap.
@@ -322,7 +345,11 @@ export function Octopus({
       const rot = st.rot;
       // Anchor on the octopus's MASS centre (47%,58% of the gif), not the
       // geometric centre, so the orbit/avoid maths track the creature itself.
-      el.style.transform = `translate3d(${st.x}px, ${st.y}px, 0) translate(-47%, -58%) rotate(${rot}deg)`;
+      // Idle micro-motion: a tiny always-on bob/sway so he never looks frozen
+      // (purely visual — doesn't touch the physics or the cursor gap).
+      const bobX = Math.sin(now * 0.0012) * 3 + Math.sin(now * 0.0019 + 1.3) * 2;
+      const bobY = Math.sin(now * 0.0009 + 0.7) * 4 + Math.sin(now * 0.0022) * 2;
+      el.style.transform = `translate3d(${st.x + bobX}px, ${st.y + bobY}px, 0) translate(-47%, -58%) rotate(${rot}deg)`;
 
       // Advanced-mode debug: a fading trail of the goal point, plus the octopus
       // and a link line — so the orbit/flee path is visible.
