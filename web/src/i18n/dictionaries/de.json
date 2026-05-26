@@ -14,50 +14,17 @@
   },
   "about": {
     "label": "01 / Über mich",
-    "title": "Ein bisschen zur Person hinter den Kolben",
+    "title": "Ein bisschen zur Person hinter den Gläsern",
     "bio": [
-      "Ich bin Yannic — ein Softwareentwickler, der vage Ideen gerne in Dinge verwandelt, die tatsächlich laufen.",
-      "Ich bewege mich sicher zwischen Front- und Backend, achte auf Details und liebe den Moment, in dem ein umständlicher Ablauf endlich mühelos wird."
-    ],
-    "columns": [
-      {
-        "title": "Coding & Frameworks",
-        "items": [
-          "Java",
-          "JavaScript / TypeScript",
-          "Python",
-          "PHP / Laravel",
-          "C / C++ / C#",
-          "React & Vue",
-          "Angular",
-          "Node.js",
-          "SQL",
-          "HTML / CSS / Sass"
-        ]
-      },
-      {
-        "title": "Software",
-        "items": ["VS Code", "Visual Studio", "JetBrains Suite", "Git & GitHub"]
-      },
-      {
-        "title": "Systeme",
-        "items": ["Windows 10 / 11", "Ubuntu", "Kali Linux", "Garuda", "Raspberry Pi"]
-      },
-      {
-        "title": "Sprachen",
-        "items": ["Deutsch — Muttersprache", "Englisch — fliessend", "Französisch — Grundlagen"]
-      },
-      {
-        "title": "Neben dem Code",
-        "items": ["Elektronik & Basteln", "Musik", "Fotografie", "Guter Kaffee"]
-      }
+      "Ich bin Yannic — Entwickler, der gern Dinge baut, die Menschen wirklich weiterhelfen, und der sich für Computer und Security begeistert.",
+      "Ich bewege mich sicher zwischen Front- und Backend, habe ein Auge fürs Detail und lebe für den Moment, in dem ein umständlicher Ablauf endlich rundläuft."
     ]
   },
   "skills": {
     "label": "02 / Skills",
-    "title": "In Lösung gehalten",
-    "subtitle": "Jeder Kolben enthält ein Werkzeug, mit dem ich arbeite — an seiner eigenen Kette.",
-    "hint": "Bring die Kolben in Bewegung"
+    "title": "Schwebend in Lösung",
+    "subtitle": "Jedes Glas enthält ein Werkzeug, mit dem ich arbeite — an seiner eigenen Kette.",
+    "hint": "Bring die Gläser in Bewegung"
   },
   "projects": {
     "label": "03 / Ausgewählte Arbeiten",
@@ -67,7 +34,7 @@
   },
   "contact": {
     "label": "04 / Kontakt",
-    "title": "Lass uns etwas zusammenmischen",
+    "title": "Lass uns etwas zusammenbrauen",
     "subtitle": "Erzähl mir von deiner Idee. Keine E-Mail oder Nummer zum Abtippen — einfach schreiben und absenden.",
     "name": "Name",
     "namePlaceholder": "Dein Name",
@@ -83,7 +50,7 @@
   },
   "footer": {
     "thanks": "Danke fürs Vorbeischauen.",
-    "note": "Diese Ecke des Webs köchelt noch — wie alles, das es wert ist. ;)",
+    "note": "Diese Ecke des Webs köchelt noch — wie alles, was sich lohnt. ;)",
     "rights": "© 2026 Yannic Studer",
     "builtWith": "Gebaut mit Next.js, Matter.js & viel Koffein.",
     "backToTop": "Nach oben"
@@ -91,7 +58,7 @@
   "menu": {
     "open": "Menü",
     "close": "Schliessen",
-    "theme": "Thema",
+    "theme": "Design",
     "language": "Sprache"
   }
 }

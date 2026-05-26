@@ -17,7 +17,7 @@ export default async function Page({
   return (
     <>
       <Hero dict={dict} />
-      <About dict={dict} />
+      <About dict={dict} lang={lang} />
       <Skills dict={dict} />
       <Projects dict={dict} />
       <Contact dict={dict} />

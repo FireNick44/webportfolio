@@ -16,41 +16,8 @@
     "label": "01 / Me",
     "title": "A bit about the person behind the flasks",
     "bio": [
-      "I'm Yannic — a software developer who likes turning fuzzy ideas into things that actually run.",
-      "I move comfortably between front end and back end, care about details, and enjoy the moment a clunky workflow finally feels effortless."
-    ],
-    "columns": [
-      {
-        "title": "Coding & Frameworks",
-        "items": [
-          "Java",
-          "JavaScript / TypeScript",
-          "Python",
-          "PHP / Laravel",
-          "C / C++ / C#",
-          "React & Vue",
-          "Angular",
-          "Node.js",
-          "SQL",
-          "HTML / CSS / Sass"
-        ]
-      },
-      {
-        "title": "Software",
-        "items": ["VS Code", "Visual Studio", "JetBrains Suite", "Git & GitHub"]
-      },
-      {
-        "title": "Systems",
-        "items": ["Windows 10 / 11", "Ubuntu", "Kali Linux", "Garuda", "Raspberry Pi"]
-      },
-      {
-        "title": "Languages",
-        "items": ["German — native", "English — fluent", "French — basics"]
-      },
-      {
-        "title": "Beyond code",
-        "items": ["Electronics & tinkering", "Music", "Photography", "Good coffee"]
-      }
+      "I'm Yannic — a developer who likes building things that genuinely help people, and who's endlessly curious about computers and security.",
+      "I move comfortably between front end and back end, sweat the small details, and live for the moment a clunky workflow finally clicks."
     ]
   },
   "skills": {

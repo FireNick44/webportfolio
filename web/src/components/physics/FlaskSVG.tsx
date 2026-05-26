@@ -1,5 +1,11 @@
 import { forwardRef } from "react";
 import { FLASK_WIDTH, FLASK_HEIGHT } from "@/physics/constants";
+import {
+  FLASK_SHAPE_DEFS,
+  FLASK_GLASS_STROKE,
+  withAlpha,
+  type FlaskShape,
+} from "@/physics/flaskShapes";
 
 interface Props {
   id: string;
@@ -11,10 +17,31 @@ interface Props {
   iconBob?: { delay: number; dur: number };
   /** Lift this flask above the hint scrim (z > scrim) — the bright "drag me" demo. */
   elevated?: boolean;
+  /** Bottle silhouette (rect/round/cone). Data in `flaskShapes.ts`. */
+  shape?: FlaskShape;
+  /** Water alpha override (0..1). Defaults to whatever the colour string carries. */
+  liquidOpacity?: number;
+  /** Decorative back-tier flask. Drops the 3D gradient + side highlight for a
+   *  flatter, more solid look so the back layer reads as background depth, not
+   *  competing detail. */
+  isSkeleton?: boolean;
 }
 
 const FlaskSVG = forwardRef<HTMLDivElement, Props>(
-  ({ id, color = "rgba(255,86,86,0.7)", skillIcon, iconBob, elevated }, ref) => {
+  (
+    {
+      id,
+      color = "rgba(255,86,86,0.7)",
+      skillIcon,
+      iconBob,
+      elevated,
+      shape = "rect",
+      liquidOpacity,
+      isSkeleton = false,
+    },
+    ref,
+  ) => {
+    const def = FLASK_SHAPE_DEFS[shape];
     // The bob wraps the icon image as a CHILD of icon-wet/icon-dry, because
     // syncDom REPLACES the transform attribute on those <g>s every frame — a
     // child wrapper composes (rotate from parent, translateY here) untouched.
@@ -29,10 +56,20 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
     const gradId1 = `flask-lg1-${id}`;
     const gradId2 = `flask-lg2-${id}`;
     const gradId3 = `flask-lg3-${id}`;
+    const gradShade = `flask-shade-${id}`;
     const clipId = `liquid-clip-${id}`;
     const rectId = `liquid-rect-${id}`;
     const dryClipId = `dry-clip-${id}`;
     const dryRectId = `dry-rect-${id}`;
+
+    // Clip rects are generous so they cover even when the liquid rect rotates
+    // by ±MAX_LIQUID_TILT_DEG. Sized off the shape's viewBox.
+    const [, , vbW, vbH] = def.viewBox.split(" ").map(Number);
+    const clipPad = Math.max(vbW, vbH);
+
+    const waterFill =
+      typeof liquidOpacity === "number" ? withAlpha(color, liquidOpacity) : color;
+    const { iconBox, cork, corkOverlay, band, glass, water, sheens, bodyShade } = def;
 
     return (
       <div
@@ -51,20 +88,24 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
         <svg
           width={FLASK_WIDTH}
           height={FLASK_HEIGHT}
-          viewBox="0 0 139 180"
+          viewBox={def.viewBox}
           xmlns="http://www.w3.org/2000/svg"
           style={{ overflow: "hidden" }}
         >
           <defs>
             <linearGradient
               id={gradId1}
-              x1="0.5"
-              x2="0.929"
-              y2="0.877"
+              x1="0"
+              y1="0"
+              x2="1"
+              y2="0"
               gradientUnits="objectBoundingBox"
             >
-              <stop offset="0" stopColor="#fff" stopOpacity="0.4" />
-              <stop offset="1" stopColor="#bfbfbf" stopOpacity="0.502" />
+              {/* Horizontal left-to-right body shading. Pushed up (test): more
+                  solid + stronger left highlight so front flasks read with
+                  similar weight to the flat skeleton fill behind them. */}
+              <stop offset="0" stopColor="#ffffff" stopOpacity="0.6" />
+              <stop offset="1" stopColor="#1a1a1a" stopOpacity="0.35" />
             </linearGradient>
             <linearGradient
               id={gradId2}
@@ -89,103 +130,125 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
               <stop offset="1" stopColor="gray" stopOpacity="0" />
             </linearGradient>
 
-            {/* Clip for liquid — rect counter-rotates so surface stays level */}
-            {/* Water area: covers below the water line */}
+            {/* Body-shade gradient — vertical white-alpha fading to transparent.
+                Drives the optional bodyShade path each shape may carry, ported
+                from the 2024 SVGs' left-side highlight overlays. */}
+            <linearGradient
+              id={gradShade}
+              x1="0"
+              y1="0"
+              x2="0"
+              y2="1"
+              gradientUnits="objectBoundingBox"
+            >
+              <stop offset="0" stopColor="#ffffff" stopOpacity="0.18" />
+              <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+            </linearGradient>
+
+            {/* Water area: covers below the water line. Counter-rotates via the
+                rect id so the surface stays level as the flask swings. */}
             <clipPath id={clipId}>
               <rect
                 id={rectId}
-                x={-60}
-                y={65}
-                width={260}
-                height={200}
+                x={-clipPad}
+                y={def.clipY}
+                width={clipPad * 3}
+                height={clipPad * 2}
               />
             </clipPath>
-            {/* Dry area: covers above the water line */}
+            {/* Dry area: covers above the water line. */}
             <clipPath id={dryClipId}>
               <rect
                 id={dryRectId}
-                x={-60}
-                y={-135}
-                width={260}
-                height={200}
+                x={-clipPad}
+                y={def.clipY - clipPad * 2}
+                width={clipPad * 3}
+                height={clipPad * 2}
               />
             </clipPath>
           </defs>
 
-          {/* 1. Liquid fill (bottom layer, clipped) */}
+          {/* 1. Liquid fill (bottom layer, clipped to the body interior). */}
           <g clipPath={`url(#${clipId})`}>
-            <path
-              d="M15.01,49.439H116v84.446c0,4.873.2,31.843-46.287,31.631H58.731C14.718,165.728,15,138.758,15,133.885Z"
-              transform="translate(4, 2.483)"
-              fill={color}
-            />
+            <path d={water.d} transform={water.transform} fill={waterFill} />
           </g>
 
-          {/* 2. Glass body outline */}
-          <g transform="translate(0, 9)">
+          {/* 2. Glass body outline — gradient on physics flasks, flat fill on
+              skeletons so the back layer reads as quiet depth not detail. */}
+          <g transform={glass.transform}>
             <path
-              d="M74.714,171H61.122C6.651,171.239,7,140.671,7,135.148V16H4a4,4,0,0,1-4-4V4A4,4,0,0,1,4,0H135a4,4,0,0,1,4,4v8a4,4,0,0,1-4,4h-3V135.148c0,5.5.242,35.849-56.61,35.851Z"
-              fill={`url(#${gradId1})`}
+              d={glass.d}
+              fill={
+                isSkeleton ? "rgba(160,160,165,0.55)" : `url(#${gradId1})`
+              }
               stroke="rgba(224,224,224,0.5)"
-              strokeWidth={1}
+              strokeWidth={FLASK_GLASS_STROKE}
             />
           </g>
 
-          {/* 4. Band below cap */}
-          <g transform="translate(3, 9)">
+          {/* 3. Band below cap */}
+          <g transform={band.transform}>
             <path
-              d="M7,16V13H126v3Z"
+              d={band.d}
               fill="none"
               stroke="rgba(224,224,224,0.5)"
               strokeWidth={1}
             />
           </g>
 
-          {/* 5. Cork / cap */}
+          {/* 3b. Optional body shading (per shape) — subtle left-side highlight
+              overlay that the 2024 SVGs had on the cone/rect. Skipped for
+              skeletons (they're flat by design). */}
+          {bodyShade && !isSkeleton && (
+            <path
+              d={bodyShade.d}
+              transform={bodyShade.transform}
+              fill={`url(#${gradShade})`}
+            />
+          )}
+
+          {/* 4. Cork / cap */}
           <rect
-            x={17}
-            y={0}
-            width={105}
-            height={33}
+            x={cork.x}
+            y={cork.y}
+            width={cork.w}
+            height={cork.h}
             rx={3}
             fill="rgba(164,111,116,0.4)"
           />
           <path
-            d="M3,0h99a3,3,0,0,1,3,3V9.019L0,8.987S0,4.274,0,3A3,3,0,0,1,3,0Z"
-            transform="translate(17, 0)"
+            d={corkOverlay.d}
+            transform={corkOverlay.transform}
             fill={`url(#${gradId2})`}
           />
 
-          {/* Skill icon — split into submerged part (clipped by water) and dry
-              part. Rendered UNDER the glass reflections below, so it sits one
-              layer back (behind the front-glass sheen) instead of pasted on top. */}
+          {/* 5. Skill icon — submerged + dry parts, drawn AFTER the glass body
+              so it reads in FRONT of the glass. */}
           {skillIcon && (
             <>
-              {/* Submerged portion: clipped by the liquid line. */}
               <g clipPath={`url(#${clipId})`}>
                 <g id={`icon-wet-${id}`}>
                   <g className={bobClass} style={bobStyle}>
                     <image
                       href={skillIcon}
-                      x={34}
-                      y={55}
-                      width={70}
-                      height={70}
+                      x={iconBox.x}
+                      y={iconBox.y}
+                      width={iconBox.w}
+                      height={iconBox.h}
                       preserveAspectRatio="xMidYMid meet"
                     />
                   </g>
                 </g>
               </g>
-              {/* Dry portion: everything above the water line */}
               <g clipPath={`url(#${dryClipId})`}>
                 <g id={`icon-dry-${id}`}>
                   <g className={bobClass} style={bobStyle}>
                     <image
                       href={skillIcon}
-                      x={34}
-                      y={55}
-                      width={70}
-                      height={70}
+                      x={iconBox.x}
+                      y={iconBox.y}
+                      width={iconBox.w}
+                      height={iconBox.h}
                       preserveAspectRatio="xMidYMid meet"
                     />
                   </g>
@@ -194,21 +257,19 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
             </>
           )}
 
-          {/* Glass reflections — top layer, a sheen drawn over the icon */}
-          <path
-            d="M62.567,71.2s4.588-43.336-11.624-60.058S0,1.481,0,1.481,23.391,6.4,40.481,22.282C47.368,28.682,56.959,42.241,62.567,71.2Z"
-            transform="translate(125.448, 109.577) rotate(90)"
-            fill="rgba(255,255,255,0.17)"
-          />
-          <path
-            d="M68.132,24.612c1.4-6.2-12.111-5.589-35.888-3.41s-47.7,4.728-46.834,10.69S66.734,30.813,68.132,24.612Z"
-            transform="translate(49.692, 66.147) rotate(96)"
-            fill={`url(#${gradId3})`}
-          />
+          {/* 6. Glass reflections — top sheen drawn over everything. */}
+          {sheens.map((s, i) => (
+            <path
+              key={i}
+              d={s.d}
+              transform={s.transform}
+              fill={s.gradient ? `url(#${gradId3})` : "rgba(255,255,255,0.17)"}
+            />
+          ))}
         </svg>
       </div>
     );
-  }
+  },
 );
 
 FlaskSVG.displayName = "FlaskSVG";

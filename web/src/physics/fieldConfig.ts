@@ -34,8 +34,8 @@ export const DESKTOP_DEFAULT: FieldConfig = {
   // chain length now). Extra links above the physics cap are cheap static rope.
   segmentRange: [3, 16],
   layout: "field",
-  bgSkeletons: 18, // small ghosts filling depth behind the rack at ALL heights (incl. middle)
-  coverSkeletons: 6, // varied flasks (big & small) hung high BEHIND the rack, near the surface
+  bgSkeletons: 24, // small ghosts filling depth behind the rack at ALL heights (incl. middle)
+  coverSkeletons: 14, // varied flasks (big & small) hung behind the rack from the surface into the upper-middle band
 };
 
 // Mobile: tier 0 = interactive column; tiers 1..2 = background skeleton planes.
@@ -65,10 +65,10 @@ export const MOBILE_CONFIG: FieldConfig = {
 // when motion is off — maxPhysicsFlasks no longer caps icon flasks here, it only
 // matters as the 0 = static sentinel. bgSkeletons add static depth behind.
 export const FIELD_BY_TIER: Record<GraphicsTier, FieldConfig> = {
-  off: { flaskCount: 24, maxPhysicsFlasks: 0, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 12, coverSkeletons: 4 },
-  low: { flaskCount: 26, maxPhysicsFlasks: 8, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 13], layout: "field", bgSkeletons: 12, coverSkeletons: 4 },
+  off: { flaskCount: 24, maxPhysicsFlasks: 0, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
+  low: { flaskCount: 26, maxPhysicsFlasks: 8, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 13], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
   medium: { ...DESKTOP_DEFAULT, maxPhysicsFlasks: 18, skeletonBands: 2 },
-  high: { flaskCount: 44, maxPhysicsFlasks: 26, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 24, coverSkeletons: 8 },
+  high: { flaskCount: 44, maxPhysicsFlasks: 26, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 32, coverSkeletons: 18 },
 };
 
 /** Pick the flask field config for the resolved tier + device. Mobile keeps the

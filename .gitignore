@@ -1,2 +1,8 @@
 # VS Code files for those working on multiple tools
 .vscode/
+# JetBrains
+.idea/
+# macOS finder droppings
+.DS_Store
+# Local Netlify folder
+.netlify

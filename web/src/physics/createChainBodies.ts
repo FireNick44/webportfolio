@@ -62,16 +62,29 @@ export function createChainBodies(
 
   // Joints connected INSET from each segment's centre (not the edge) → adjacent
   // links overlap, hiding the joint and smoothing the curve (matter-js "ropeC").
+  //
+  // Stiffness ramps along the chain: links nearer the anchor (static rope above)
+  // are stiffer + damped more so they resist swinging, while the bottom links
+  // by the flask stay loose so it can still flop around. Reads as "the chain
+  // hangs steady up top, only the bottle end swings."
+  const stiffTop = 0.99;
+  const stiffBot = CHAIN_STIFFNESS; // 0.92, current default
+  const dampTop = 0.7;
+  const dampBot = CHAIN_DAMPING; // 0.45
+  const lastIdx = Math.max(1, segments.length - 1);
   for (let i = 0; i < segments.length - 1; i++) {
     const hA = segmentHeights[i];
     const hB = segmentHeights[i + 1];
+    const frac = i / lastIdx; // 0 at top → 1 at bottom
+    const stiffness = stiffTop + (stiffBot - stiffTop) * frac;
+    const damping = dampTop + (dampBot - dampTop) * frac;
     const constraint = Matter.Constraint.create({
       bodyA: segments[i],
       pointA: { x: 0, y: JOINT_INSET * hA },
       bodyB: segments[i + 1],
       pointB: { x: 0, y: -JOINT_INSET * hB },
-      stiffness: CHAIN_STIFFNESS,
-      damping: CHAIN_DAMPING,
+      stiffness,
+      damping,
       length: 0,
       render: { visible: false },
     });

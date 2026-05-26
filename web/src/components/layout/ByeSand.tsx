@@ -1,4 +1,4 @@
-// The colourful layered "sand" ground from Noel's original portfolio's #bye
+// The colourful layered "sand" ground from the 2024 portfolio's #bye
 // section — four stacked wave bands that read as a beach/seabed. Fixed colours
 // (this is the page's playful, intentional pop of colour at the very end).
 

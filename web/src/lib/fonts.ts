@@ -1,7 +1,7 @@
 import localFont from "next/font/local";
 import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 
-// Noel's signature display face, carried over from the original portfolio.
+// The signature display face, carried over from the 2024 portfolio.
 export const berlin = localFont({
   src: [
     { path: "../fonts/BerlinTypeWeb-Regular.woff2", weight: "400", style: "normal" },

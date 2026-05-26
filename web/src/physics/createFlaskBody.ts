@@ -20,7 +20,11 @@ export function createFlaskBody(
   // apart. This filter collides with the walls only — not other flasks —
   // reusing existing categories (no new constants).
   noFlaskCollision: boolean = false,
-  layer: number = 0
+  layer: number = 0,
+  // Shift the chain-attachment point on the flask body (body-local px, scaled
+  // by `scale`). Negative = higher up. Lets cone-style shapes have the chain
+  // end visually at the cork top instead of partway down the cork.
+  chainAttachOffsetPx: number = 0,
 ): FlaskResult {
   const segPos = lastChainSegment.position;
   const w = FLASK_HITBOX_WIDTH * scale;
@@ -48,7 +52,7 @@ export function createFlaskBody(
     bodyA: lastChainSegment,
     pointA: { x: 0, y: lastSegmentHeight / 2 },
     bodyB: body,
-    pointB: { x: 0, y: -hgt / 2 },
+    pointB: { x: 0, y: -hgt / 2 + chainAttachOffsetPx * scale },
     stiffness: 1,
     damping: 0.7,
     length: 0,

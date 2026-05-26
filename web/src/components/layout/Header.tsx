@@ -8,6 +8,7 @@ import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { usePageTransition } from "@/components/layout/PageTransitionProvider";
 import { iconButtonVariants } from "@/components/ui/button-variants";
+import { Monogram } from "@/components/layout/Monogram";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.76, 0, 0.24, 1] as const;
@@ -65,11 +66,10 @@ export default function Header({
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: "smooth" });
           }}
-          className="font-display text-xl font-bold tracking-tight transition-opacity hover:opacity-70"
+          className="text-foreground transition-opacity hover:opacity-70"
           aria-label="Yannic Studer — home"
         >
-          YS
-          <span className="text-accent">.</span>
+          <Monogram className="h-6 w-auto" />
         </a>
 
         <div className="flex items-center gap-3 md:gap-5">
@@ -139,9 +139,7 @@ export default function Header({
             className="fixed inset-0 z-[250] flex flex-col bg-background"
           >
             <div className="flex items-center justify-between px-5 py-4 sm:px-8 sm:py-5">
-              <span className="font-display text-2xl font-bold tracking-tight">
-                NS<span className="text-accent">.</span>
-              </span>
+              <Monogram className="h-7 w-auto text-foreground" />
               <button
                 type="button"
                 onClick={() => setOpen(false)}

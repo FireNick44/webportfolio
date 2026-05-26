@@ -1,4 +1,5 @@
 import type { FieldConfig } from "./fieldConfig";
+import { FLASK_SHAPES, type FlaskShape } from "./flaskShapes";
 import {
   FLASK_WIDTH,
   FLASK_HEIGHT,
@@ -19,6 +20,9 @@ export interface FlaskConfig {
   isSkeleton: boolean;
   layer: number;
   skillIcon?: string;
+  /** One of three bottle silhouettes (rect/round/cone). Picked from rng so the
+   *  layout is reproducible; falls back to "rect" when randomisation is off. */
+  shape: FlaskShape;
 }
 
 export const FLASK_COLORS = [
@@ -119,6 +123,8 @@ export function generateFlasks(
    *  flask-half below the top wave and above the bottom wave so none hang inside
    *  the animated wave bands. Omitted (tests) → small fractional insets. */
   waveHeight?: number,
+  /** Pick a different bottle silhouette per flask (rng-based). Off → all rect. */
+  randomizeShapes = false,
 ): FlaskConfig[] {
   const rng = mulberry32(seed);
   // Separate stream for horizontal placement so tuning spacing/retries never
@@ -142,12 +148,16 @@ export function generateFlasks(
     layer: number,
     anchorY: number,
     segments: number,
+    // `forceGhost` lets the bgSkeleton pass place big (front-tier-scale) static
+    // flasks for depth without stealing a skill icon or going dynamic.
+    forceGhost = false,
   ): FlaskConfig => {
     const scale = config.layerScale[layer];
     const bandSkeleton = layer >= firstSkelTier;
     // Foreground tiers carry the skill icons; back-tier bands stay decorative.
     let skillIcon: string | undefined;
-    if (!bandSkeleton && skillIdx < skills.length) skillIcon = skills[skillIdx++];
+    if (!forceGhost && !bandSkeleton && skillIdx < skills.length)
+      skillIcon = skills[skillIdx++];
 
     // Skeleton (static, no physics) rules:
     //  • back-tier bands are always decorative skeletons;
@@ -159,6 +169,7 @@ export function generateFlasks(
     const motionOff = config.maxPhysicsFlasks === 0;
     const overBudget = !bandSkeleton && physicsCount >= config.maxPhysicsFlasks;
     const isSkeleton =
+      forceGhost ||
       bandSkeleton ||
       motionOff ||
       (config.layout === "field" ? !skillIcon : overBudget);
@@ -168,7 +179,23 @@ export function generateFlasks(
     // hue-contrasting water colour (see pickFlaskColor); others stay random.
     const iconColor = skillIcon ? colorByPath?.[skillIcon] : undefined;
     const color = pickFlaskColor(iconColor, rng());
-    return { xPct, anchorY, segments, color, scale, isSkeleton, layer, skillIcon };
+    // One more rng draw for shape — kept after colour so adding/removing the
+    // shape pick doesn't shift the earlier layout sequence (it still does shift
+    // chain/x sampling that follow, but tests don't depend on that ordering).
+    const shape: FlaskShape = randomizeShapes
+      ? FLASK_SHAPES[Math.floor(rng() * FLASK_SHAPES.length)]
+      : "rect";
+    return {
+      xPct,
+      anchorY,
+      segments,
+      color,
+      scale,
+      isSkeleton,
+      layer,
+      skillIcon,
+      shape,
+    };
   };
 
   // Shared body-aware placement: pick a random x that doesn't overlap any placed
@@ -299,24 +326,55 @@ export function generateFlasks(
         .sort((a, b) => b.c - a.c)
         .slice(0, coverCount);
       const corkRef = fillTop - FLASK_HEIGHT / 2; // ≈ wave bottom (a full flask's cork at fillTop)
+      // Anti-overlap pool for the cover loop: re-check each candidate against
+      // both already-placed foreground/bg flasks AND prior cover picks before
+      // committing, retrying a few times. Without this the busy-bin heuristic
+      // happily piles cover flasks on top of each other at high densities.
+      const coverPlaced: Placed[] = [];
+      const TRIES = 6;
       for (const { i: bin } of bins) {
-        const xPct = (bin + 0.15 + placeRng() * 0.7) / BINS;
-        const scale = 0.45 + placeRng() * 0.85; // 0.45..1.3 — big AND small, but not back-ghost tiny
-        // Back the body out from a cork that sits just below (or a touch behind)
-        // the wave, so the flask hangs near the surface on a barely-seen chain.
-        const cork = corkRef + (placeRng() * 0.18 - 0.03) * viewport.height;
-        const { segments, anchorY } = solveChain(
-          cork + (FLASK_HEIGHT / 2) * scale,
-          scale,
-        );
+        let chosen: {
+          xPct: number;
+          scale: number;
+          cork: number;
+          bodyY: number;
+        } | null = null;
+        for (let t = 0; t < TRIES; t++) {
+          const xPct = (bin + 0.15 + placeRng() * 0.7) / BINS;
+          const scale = 0.45 + placeRng() * 0.85; // 0.45..1.3 — big AND small, never back-ghost tiny
+          // Cork sits anywhere from just behind the top wave down to about
+          // mid-section, so the big cover flasks span from near the surface
+          // into the upper-middle band.
+          const cork = corkRef + (placeRng() * 0.42 - 0.03) * viewport.height;
+          const bodyY = cork + (FLASK_HEIGHT / 2) * scale;
+          const cand: Placed = {
+            xpx: xPct * viewport.width,
+            bodyY,
+            scale,
+            layer: 0,
+          };
+          const collides =
+            coverPlaced.some((p) => conflicts(cand, p)) ||
+            placed.some((p) => conflicts(cand, p));
+          if (!collides) {
+            chosen = { xPct, scale, cork, bodyY };
+            coverPlaced.push(cand);
+            break;
+          }
+        }
+        if (!chosen) continue; // give up on this bin rather than overlap
+        const { segments, anchorY } = solveChain(chosen.bodyY, chosen.scale);
         out.push({
-          xPct,
+          xPct: chosen.xPct,
           anchorY,
           segments,
           color: pickFlaskColor(undefined, rng()),
-          scale,
+          scale: chosen.scale,
           isSkeleton: true,
           layer: 0,
+          shape: randomizeShapes
+            ? FLASK_SHAPES[Math.floor(rng() * FLASK_SHAPES.length)]
+            : "rect",
         });
       }
     }

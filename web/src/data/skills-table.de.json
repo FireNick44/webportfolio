@@ -1,7 +1,7 @@
 {
   "categories": [
     {
-      "title": "Coding & Frameworks",
+      "title": "Programmierung & Frameworks",
       "groups": [
         { "label": "//basics+++", "items": ["HTML / CSS, SCSS", "JavaScript", "C#, C++", "Laravel"] },
         { "label": "//basics++", "items": ["TypeScript", "Vue.js, Angular", "PHP"] },
@@ -16,7 +16,7 @@
       ]
     },
     {
-      "title": "OS",
+      "title": "Betriebssysteme",
       "groups": [
         { "label": "//daily driver", "items": ["macOS"] },
         { "label": "//still learning <3", "items": ["Linux", "Garuda, Kali, Raspbian,", "Ubuntu, EndeavourOS"] },
@@ -24,18 +24,18 @@
       ]
     },
     {
-      "title": "Languages",
+      "title": "Sprachen",
       "groups": [
         { "label": "//native", "items": ["de-DE Deutsch"] },
         { "label": "//fluent", "items": ["en-US English"] }
       ]
     },
     {
-      "title": "Other interests",
+      "title": "Weitere Interessen",
       "groups": [
-        { "items": ["Games, Painting"] },
-        { "items": ["Diving, Project AWARE"] },
-        { "items": ["Security, Ethics"] }
+        { "items": ["Gaming, Malen"] },
+        { "items": ["Tauchen, Project AWARE"] },
+        { "items": ["Security, Ethik"] }
       ]
     }
   ]

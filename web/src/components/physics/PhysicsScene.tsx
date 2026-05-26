@@ -10,9 +10,9 @@ import { useAppStore } from "@/store/useAppStore";
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
 import FlaskHint from "./FlaskHint";
-import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH, FLASK_HITBOX_HEIGHT } from "@/physics/constants";
+import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/physics/constants";
 import FlaskChain from "./FlaskChain";
-import { generateFlasks, chainLength } from "@/physics/generateFlasks";
+import { generateFlasks } from "@/physics/generateFlasks";
 import { fieldConfigFor } from "@/physics/fieldConfig";
 import skills from "@/data/skills.json";
 
@@ -90,6 +90,8 @@ export default function PhysicsScene({
   const [layoutSeed] = useState(() => (Math.random() * 0x7fffffff) | 0);
   const [interacted, setInteracted] = useState(hasInteractedWithRack);
   const advanced = useAppStore((s) => s.advanced);
+  const liquidOpacity = useAppStore((s) => s.liquidOpacity);
+  const randomizeShapes = useAppStore((s) => s.randomizeFlaskShapes);
   // Shared site-wide graphics setting (capped by reduced-motion / touch).
   const tier = useGraphicsTier();
   // Icon idle-bob only on the richer tiers (off on low/off for perf/motion).
@@ -121,32 +123,14 @@ export default function PhysicsScene({
       skillPaths,
       layoutSeed,
       colorByPath,
-      waveHeight
+      waveHeight,
+      randomizeShapes
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed]);
+  }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed, randomizeShapes]);
 
-  // While the hint is up, lift ONE physics flask near the centre bright above the
-  // scrim as the "drag me" demo. Pick one whose body sits comfortably between the
-  // wave bands so the spotlight can't expose a cork the top wave was hiding.
-  const demoIndex = useMemo(() => {
-    if (!flasks.length || dims.height === 0) return -1;
-    let best = -1;
-    let bestScore = Infinity;
-    flasks.forEach((f, i) => {
-      if (f.isSkeleton || !f.skillIcon) return;
-      const bodyY =
-        f.anchorY + chainLength(f.segments) + (FLASK_HITBOX_HEIGHT * f.scale) / 2;
-      const yFrac = bodyY / dims.height;
-      if (yFrac < 0.22 || yFrac > 0.6) return; // keep clear of the wave bands
-      const score = Math.abs(f.xPct - 0.5) + Math.abs(yFrac - 0.4) * 0.8;
-      if (score < bestScore) {
-        bestScore = score;
-        best = i;
-      }
-    });
-    return best;
-  }, [flasks, dims.height]);
+  // (Demo "drag me" spotlight removed — was not smooth; the hint scrim is
+  // enough on its own.)
 
   useEffect(() => {
     if (dims.width === 0) return;
@@ -240,9 +224,13 @@ export default function PhysicsScene({
               scale={cfg.scale}
               isSkeleton={cfg.isSkeleton}
               skillIcon={cfg.skillIcon}
+              shape={cfg.shape}
+              liquidOpacity={liquidOpacity}
               active={active}
-              noFlaskCollision={isMobile}
-              elevated={active && !interacted && i === demoIndex}
+              // Collide on mobile too: only the ≤8 dynamic flasks have bodies
+              // (statics are DOM-only, FlaskChain skips them), all in tier 0, so
+              // they bump each other without a static "thicket" to fight.
+              noFlaskCollision={false}
               iconBob={
                 animateIcons
                   ? { delay: (i * 0.41) % 2.6, dur: 2.0 + ((i * 0.29) % 1.3) }

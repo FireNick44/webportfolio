@@ -12,7 +12,7 @@ import { Reveal } from "@/components/ui/Reveal";
 
 const L = layout as ProjectsLayout;
 
-// Bright per-card gradients ported 1:1 from Noel's original portfolio (with
+// Bright per-card gradients ported 1:1 from the 2024 portfolio (with
 // dark text on top, as in the original). Cycled by index.
 const PROJECT_GRADIENTS = [
   "linear-gradient(170deg, #7afff8, #8174f7)",

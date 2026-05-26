@@ -33,7 +33,7 @@ export async function generateMetadata({
   const description = dict.hero.tagline;
 
   return {
-    metadataBase: new URL("https://noelstuder.dev"),
+    metadataBase: new URL("https://a36.dev"),
     title: { default: title, template: "%s · Yannic Studer" },
     description,
     manifest: "/manifest.webmanifest",

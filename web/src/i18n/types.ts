@@ -16,7 +16,6 @@ export interface Dictionary {
     label: string;
     title: string;
     bio: string[];
-    columns: { title: string; items: string[] }[];
   };
   skills: {
     label: string;

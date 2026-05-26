@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-export const STORAGE_KEY = "noel-portfolio-v1";
+export const STORAGE_KEY = "yannic-portfolio-v1";
 
 export interface DeviceInfo {
   userAgent: string;
@@ -35,6 +35,15 @@ interface AppState {
   /** Game-style quality tier for the underwater scene. */
   graphicsTier: "off" | "low" | "medium" | "high";
   setGraphicsTier: (tier: "off" | "low" | "medium" | "high") => void;
+  /** Live-tunable flask water alpha (0..1). The palette stores colours at 0.7;
+   *  this overrides their alpha at render time so the technical panel can adjust
+   *  it without rebuilding the layout. */
+  liquidOpacity: number;
+  setLiquidOpacity: (a: number) => void;
+  /** When true, generateFlasks picks one of the three flask shapes (rect/round/
+   *  cone) per bottle for visual variety. Off → all rectangular. */
+  randomizeFlaskShapes: boolean;
+  setRandomizeFlaskShapes: (v: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -61,6 +70,11 @@ export const useAppStore = create<AppState>()(
       setAdvanced: (advanced) => set({ advanced }),
       graphicsTier: "medium",
       setGraphicsTier: (graphicsTier) => set({ graphicsTier }),
+      liquidOpacity: 0.7,
+      setLiquidOpacity: (liquidOpacity) => set({ liquidOpacity }),
+      randomizeFlaskShapes: true,
+      setRandomizeFlaskShapes: (randomizeFlaskShapes) =>
+        set({ randomizeFlaskShapes }),
     }),
     {
       name: STORAGE_KEY,
@@ -73,6 +87,8 @@ export const useAppStore = create<AppState>()(
         tokenOverrides: state.tokenOverrides,
         advanced: state.advanced,
         graphicsTier: state.graphicsTier,
+        liquidOpacity: state.liquidOpacity,
+        randomizeFlaskShapes: state.randomizeFlaskShapes,
       }),
     },
   ),

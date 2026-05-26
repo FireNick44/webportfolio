@@ -7,6 +7,12 @@ export interface FrameLoopDeps {
 const FIXED = 1000 / 60;
 const MAX_FRAME = 100;
 const MAX_STEPS = 5;
+// Slow-step warning. Logs to console when a SINGLE engine step exceeds the
+// budget by a clear margin — i.e. the solver is struggling (stretched chain
+// blowing up etc). Throttled so a sustained problem doesn't spam the log.
+const SLOW_STEP_MS = 22;
+const LOG_THROTTLE_MS = 1000;
+let lastSlowLog = 0;
 
 export function createFrameLoop(deps: FrameLoopDeps) {
   const subs = new Map<string, SyncFn>();
@@ -15,7 +21,20 @@ export function createFrameLoop(deps: FrameLoopDeps) {
     if (last >= 0) {
       acc += Math.min(t - last, MAX_FRAME);
       let steps = 0;
-      while (acc >= FIXED && steps < MAX_STEPS) { deps.update(FIXED); acc -= FIXED; steps++; }
+      while (acc >= FIXED && steps < MAX_STEPS) {
+        const s0 = performance.now();
+        deps.update(FIXED);
+        const dt = performance.now() - s0;
+        if (dt > SLOW_STEP_MS && t - lastSlowLog > LOG_THROTTLE_MS) {
+          lastSlowLog = t;
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[physics] slow step ${dt.toFixed(1)}ms (budget ${FIXED.toFixed(1)}ms)`,
+          );
+        }
+        acc -= FIXED;
+        steps++;
+      }
       if (steps === MAX_STEPS) acc = 0;
       if (steps > 0) for (const fn of subs.values()) fn();
     }

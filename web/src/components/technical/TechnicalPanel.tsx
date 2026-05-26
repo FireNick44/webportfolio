@@ -120,6 +120,12 @@ export default function TechnicalPanel({
   const setHasShownLoader = useAppStore((s) => s.setHasShownLoader);
   const graphicsTier = useAppStore((s) => s.graphicsTier);
   const setGraphicsTier = useAppStore((s) => s.setGraphicsTier);
+  const liquidOpacity = useAppStore((s) => s.liquidOpacity);
+  const setLiquidOpacity = useAppStore((s) => s.setLiquidOpacity);
+  const randomizeFlaskShapes = useAppStore((s) => s.randomizeFlaskShapes);
+  const setRandomizeFlaskShapes = useAppStore(
+    (s) => s.setRandomizeFlaskShapes,
+  );
 
   const pathname = usePathname();
   const activeVersion = currentVersionId(pathname ?? "/");
@@ -328,6 +334,61 @@ export default function TechnicalPanel({
               Switch the page&apos;s ending between the current outro and the
               interactive underwater scene. Graphics scales the effect — Off
               respects reduced motion; touch devices cap at Low.
+            </p>
+          </div>
+
+          {/* Flask rack — live tuning */}
+          <div className="border border-border">
+            <PanelHead>Flask rack</PanelHead>
+            <div className="space-y-5 p-5">
+              {/* Water opacity */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="lab-label w-24">Water alpha</span>
+                <input
+                  type="range"
+                  min={0}
+                  max={1}
+                  step={0.02}
+                  value={liquidOpacity}
+                  onChange={(e) => setLiquidOpacity(parseFloat(e.target.value))}
+                  className="flex-1 accent-foreground"
+                />
+                <span className="w-10 text-right font-mono text-xs tabular-nums">
+                  {liquidOpacity.toFixed(2)}
+                </span>
+              </div>
+
+              {/* Randomize shapes */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="lab-label w-24">Shapes</span>
+                <div className="flex gap-px bg-border">
+                  {(
+                    [
+                      ["off", false],
+                      ["random", true],
+                    ] as const
+                  ).map(([label, on]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setRandomizeFlaskShapes(on)}
+                      className={cn(
+                        "bg-background px-3 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
+                        randomizeFlaskShapes === on
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
+              Live water alpha (0–1, palette default 0.7) and bottle-shape
+              randomisation (rect / round / cone). Shape changes apply on the
+              next layout reseed — currently a full reload.
             </p>
           </div>
 

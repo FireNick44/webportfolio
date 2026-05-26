@@ -7,6 +7,7 @@ import FlaskSVG from "./FlaskSVG";
 import { createChainBodies, type ChainResult } from "@/physics/createChainBodies";
 import { createFlaskBody, type FlaskResult } from "@/physics/createFlaskBody";
 import { FrameLoopContext } from "@/hooks/useFrameLoop";
+import { FLASK_SHAPE_DEFS, type FlaskShape } from "@/physics/flaskShapes";
 import {
   CHAIN_SEGMENT_COUNT,
   CHAIN_SEGMENT_WIDTH,
@@ -36,6 +37,11 @@ interface Props {
   iconBob?: { delay: number; dur: number };
   /** Lift just this flask's body bright above the hint scrim (the drag demo). */
   elevated?: boolean;
+  /** Bottle silhouette to render (rect/round/cone). */
+  shape?: FlaskShape;
+  /** Water alpha override (0..1); the palette stores 0.7 — this lets the
+   *  technical panel tune it live without rebuilding the layout. */
+  liquidOpacity?: number;
 }
 
 export default function FlaskChain({
@@ -53,6 +59,8 @@ export default function FlaskChain({
   isSkeleton = false,
   iconBob,
   elevated = false,
+  shape = "rect",
+  liquidOpacity = 0.7,
 }: Props) {
   const chainRefs = useRef<(HTMLDivElement | null)[]>([]);
   const flaskRef = useRef<HTMLDivElement | null>(null);
@@ -129,10 +137,31 @@ export default function FlaskChain({
       lastH,
       scale,
       noFlaskCollision,
-      layer
+      layer,
+      FLASK_SHAPE_DEFS[shape].chainAttachOffsetPx ?? 0,
     );
 
     bodiesRef.current = { chain, flask };
+
+    // Tell the drag handler how far the flask can travel from its anchor — used
+    // to clamp the drag target so a fast/far pull can't overstretch the stiff
+    // length-0 rope (which would otherwise explode into flicker). Tiny slack
+    // (5%) so the constraint always has a small error to chase, never exactly 0.
+    const pinX = ax;
+    const pinY = ay + chain.staticHeight;
+    // 45% slack so the drag has REAL over-drag room — 5/15% felt dead, target
+    // was clamped almost at rest length and the body trailed by a hair. The
+    // chain still can't actually stretch past its real length physically (the
+    // rope's stiff constraints hold the body back), but the constraint target
+    // can lead the body, which is what reads as "I'm pulling on this thing."
+    const maxReach =
+      Math.hypot(flask.body.position.x - pinX, flask.body.position.y - pinY) *
+      1.45;
+    (flask.body.plugin as Record<string, unknown>) = {
+      ...(flask.body.plugin ?? {}),
+      anchor: { x: pinX, y: pinY },
+      maxReach,
+    };
 
     Matter.Composite.add(engine.world, [
       ...chain.segments,
@@ -193,7 +222,11 @@ export default function FlaskChain({
     const { chain, flask } = bodiesRef.current;
 
     // Update the world-space pin (below the static top for skeleton chains)
-    chain.anchorConstraint.pointA = { x: anchorX, y: anchorY + chain.staticHeight };
+    const newPinY = anchorY + chain.staticHeight;
+    chain.anchorConstraint.pointA = { x: anchorX, y: newPinY };
+    // Keep the drag-clamp anchor (see body-creation effect) in sync on resize.
+    const p = flask.body.plugin as { anchor?: { x: number; y: number } };
+    if (p?.anchor) p.anchor = { x: anchorX, y: newPinY };
 
     // Translate all bodies and zero velocity
     for (const seg of chain.segments) {
@@ -246,11 +279,17 @@ export default function FlaskChain({
       flaskEl.style.transformOrigin = `${FLASK_WIDTH / 2}px ${FLASK_HEIGHT / 2}px`;
       flaskEl.style.opacity = String(opacity);
 
+      // Counter-rotate the liquid so its surface stays level — but NORMALISE to
+      // [-180,180] first. Matter accumulates fb.angle unbounded, so a flip/spin
+      // leaves it at 360°+ and the clamp would pin the water (and the icon that
+      // chases it) tilted forever, even once the flask settles back upright.
+      const normDeg = (((-angleDeg + 180) % 360) + 360) % 360 - 180;
       const clampedDeg = Math.max(
         -MAX_LIQUID_TILT_DEG,
-        Math.min(MAX_LIQUID_TILT_DEG, -angleDeg)
+        Math.min(MAX_LIQUID_TILT_DEG, normDeg)
       );
-      const rotateAttr = `rotate(${clampedDeg}, 69.5, 90)`;
+      const pivot = FLASK_SHAPE_DEFS[shape].pivot;
+      const rotateAttr = `rotate(${clampedDeg}, ${pivot.x}, ${pivot.y})`;
       liquidRectRef.current?.setAttribute("transform", rotateAttr);
       dryRectRef.current?.setAttribute("transform", rotateAttr);
 
@@ -263,7 +302,7 @@ export default function FlaskChain({
       const damp = -iconVelRef.current * damping;
       iconVelRef.current += (spring + damp) * dt * 60;
       iconAngleRef.current += iconVelRef.current * dt;
-      const iconRotate = `rotate(${iconAngleRef.current}, 69.5, 90)`;
+      const iconRotate = `rotate(${iconAngleRef.current}, ${pivot.x}, ${pivot.y})`;
       iconWetRef.current?.setAttribute("transform", iconRotate);
       iconDryRef.current?.setAttribute("transform", iconRotate);
     }
@@ -298,6 +337,9 @@ export default function FlaskChain({
         skillIcon={skillIcon}
         iconBob={iconBob}
         elevated={elevated}
+        shape={shape}
+        liquidOpacity={liquidOpacity}
+        isSkeleton={isSkeleton}
       />
     </>
   );
