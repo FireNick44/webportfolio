@@ -9,7 +9,7 @@ import {
 } from "./constants";
 
 const FIELD: FieldConfig = {
-  flaskCount: 30, maxPhysicsFlasks: 18,
+  flaskCount: 30, maxPhysicsFlasks: 18, maxPhysicsSegments: 6,
   layerScale: [1.0, 0.82, 0.66, 0.5, 0.36],
   skeletonBands: 2, segmentRange: [3, 11], layout: "field",
 };
@@ -100,7 +100,7 @@ describe("generateFlasks (field)", () => {
 
 describe("generateFlasks (column / mobile)", () => {
   const COLUMN: FieldConfig = {
-    flaskCount: 28, maxPhysicsFlasks: 4,
+    flaskCount: 28, maxPhysicsFlasks: 4, maxPhysicsSegments: 6,
     layerScale: [0.62, 0.4, 0.3], skeletonBands: 2,
     segmentRange: [4, 18], layout: "column",
   };

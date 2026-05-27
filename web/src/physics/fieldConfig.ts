@@ -1,4 +1,4 @@
-import { LAYER_SCALE } from "./constants";
+import { LAYER_SCALE, MAX_PHYSICS_SEGMENTS } from "./constants";
 import type { GraphicsTier } from "@/lib/outro/tiers";
 
 export interface FieldConfig {
@@ -6,6 +6,9 @@ export interface FieldConfig {
   flaskCount: number;
   /** Max simulated (physics) flasks; overflow becomes skeletons. */
   maxPhysicsFlasks: number;
+  /** Per-chain cap on simulated links. Links above this in one chain are
+   *  drawn as a static rope. `Number.POSITIVE_INFINITY` simulates every link. */
+  maxPhysicsSegments: number;
   /** Scale per tier, front → back. Length === tier count. */
   layerScale: readonly number[];
   /** The back N tiers are skeletons (static, no physics, no icon). */
@@ -27,6 +30,7 @@ export interface FieldConfig {
 export const DESKTOP_DEFAULT: FieldConfig = {
   flaskCount: 30,
   maxPhysicsFlasks: 18,
+  maxPhysicsSegments: MAX_PHYSICS_SEGMENTS,
   layerScale: LAYER_SCALE,
   skeletonBands: 2,
   // maxSeg is high enough that the deepest chains reach the bottom of a tall
@@ -47,6 +51,7 @@ export const MOBILE_CONFIG: FieldConfig = {
   // skill flasks static and lazily promote only the dragged one + its immediate
   // neighbours to physics on touch (see useMousePhysics).
   maxPhysicsFlasks: 36,
+  maxPhysicsSegments: MAX_PHYSICS_SEGMENTS,
   layerScale: [0.56, 0.38, 0.28], // small so all skills pack densely & compactly
   skeletonBands: 2,
   segmentRange: [2, 24], // short top chains (small gap) → long deep ones; skeleton-cheap
@@ -65,10 +70,10 @@ export const MOBILE_CONFIG: FieldConfig = {
 // when motion is off — maxPhysicsFlasks no longer caps icon flasks here, it only
 // matters as the 0 = static sentinel. bgSkeletons add static depth behind.
 export const FIELD_BY_TIER: Record<GraphicsTier, FieldConfig> = {
-  off: { flaskCount: 24, maxPhysicsFlasks: 0, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
-  low: { flaskCount: 26, maxPhysicsFlasks: 8, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 13], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
+  off: { flaskCount: 24, maxPhysicsFlasks: 0, maxPhysicsSegments: MAX_PHYSICS_SEGMENTS, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
+  low: { flaskCount: 26, maxPhysicsFlasks: 8, maxPhysicsSegments: MAX_PHYSICS_SEGMENTS, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 13], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
   medium: { ...DESKTOP_DEFAULT, maxPhysicsFlasks: 18, skeletonBands: 2 },
-  high: { flaskCount: 44, maxPhysicsFlasks: 26, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 32, coverSkeletons: 18 },
+  high: { flaskCount: 44, maxPhysicsFlasks: 26, maxPhysicsSegments: Number.POSITIVE_INFINITY, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 32, coverSkeletons: 18 },
 };
 
 /** Pick the flask field config for the resolved tier + device. Mobile keeps the
