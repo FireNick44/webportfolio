@@ -69,7 +69,9 @@ export function createChainBodies(
   // hangs steady up top, only the bottle end swings."
   const stiffTop = 0.99;
   const stiffBot = CHAIN_STIFFNESS; // 0.92, current default
-  const dampTop = 0.7;
+  const dampTop = 0.92; // bumped from 0.7 — top physics link sits steadier so
+                       // the static→physics seam on medium/low reads as one
+                       // continuous rope instead of a visible joint.
   const dampBot = CHAIN_DAMPING; // 0.45
   const lastIdx = Math.max(1, segments.length - 1);
   for (let i = 0; i < segments.length - 1; i++) {
