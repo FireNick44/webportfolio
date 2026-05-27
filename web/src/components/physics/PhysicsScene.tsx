@@ -130,7 +130,7 @@ export default function PhysicsScene({
       randomizeShapes
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed, randomizeShapes, config]);
+  }, [dims.width > 0, dims.height, layoutSeed, randomizeShapes, config]);
 
   // (Demo "drag me" spotlight removed — was not smooth; the hint scrim is
   // enough on its own.)
