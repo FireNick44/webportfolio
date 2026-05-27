@@ -106,9 +106,12 @@ export default function PhysicsScene({
   // flasks don't spread edge-to-edge forever. Mobile/normal widths are unaffected.
   const rackWidth = Math.min(dims.width, MAX_RACK_WIDTH);
   const rackOffsetX = (dims.width - rackWidth) / 2;
+  const config = useMemo(
+    () => fieldConfigFor(tier, isMobile),
+    [tier, isMobile],
+  );
   const flasks = useMemo(() => {
     if (dims.width === 0) return [];
-    const config = fieldConfigFor(tier, isMobile);
     const skillPaths = skills.map((s) => s.svgPath);
     // svgPath → dominant icon colour, so flask water is picked to contrast.
     const colorByPath = Object.fromEntries(
@@ -127,7 +130,7 @@ export default function PhysicsScene({
       randomizeShapes
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed, randomizeShapes]);
+  }, [dims.width > 0, isMobile, dims.height, tier, layoutSeed, randomizeShapes, config]);
 
   // (Demo "drag me" spotlight removed — was not smooth; the hint scrim is
   // enough on its own.)
@@ -222,6 +225,7 @@ export default function PhysicsScene({
               segmentCount={cfg.segments}
               layer={cfg.layer}
               scale={cfg.scale}
+              maxPhysicsSegments={config.maxPhysicsSegments}
               isSkeleton={cfg.isSkeleton}
               skillIcon={cfg.skillIcon}
               shape={cfg.shape}

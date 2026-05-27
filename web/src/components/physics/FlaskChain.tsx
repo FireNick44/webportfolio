@@ -33,6 +33,9 @@ interface Props {
   active?: boolean;
   noFlaskCollision?: boolean;
   scale?: number;
+  /** Per-chain cap on simulated links — top `segmentCount - maxPhysicsSegments`
+   *  links render as a static rope. Defaults to MAX_PHYSICS_SEGMENTS (=6). */
+  maxPhysicsSegments?: number;
   isSkeleton?: boolean;
   iconBob?: { delay: number; dur: number };
   /** Lift just this flask's body bright above the hint scrim (the drag demo). */
@@ -57,6 +60,7 @@ export default function FlaskChain({
   noFlaskCollision = false,
   scale = 1,
   isSkeleton = false,
+  maxPhysicsSegments = MAX_PHYSICS_SEGMENTS,
   iconBob,
   elevated = false,
   shape = "rect",
@@ -86,7 +90,7 @@ export default function FlaskChain({
   // static; a short physics chain (≤ cap) has no static top.
   const staticCount = isStatic
     ? segmentCount
-    : Math.max(0, segmentCount - MAX_PHYSICS_SEGMENTS);
+    : Math.max(0, segmentCount - maxPhysicsSegments);
 
   // Static rope: lay out the top `staticCount` links (drawn once, no physics).
   // For a fully-static (skeleton) flask staticCount === segmentCount, so this
