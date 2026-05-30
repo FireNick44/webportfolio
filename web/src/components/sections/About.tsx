@@ -1,5 +1,5 @@
-import { AboutPhoto } from "@/components/sections/AboutPhoto";
-import { SkillsTable } from "@/components/sections/SkillsTable";
+import { AboutPhoto } from "@/components/sections/about/AboutPhoto";
+import { SkillsTable } from "@/components/sections/about/SkillsTable";
 import { Reveal } from "@/components/ui/Reveal";
 import type { Dictionary } from "@/i18n/types";
 
