@@ -12,7 +12,13 @@ import {
 } from "react";
 
 import BeatloopsCard from "@/components/sections/projects/BeatloopsCard";
+import { cardGradient } from "@/components/sections/projects/gradients";
 import PointerQuartetCard from "@/components/sections/projects/PointerQuartetCard";
+import {
+  injectSpacers,
+  pickSpacers,
+  SPACER_DEFAULT,
+} from "@/components/sections/projects/spacers";
 import { Reveal } from "@/components/ui/Reveal";
 import layout from "@/data/projects-layout.json";
 import projects from "@/data/projects.json";
@@ -20,84 +26,6 @@ import type { Dictionary } from "@/i18n/types";
 import { resolveSpan, type ProjectsLayout } from "@/lib/projectsLayout";
 
 const L = layout as ProjectsLayout;
-
-// Bright per-card gradients ported 1:1 from the 2024 portfolio (with
-// dark text on top, as in the original). Cycled by index.
-const PROJECT_GRADIENTS = [
-  "linear-gradient(170deg, #7afff8, #8174f7)",
-  "linear-gradient(123deg, #95bef5, #5ad698)",
-  "linear-gradient(23deg, #a1f2ff, #dfa3ee)",
-  "linear-gradient(170deg, #e1a1ff, #e46565)",
-  "linear-gradient(210deg, #b1e9f3, #855ad6)",
-  "linear-gradient(150deg, #9eebcb, #d2e69c)",
-  "linear-gradient(233deg, #855ad6, #dfa3ee)",
-  "linear-gradient(70deg, #1e4eee, #a1f2ff)",
-];
-
-// Per-variant gradient overrides. Tiles tagged with `variant` in the
-// project JSON skip the indexed palette and use their own colours.
-const VARIANT_GRADIENTS: Record<string, string> = {
-  beatloops: "linear-gradient(135deg, #8b3bff 0%, #ff3b6b 100%)",
-};
-
-const cardGradient = (i: number, variant?: string) =>
-  (variant && VARIANT_GRADIENTS[variant]) ??
-  PROJECT_GRADIENTS[i % PROJECT_GRADIENTS.length];
-
-// Empty bento cells. SSR + first client paint use a single centred spacer
-// (stable → no hydration mismatch); on mount it re-rolls to 1–3 spacers at
-// random middle slots so each refresh looks a little different.
-const SPACER_DEFAULT = [3, 6];
-
-// Minimum distance (in card-order positions) between two spacers so empty
-// cells never end up adjacent / clustered in the same column.
-const SPACER_MIN_GAP = 2;
-
-// Pick 1–3 distinct insertion indices among the middle slots of an
-// `n`-card array — kept away from the very start and end of the grid.
-function pickSpacers(n: number, want: number): number[] {
-  const min = 3;
-  const max = Math.max(min, n - 3);
-  const slots: number[] = [];
-  for (let i = min; i <= max; i++) slots.push(i);
-  // Fisher–Yates shuffle for random positions each roll.
-  for (let i = slots.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [slots[i], slots[j]] = [slots[j], slots[i]];
-  }
-  const chosen: number[] = [];
-  // First pass: keep spacers spaced apart (≥ SPACER_MIN_GAP).
-  for (const s of slots) {
-    if (chosen.length >= want) break;
-    if (chosen.every((c) => Math.abs(c - s) >= SPACER_MIN_GAP)) chosen.push(s);
-  }
-  // Fallback: if spacing came up short of `want`, fill remaining slots so the
-  // requested count is still met (relevant when 3 gaps won't all fit spaced).
-  for (const s of slots) {
-    if (chosen.length >= want) break;
-    if (!chosen.includes(s)) chosen.push(s);
-  }
-  return chosen.sort((a, b) => a - b);
-}
-
-// Splice invisible 1×1 spacer cells into the rendered card list at the given
-// positions (descending so earlier indices don't shift as we insert).
-function injectSpacers(cards: ReactNode[], positions: number[]): ReactNode[] {
-  const out = [...cards];
-  for (const pos of [...positions].sort((a, b) => b - a)) {
-    if (pos < 0 || pos > out.length) continue;
-    out.splice(
-      pos,
-      0,
-      <div
-        key={`spacer-${pos}`}
-        aria-hidden
-        style={{ gridColumn: "span 1", gridRow: "span 1" }}
-      />,
-    );
-  }
-  return out;
-}
 
 export default function Projects({ dict }: { dict: Dictionary }) {
   const [secretOpen, setSecretOpen] = useState(false);
