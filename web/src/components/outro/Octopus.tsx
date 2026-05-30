@@ -11,61 +11,43 @@ import type { InkHandle } from "./InkCloud";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):
- *  - cursor still → curious: it loops AROUND the cursor on a wobbly, randomised
- *    orbit (radius + angular speed vary, re-seeded each session — not a flat circle);
- *  - cursor moving → afraid: it steers away (quicker the more scared it is), and
- *    persistent close hunting builds scare → it darts off-screen to hide, then
- *    sneaks back.
- * Speed varies with mood: gentle while orbiting, quick while fleeing.
- * In advanced mode it draws its target trail so the motion is easy to debug.
+ *  - cursor still → curious: it loops AROUND the cursor on a wobbly,
+ *    randomised orbit (radius + angular speed vary, re-seeded each session);
+ *  - cursor moving → afraid: it steers away (quicker the more scared it is),
+ *    and persistent close hunting builds scare → it darts off-screen to hide,
+ *    then sneaks back.
+ * Speed varies with mood: gentle while orbiting, quick while fleeing. In
+ * advanced mode it draws its target trail so the motion is easy to debug.
+ *
+ * Tuning constants + pickSpot live in `lib/outro/octopusTuning.ts`.
  */
-const DAMP = 2.4;
-const SPRING = 1.5; // gentler pull to the spot → eases in, doesn't dart
-const AVOID_R = 340;
-const AVOID_FORCE = 5200;
-const PERSONAL_R = 185; // approach this close and he backs off (every mood, calm)
-const PERSONAL_FORCE = 4600;
-const SCARE_GAIN = 0.9; // scare/sec accrued while actively fleeing → panic-hide
-const SCARE_DECAY = 0.6;
-const SCARE_TRIGGER = 1.4;
-const HIDE_MIN = 7000;
-const HIDE_RAND = 4000;
-const ORBIT_R = 200; // curious orbit sits just outside the personal-space gap
-const ORBIT_SPEED = 2.0;
-const ORBIT_K = 3.2;
-const MIN_GAP = 118; // hard floor: the octopus never gets closer than this to the cursor
-// Mood-based speed caps (px/s): calm orbit < wary avoid < panicked flee.
-const SPEED_ORBIT = 540;
-const SPEED_WARY = 520; // roam travel cap — calmer, no zipping side-to-side
-const SPEED_FLEE = 1040;
-const SPEED_DASH = 1320; // brief burst when he jumps away after inking
-const TAU = Math.PI * 2;
+import {
+  AVOID_FORCE,
+  AVOID_R,
+  DAMP,
+  HIDE_MIN,
+  HIDE_RAND,
+  MIN_GAP,
+  ORBIT_K,
+  ORBIT_R,
+  ORBIT_SPEED,
+  PERSONAL_FORCE,
+  PERSONAL_R,
+  pickSpot,
+  SPOTS,
+  SCARE_DECAY,
+  SCARE_GAIN,
+  SCARE_TRIGGER,
+  SPEED_DASH,
+  SPEED_FLEE,
+  SPEED_ORBIT,
+  SPEED_WARY,
+  SPRING,
+  TAU,
+} from "@/lib/outro/octopusTuning";
 
-// Favourite hangouts (fractions of the scene) the octopus drifts between when it
-// isn't reacting to the cursor — weighted so it has habits, not pure randomness.
-const SPOTS: { x: number; y: number; w: number }[] = [
-  { x: 0.24, y: 0.74, w: 4 }, // tucked behind the front kelp
-  { x: 0.05, y: 0.6, w: 3 }, //  lurking at the left edge
-  { x: 0.95, y: 0.6, w: 3 }, //  lurking at the right edge
-  { x: 0.5, y: 0.56, w: 1 }, //  open water (rarely)
-  { x: 0.72, y: 0.72, w: 1 }, // sand, right of centre
-];
-const SPOT_TOTAL = SPOTS.reduce((sum, p) => sum + p.w, 0);
-const clamp = (v: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, v));
-
-/** Weighted pick of a favourite spot, with a little jitter so it's never exact. */
-function pickSpot(W: number, H: number): { x: number; y: number } {
-  let r = Math.random() * SPOT_TOTAL;
-  let spot = SPOTS[0];
-  for (const p of SPOTS) {
-    r -= p.w;
-    if (r <= 0) { spot = p; break; }
-  }
-  return {
-    x: clamp(spot.x + (Math.random() - 0.5) * 0.12, 0.02, 0.98) * W,
-    y: clamp(spot.y + (Math.random() - 0.5) * 0.1, 0.45, 0.85) * H,
-  };
-}
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.max(lo, Math.min(hi, v));
 
 export function Octopus({
   pointer,
