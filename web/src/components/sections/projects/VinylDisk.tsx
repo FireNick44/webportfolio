@@ -152,11 +152,17 @@ export default function VinylDisk({
           transformStyle: "preserve-3d",
           transformOrigin: "center center",
           transition: "transform 60ms ease-out",
+          // Safari: without an explicit hint here the parallax tilt jitters
+          // on the first pointermove burst as the compositor lazily promotes.
+          willChange: "transform",
         }}
       >
         {/* Inner: the continuous CSS backspin around the tilted plane's
             axis (i.e., the disc's own Z, not the viewer's). The circle
-            clip turns the foreshortened square into a perfect ellipse. */}
+            clip turns the foreshortened square into a perfect ellipse.
+            border-radius:50% on a same-size container is far cheaper than
+            clip-path on Safari (clip-path forces a raster pass per repaint;
+            border-radius rounds the layer's bitmap edge once). */}
         <motion.div
           animate={{ rotate: -360 }}
           transition={{
@@ -167,17 +173,20 @@ export default function VinylDisk({
           style={{
             position: "absolute",
             inset: 0,
-            clipPath: "circle(50% at center)",
+            borderRadius: "50%",
+            overflow: "hidden",
+            willChange: "transform",
           }}
         >
-          {/* Layer 1 — static groove dots. */}
+          {/* Layer 1 — static groove dots. border-radius beats clip-path on
+              Safari for hundreds of small cells (cheaper raster). */}
           <div style={gridStyle}>
             {DISC_MASK.map((on, i) => (
               <div
                 key={`g${i}`}
                 style={{
                   backgroundColor: on ? "#1a1a1a" : "transparent",
-                  clipPath: "circle(50% at center)",
+                  borderRadius: "50%",
                 }}
               />
             ))}
@@ -192,7 +201,7 @@ export default function VinylDisk({
                   backgroundColor: "#fff",
                   opacity: on ? 0.92 : 0,
                   transition: "opacity 70ms linear",
-                  clipPath: "circle(50% at center)",
+                  borderRadius: "50%",
                 }}
               />
             ))}

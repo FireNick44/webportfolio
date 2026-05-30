@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
 import VinylDisk from "@/components/sections/projects/VinylDisk";
 import type { SizeSpan } from "@/lib/projectsLayout";
@@ -40,6 +40,12 @@ export default function BeatloopsCard({
   const [tilt, setTilt] = useState<{ pitch: number; yaw: number } | null>(
     null,
   );
+  // rAF throttle: a 120 Hz macOS mouse otherwise sets state ~8 ms apart and
+  // the wrapper's `transition: transform 60ms` retriggers mid-flight every
+  // tick — Safari especially handles overlapping transitions poorly and
+  // stutters. Coalesce to one update per animation frame.
+  const pendingTiltRef = useRef<{ pitch: number; yaw: number } | null>(null);
+  const rafRef = useRef(0);
 
   const onPointerMove = useCallback(
     (e: PointerEvent<HTMLAnchorElement>) => {
@@ -50,16 +56,36 @@ export default function BeatloopsCard({
       const x = (e.clientX - rect.left) / rect.width; // 0..1
       const y = (e.clientY - rect.top) / rect.height;
       // Cursor on the right → disc yaws right; cursor near the top of
-      // the tile → disc tips further back (parallax — looking down at the
-      // turntable from above). Cursor at the bottom flattens it out.
+      // the tile → disc tips further back (parallax). Cursor at the
+      // bottom flattens it out.
       const yaw = (x - 0.5) * 2 * DISC_YAW_RANGE;
       const pitch = -(y - 0.5) * 2 * DISC_PITCH_RANGE;
-      setTilt({ pitch, yaw });
+      pendingTiltRef.current = { pitch, yaw };
+      if (rafRef.current === 0) {
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = 0;
+          if (pendingTiltRef.current) setTilt(pendingTiltRef.current);
+        });
+      }
     },
     [],
   );
 
-  const reset = useCallback(() => setTilt(null), []);
+  const reset = useCallback(() => {
+    if (rafRef.current) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = 0;
+    }
+    pendingTiltRef.current = null;
+    setTilt(null);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    },
+    [],
+  );
 
   return (
     <a

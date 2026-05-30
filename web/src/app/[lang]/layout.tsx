@@ -7,7 +7,8 @@ import LoadingScreen from "@/components/layout/LoadingScreen";
 import ScrollTimeline from "@/components/layout/ScrollTimeline";
 import { PageTransitionProvider } from "@/components/layout/PageTransitionProvider";
 import { getDictionary } from "@/i18n/dictionary";
-import { type Locale, locales } from "@/i18n/config";
+import { type Locale, locales, defaultLocale } from "@/i18n/config";
+import { buildJsonLd } from "@/lib/seo/jsonLd";
 
 export const dynamicParams = false;
 
@@ -30,7 +31,15 @@ export async function generateMetadata({
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
   const title = "Yannic Studer — Software Developer";
-  const description = dict.hero.tagline;
+  // Lead with the name so "Yannic Studer" sits at the start of the meta
+  // description — branded-query CTR and entity recognition both lean on it.
+  const description = `Yannic Studer — ${dict.hero.tagline}`;
+  // hreflang map plus an x-default pointing at the site root's default-locale
+  // route so non-localised crawlers land on the canonical English version.
+  const languageAlternates: Record<string, string> = Object.fromEntries(
+    locales.map((l) => [l, `/${l}`]),
+  );
+  languageAlternates["x-default"] = `/${defaultLocale}`;
 
   return {
     metadataBase: new URL("https://a36.dev"),
@@ -48,7 +57,7 @@ export async function generateMetadata({
     twitter: { card: "summary_large_image", title, description },
     alternates: {
       canonical: `/${lang}`,
-      languages: Object.fromEntries(locales.map((l) => [l, `/${l}`])),
+      languages: languageAlternates,
     },
   };
 }
@@ -62,10 +71,22 @@ export default async function LangLayout({
 }>) {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
+  // Schema.org graph: Person (Yannic Studer) + WebSite + WebPage. Inlining as
+  // application/ld+json is the canonical way for Google to pick up structured
+  // data; sameAs across the user's other profiles strengthens the entity link.
+  const jsonLd = buildJsonLd({
+    lang,
+    title: "Yannic Studer — Software Developer",
+    description: `Yannic Studer — ${dict.hero.tagline}`,
+  });
 
   return (
     <AppStateProvider lang={lang}>
       <PageTransitionProvider>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
         <ScrollTimeline labels={dict.nav as unknown as Record<string, string>} />
         <LoadingScreen />
         <div className="flex min-h-screen flex-col">
