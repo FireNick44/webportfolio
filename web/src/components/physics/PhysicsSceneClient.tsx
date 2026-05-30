@@ -13,10 +13,8 @@ const PhysicsScene = dynamic(() => import("./PhysicsScene"), {
 
 export default function PhysicsSceneClient({
   backdrop,
-  hint,
 }: {
   backdrop?: ReactNode;
-  hint?: string;
 }) {
-  return <PhysicsScene backdrop={backdrop} hint={hint} />;
+  return <PhysicsScene backdrop={backdrop} />;
 }
