@@ -46,9 +46,6 @@ import {
   TAU,
 } from "@/lib/outro/octopusTuning";
 
-const clamp = (v: number, lo: number, hi: number) =>
-  Math.max(lo, Math.min(hi, v));
-
 export function Octopus({
   pointer,
   tapRef,
