@@ -1,4 +1,4 @@
-import { mulberry32 } from "@/lib/physics/generateFlasks";
+import { mulberry32 } from "@/lib/utils/mulberry32";
 
 const SAND_TONES = ["#d9c08a", "#d2b87f", "#c9ad72", "#e0caa0"];
 const PEBBLE = "#a98f5f";
