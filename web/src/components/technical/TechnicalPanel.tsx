@@ -16,7 +16,7 @@ import {
 } from "@/lib/themePresets";
 import { cn } from "@/lib/utils";
 import { versions, currentVersionId } from "@/lib/versions";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/lib/store/useAppStore";
 
 type Row = [string, string];
 

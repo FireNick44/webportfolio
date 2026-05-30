@@ -1,4 +1,4 @@
-import { CHAIN_SEGMENT_WIDTH, chainLength } from "@/physics/constants";
+import { CHAIN_SEGMENT_WIDTH, chainLength } from "@/lib/physics/constants";
 
 import {
   CAP_W,

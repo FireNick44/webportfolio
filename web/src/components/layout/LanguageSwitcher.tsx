@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 
 import { locales, localeMetadata, type Locale } from "@/i18n/config";
 import { cn } from "@/lib/utils";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/lib/store/useAppStore";
 
 export function LanguageSwitcher({ lang }: { lang: string }) {
   const pathname = usePathname();

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "react";
 
-import type { PointerField } from "@/hooks/usePointerField";
+import type { PointerField } from "@/lib/hooks/usePointerField";
 import { generateKelp } from "@/lib/outro/kelp";
 
 const FALLOFF = 95; // px — smooth ramp zone around a strand's box

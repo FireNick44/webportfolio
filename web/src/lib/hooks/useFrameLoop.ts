@@ -2,7 +2,7 @@
 import Matter from "matter-js";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
-import { createFrameLoop, type FrameLoop } from "@/physics/frameLoop";
+import { createFrameLoop, type FrameLoop } from "@/lib/physics/frameLoop";
 
 /** One rAF drives Engine.update (fixed timestep) then every registered flask
  *  sync. Two independent gates:

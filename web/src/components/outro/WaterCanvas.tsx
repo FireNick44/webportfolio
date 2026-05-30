@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, type RefObject } from "react";
 
-import type { PointerField } from "@/hooks/usePointerField";
+import type { PointerField } from "@/lib/hooks/usePointerField";
 import { generateBubbles } from "@/lib/outro/bubbles";
 import { repel } from "@/lib/outro/cursorPhysics";
 

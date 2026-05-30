@@ -3,7 +3,7 @@
 import { ReactNode, useEffect } from "react";
 
 import { applyTokenOverrides } from "@/lib/themePresets";
-import { useAppStore, STORAGE_KEY } from "@/store/useAppStore";
+import { useAppStore, STORAGE_KEY } from "@/lib/store/useAppStore";
 
 export default function AppStateProvider({
   children,

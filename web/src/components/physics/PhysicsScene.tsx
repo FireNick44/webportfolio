@@ -14,14 +14,14 @@ import {
 
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import skills from "@/data/skills.json";
-import { useFrameLoop, FrameLoopContext } from "@/hooks/useFrameLoop";
-import { useGraphicsTier } from "@/hooks/useGraphicsTier";
-import { useMousePhysics } from "@/hooks/useMousePhysics";
-import { usePhysicsEngine } from "@/hooks/usePhysicsEngine";
-import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/physics/constants";
-import { fieldConfigFor } from "@/physics/fieldConfig";
-import { generateFlasks } from "@/physics/generateFlasks";
-import { useAppStore } from "@/store/useAppStore";
+import { useFrameLoop, FrameLoopContext } from "@/lib/hooks/useFrameLoop";
+import { useGraphicsTier } from "@/lib/hooks/useGraphicsTier";
+import { useMousePhysics } from "@/lib/hooks/useMousePhysics";
+import { usePhysicsEngine } from "@/lib/hooks/usePhysicsEngine";
+import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/lib/physics/constants";
+import { fieldConfigFor } from "@/lib/physics/fieldConfig";
+import { generateFlasks } from "@/lib/physics/generateFlasks";
+import { useAppStore } from "@/lib/store/useAppStore";
 
 import ChainGradients from "./ChainGradients";
 import FlaskChain from "./FlaskChain";

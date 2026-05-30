@@ -3,7 +3,7 @@
 import Matter from "matter-js";
 import { useEffect, useRef, useCallback, useContext, useMemo } from "react";
 
-import { FrameLoopContext } from "@/hooks/useFrameLoop";
+import { FrameLoopContext } from "@/lib/hooks/useFrameLoop";
 import {
   CHAIN_SEGMENT_COUNT,
   CHAIN_SEGMENT_WIDTH,
@@ -17,10 +17,10 @@ import {
   linkCenterOffset,
   chainLength,
   newChainGroup,
-} from "@/physics/constants";
-import { createChainBodies, type ChainResult } from "@/physics/createChainBodies";
-import { createFlaskBody, type FlaskResult } from "@/physics/createFlaskBody";
-import { FLASK_SHAPE_DEFS, type FlaskShape } from "@/physics/flaskShapes";
+} from "@/lib/physics/constants";
+import { createChainBodies, type ChainResult } from "@/lib/physics/createChainBodies";
+import { createFlaskBody, type FlaskResult } from "@/lib/physics/createFlaskBody";
+import { FLASK_SHAPE_DEFS, type FlaskShape } from "@/lib/physics/flaskShapes";
 
 import ChainLinkSVG from "./ChainLinkSVG";
 import FlaskSVG from "./FlaskSVG";

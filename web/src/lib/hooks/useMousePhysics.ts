@@ -1,8 +1,8 @@
 import Matter from "matter-js";
 import { useEffect, useRef } from "react";
 
-import { CAT_CHAIN, CAT_MOUSE, CAT_WALL } from "@/physics/constants";
-import { useAppStore } from "@/store/useAppStore";
+import { CAT_CHAIN, CAT_MOUSE, CAT_WALL } from "@/lib/physics/constants";
+import { useAppStore } from "@/lib/store/useAppStore";
 
 // How near a press must land to grab a flask/chain when it doesn't land directly
 // on one.

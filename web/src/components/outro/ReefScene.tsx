@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 
 import { BubblesBackdrop } from "@/components/bubbles/BubblesBackdrop";
 import { ByeSand } from "@/components/layout/ByeSand";
-import { useGraphicsTier } from "@/hooks/useGraphicsTier";
-import { usePointerField } from "@/hooks/usePointerField";
-import { useSceneActive } from "@/hooks/useSceneActive";
+import { useGraphicsTier } from "@/lib/hooks/useGraphicsTier";
+import { usePointerField } from "@/lib/hooks/usePointerField";
+import { useSceneActive } from "@/lib/hooks/useSceneActive";
 import { isTap } from "@/lib/outro/ink";
 import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
 

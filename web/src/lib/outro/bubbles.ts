@@ -1,4 +1,4 @@
-import { mulberry32 } from "../../physics/generateFlasks";
+import { mulberry32 } from "@/lib/physics/generateFlasks";
 
 export interface Bubble {
   id: number;

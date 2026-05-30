@@ -9,7 +9,7 @@ import { WaveDivider } from "@/components/ui/WaveDivider";
 import type { Dictionary } from "@/i18n/types";
 import { buildInfo } from "@/lib/buildInfo";
 import { shuffleTheme, scrollToTop } from "@/lib/shuffleTheme";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/lib/store/useAppStore";
 
 const GITHUB_URL = "https://github.com/FireNick44";
 const PROJECT_AWARE_URL = "https://www.projectaware.org/";

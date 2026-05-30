@@ -1,4 +1,4 @@
-import { mulberry32 } from "../../physics/generateFlasks";
+import { mulberry32 } from "@/lib/physics/generateFlasks";
 
 const GREENS = ["#1f6b3a", "#2f8a4d", "#3fa861", "#176030"];
 

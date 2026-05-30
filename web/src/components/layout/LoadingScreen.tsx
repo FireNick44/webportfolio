@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore } from "@/lib/store/useAppStore";
 
 import { Y_PATH, S_PATH } from "./Monogram";
 

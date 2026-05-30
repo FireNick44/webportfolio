@@ -1,11 +1,11 @@
 import { forwardRef } from "react";
 
-import { FLASK_WIDTH, FLASK_HEIGHT } from "@/physics/constants";
+import { FLASK_WIDTH, FLASK_HEIGHT } from "@/lib/physics/constants";
 import {
   FLASK_SHAPE_DEFS,
   FLASK_GLASS_STROKE,
   type FlaskShape,
-} from "@/physics/flaskShapes";
+} from "@/lib/physics/flaskShapes";
 
 interface Props {
   id: string;
