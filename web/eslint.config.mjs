@@ -50,16 +50,10 @@ const eslintConfig = defineConfig([
     },
   },
   {
-    // Page-shaped files: Next routes + the WIP-large settings panel until
-    // it's split into per-panel components. These are top-level wiring, not
-    // reusable components — exempting them stops a noise storm without
-    // lowering the bar for everything else. Drop the TechnicalPanel entry
-    // from this list once the split lands.
-    files: [
-      "src/app/**/layout.tsx",
-      "src/app/**/page.tsx",
-      "src/components/technical/TechnicalPanel.tsx",
-    ],
+    // Page-shaped files: Next routes. Top-level wiring, not reusable
+    // components — exempting them stops a noise storm without lowering the
+    // bar for everything else.
+    files: ["src/app/**/layout.tsx", "src/app/**/page.tsx"],
     rules: { "max-lines": "off" },
   },
   {
