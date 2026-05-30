@@ -25,11 +25,22 @@ export interface FlaskConfig {
   shape: FlaskShape;
 }
 
+// RGB representation of the 8-colour palette — used ONLY by the contrast
+// (hue-distance) logic to pick an index. The actual fill returned to the
+// renderer is the matching `var(--flask-cN)` CSS variable so it can swap per
+// theme without rebuilding the layout. Order MUST match the CSS vars.
 export const FLASK_COLORS = [
   "rgba(255, 86, 86, 0.7)", "rgba(86, 200, 255, 0.7)", "rgba(86, 255, 130, 0.7)",
   "rgba(255, 200, 60, 0.7)", "rgba(200, 86, 255, 0.7)", "rgba(255, 140, 60, 0.7)",
   "rgba(60, 255, 220, 0.7)", "rgba(255, 100, 180, 0.7)",
 ];
+
+/** CSS-var references for SVG fill — the renderer uses these so a theme swap
+ *  (light/dark/preset/shuffle) instantly recolours the water. Alpha is applied
+ *  separately via SVG `fill-opacity` (liquidOpacity store slider). */
+export const FLASK_COLOR_VARS = FLASK_COLORS.map(
+  (_, i) => `var(--flask-c${i})`,
+);
 
 // --- Icon/water contrast helpers ----------------------------------------
 // Pick a flask water colour that doesn't camouflage the skill icon. We rank the
@@ -76,17 +87,20 @@ export function pickFlaskColor(
   iconColor: string | undefined,
   pick: number,
 ): string {
+  // Returns the CSS-var ref for the chosen palette slot (not the rgba). Hue
+  // math still runs against the static FLASK_COLORS array so the contrast
+  // ranking is identical regardless of which theme's tokens are active.
   if (!iconColor)
-    return FLASK_COLORS[Math.floor(pick * FLASK_COLORS.length)];
+    return FLASK_COLOR_VARS[Math.floor(pick * FLASK_COLOR_VARS.length)];
   const { h, s, l } = rgbToHsl(hexToRgb(iconColor));
   if (s < 0.22 || l < 0.12 || l > 0.9)
-    return FLASK_COLORS[Math.floor(pick * FLASK_COLORS.length)];
+    return FLASK_COLOR_VARS[Math.floor(pick * FLASK_COLOR_VARS.length)];
   const ranked = FLASK_COLOR_HUES.map((fh, idx) => ({
     idx,
     d: hueDistance(h, fh),
   })).sort((a, b) => b.d - a.d);
   const keep = ranked.slice(0, Math.ceil(ranked.length / 2));
-  return FLASK_COLORS[keep[Math.floor(pick * keep.length)].idx];
+  return FLASK_COLOR_VARS[keep[Math.floor(pick * keep.length)].idx];
 }
 
 export function mulberry32(seed: number) {
@@ -106,10 +120,13 @@ export { chainLength };
 
 /** Vertical centre of a flask's body — used for back-to-front stacking so a
  *  HIGHER flask (smaller y) paints on top and a lower flask's long chain tucks
- *  behind the flasks above it. Includes the scaled half-hitbox so mixed sizes
- *  compare by where the body actually sits, not just the chain bottom. */
+ *  behind the flasks above it. Chain length is screen-space here =
+ *  chainLength(segments) × scale (chain bodies are scaled uniformly per layer,
+ *  see createChainBodies.ts); the half-hitbox is scaled the same way. */
 function bodyCenterY(f: FlaskConfig): number {
-  return f.anchorY + chainLength(f.segments) + (FLASK_HITBOX_HEIGHT * f.scale) / 2;
+  return (
+    f.anchorY + chainLength(f.segments) * f.scale + (FLASK_HITBOX_HEIGHT * f.scale) / 2
+  );
 }
 
 export function generateFlasks(
@@ -247,28 +264,41 @@ export function generateFlasks(
   const waveGap = waveHeight != null ? waveHeight + FLASK_HEIGHT / 2 : undefined;
   const fillTop = waveGap ?? 0.06 * viewport.height;
   const fillBot = viewport.height - (waveGap ?? 0.05 * viewport.height);
-  // Joint overlap shrinks each chain, so the longest chain needs more segments to
-  // reach the deepest target. Grow maxSeg past the config floor as needed (capped
-  // for sanity) so the rack still fills to the bottom whatever the overlap.
+  // Joint overlap + per-layer SCALE both shrink each chain in screen px, so the
+  // longest chain needs more UNSCALED segments to reach the deepest target.
+  // Size maxSeg for the back-most layer (smallest scale, longest unscaled chain
+  // required). Capped at 64 for sanity. With per-layer scale applied uniformly
+  // to chain bodies + visuals, screen-space chain length is
+  // chainLength(segments) × scale.
+  const minScale = Math.min(...config.layerScale);
   const maxSeg = Math.min(
     64,
-    Math.max(configMaxSeg, segmentsForLength(fillBot - HIDDEN_TOP)),
+    Math.max(configMaxSeg, segmentsForLength((fillBot - HIDDEN_TOP) / minScale)),
   );
 
   // Back-solve a chain so the flask BODY lands at (≈) targetBodyY while the chain
   // TOP always stays at/above floorY — tucked behind the top wave, never starting
-  // mid-air. DEPTH (not tier) drives chain length now.
+  // mid-air. DEPTH (not tier) drives chain length now. Multiply chainLength by
+  // `scale` because chain bodies are scaled uniformly per layer; segmentsForLength
+  // is still unscaled (it counts unscaled segment heights), so divide the wanted
+  // screen-space length by `scale` before looking up the count.
   const solveChain = (targetBodyY: number, scale: number) => {
     const half = (FLASK_HITBOX_HEIGHT * scale) / 2;
-    const reachMax = HIDDEN_TOP + chainLength(maxSeg) + half;
+    const reachMax = HIDDEN_TOP + chainLength(maxSeg) * scale + half;
     const target = Math.min(targetBodyY, reachMax);
     const want = target - half - HIDDEN_TOP;
-    const segments = Math.max(minSeg, Math.min(maxSeg, segmentsForLength(want)));
+    const segments = Math.max(
+      minSeg,
+      Math.min(maxSeg, segmentsForLength(want / scale)),
+    );
     // Chain top must tuck behind the wave (≤ HIDDEN_TOP) — never start mid-air.
     // Math.min also absorbs float drift at the reachMax boundary. bodyY is then
     // derived from the final anchor so placement/render stay consistent.
-    const anchorY = Math.min(target - chainLength(segments) - half, HIDDEN_TOP);
-    const bodyY = anchorY + chainLength(segments) + half;
+    const anchorY = Math.min(
+      target - chainLength(segments) * scale - half,
+      HIDDEN_TOP,
+    );
+    const bodyY = anchorY + chainLength(segments) * scale + half;
     return { segments, anchorY, bodyY };
   };
 

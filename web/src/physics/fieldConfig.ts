@@ -73,7 +73,12 @@ export const FIELD_BY_TIER: Record<GraphicsTier, FieldConfig> = {
   off: { flaskCount: 24, maxPhysicsFlasks: 0, maxPhysicsSegments: MAX_PHYSICS_SEGMENTS, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
   low: { flaskCount: 26, maxPhysicsFlasks: 8, maxPhysicsSegments: MAX_PHYSICS_SEGMENTS, layerScale: LAYER_SCALE, skeletonBands: 3, segmentRange: [3, 13], layout: "field", bgSkeletons: 18, coverSkeletons: 8 },
   medium: { ...DESKTOP_DEFAULT, maxPhysicsFlasks: 18, skeletonBands: 2 },
-  high: { flaskCount: 44, maxPhysicsFlasks: 26, maxPhysicsSegments: Number.POSITIVE_INFINITY, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 32, coverSkeletons: 18 },
+  // maxPhysicsSegments was Infinity (whole chain simulated). That made a
+  // released chain wake + DOM-update ALL its links every frame — the visible
+  // "let go" spike. Cap at 8: only the bottom 8 links swing (a chain's top
+  // barely moves anyway), the rest are static rope. Big drop in awake bodies +
+  // per-frame transform writes for a near-identical look.
+  high: { flaskCount: 44, maxPhysicsFlasks: 26, maxPhysicsSegments: 8, layerScale: LAYER_SCALE, skeletonBands: 2, segmentRange: [3, 16], layout: "field", bgSkeletons: 32, coverSkeletons: 18 },
 };
 
 /** Pick the flask field config for the resolved tier + device. Mobile keeps the

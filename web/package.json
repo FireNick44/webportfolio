@@ -1,6 +1,6 @@
 {
   "name": "web",
-  "version": "0.1.0",
+  "version": "2.2.4",
   "private": true,
   "scripts": {
     "sync:versions": "node scripts/sync-versions.mjs",

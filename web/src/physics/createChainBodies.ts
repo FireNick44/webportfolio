@@ -7,7 +7,7 @@ import {
   getSegmentHeight,
   linkCenterOffset,
   JOINT_INSET,
-  CHAIN_FILTER,
+  chainCollisionFilter,
 } from "./constants";
 
 export interface ChainResult {
@@ -25,32 +25,50 @@ export function createChainBodies(
   anchorY: number,
   segmentCount: number = CHAIN_SEGMENT_COUNT,
   scale: number = 1,
-  staticCount: number = 0
+  staticCount: number = 0,
+  // Collision layer + per-chain group: chains adopt the flask's layer category
+  // so cross-chain (different flask) same-layer hits land, and the negative
+  // group keeps the chain from colliding with its own segments + flask.
+  // Defaults reproduce the legacy "chain hits nothing but its constraints"
+  // behaviour when callers don't pass them (the layer-0 mask is harmless on
+  // an isolated chain, and group=0 is Matter's "no group" sentinel).
+  layer: number = 0,
+  group: number = 0,
 ): ChainResult {
   const segments: Matter.Body[] = [];
   const segmentHeights: number[] = [];
   const constraints: Matter.Constraint[] = [];
 
+  // Scale applies UNIFORMLY to chain dimensions now (was previously X-only).
+  // Width AND height of the bodies, the spacing offsets, the static-rope length
+  // and the constraint anchor points — all multiplied by `scale` so back-layer
+  // chains have proportionally-sized cap rings instead of width-only-scaled
+  // tall-thin stretched pills. The unscaled segmentHeights are kept in
+  // `segmentHeights[]` because the render side (FlaskChain.tsx) uses them to
+  // size the wrapper's CSS box in unscaled coords AND applies the same
+  // `scale(scale)` transform — wrapper-box maths and body-size maths therefore
+  // both work out, with the visual content (scaled inside the wrapper) lining
+  // up with the (scaled) body extent.
+
   // The top `staticCount` links are drawn as a static rope (no bodies); physics
   // begins below them. With link overlap the pin sits at the first physics link's
   // TOP = its overlap-aware centre minus half its height.
-  const firstPhysHeight = getSegmentHeight(staticCount);
-  const staticHeight = linkCenterOffset(staticCount) - firstPhysHeight / 2;
+  const firstPhysHeight = getSegmentHeight(staticCount, segmentCount);
+  const staticHeight =
+    (linkCenterOffset(staticCount, segmentCount) - firstPhysHeight / 2) * scale;
   const pinY = anchorY + staticHeight;
 
   for (let idx = staticCount; idx < segmentCount; idx++) {
-    // Width scales with depth (perspective/thickness); height does NOT. Centre is
-    // the overlap-aware position so links sit packed/overlapping, not end-to-end.
-    const h = getSegmentHeight(idx);
-    segmentHeights.push(h);
+    const h = getSegmentHeight(idx, segmentCount);
+    segmentHeights.push(h); // UNSCALED — render uses these for wrapper CSS box
 
     const segment = Matter.Bodies.rectangle(
       anchorX,
-      anchorY + linkCenterOffset(idx),
+      anchorY + linkCenterOffset(idx, segmentCount) * scale,
       CHAIN_SEGMENT_WIDTH * scale,
-      h,
+      h * scale,
       {
-        collisionFilter: CHAIN_FILTER,
+        collisionFilter: chainCollisionFilter(layer, group),
         density: 0.001,
         frictionAir: 0.03,
         sleepThreshold: 30,
@@ -82,9 +100,12 @@ export function createChainBodies(
     const damping = dampTop + (dampBot - dampTop) * frac;
     const constraint = Matter.Constraint.create({
       bodyA: segments[i],
-      pointA: { x: 0, y: JOINT_INSET * hA },
+      // pointA/pointB are BODY-LOCAL coords; body height is hA * scale, so the
+      // joint inset is JOINT_INSET * hA * scale (otherwise the pin sits outside
+      // the body for scale < 1 and the constraint goes unstable).
+      pointA: { x: 0, y: JOINT_INSET * hA * scale },
       bodyB: segments[i + 1],
-      pointB: { x: 0, y: -JOINT_INSET * hB },
+      pointB: { x: 0, y: -JOINT_INSET * hB * scale },
       stiffness,
       damping,
       length: 0,
@@ -96,7 +117,8 @@ export function createChainBodies(
   const anchorConstraint = Matter.Constraint.create({
     pointA: { x: anchorX, y: pinY },
     bodyB: segments[0],
-    pointB: { x: 0, y: -segmentHeights[0] / 2 },
+    // Body-local half-height (top edge of the body): scaled.
+    pointB: { x: 0, y: (-segmentHeights[0] / 2) * scale },
     stiffness: 1,
     damping: 0.4,
     length: 0,

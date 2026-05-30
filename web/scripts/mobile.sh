@@ -8,6 +8,10 @@ set -euo pipefail
 
 PORT="${PORT:-3000}"
 
+# Drop CSP's `upgrade-insecure-requests` for this run (see next.config.ts) —
+# the LAN server is plain HTTP and the upgrade kills every subresource fetch.
+export MOBILE_PREVIEW=1
+
 # Mac's LAN IP: Wi-Fi (en0) first, then wired (en1). Falls back to localhost.
 IP="$(ipconfig getifaddr en0 2>/dev/null || ipconfig getifaddr en1 2>/dev/null || echo '')"
 

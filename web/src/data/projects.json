@@ -4,41 +4,40 @@
     "subtitle": "iOS · React Native",
     "tech": [],
     "url": "https://apps.apple.com/app/id6761362473",
-    "size": "large"
+    "size": "tall"
+  },
+  {
+    "name": "BEATLOOPS",
+    "subtitle": "DJ Portfolio",
+    "tech": ["Tech Lead"],
+    "url": "https://beatloops.ch/",
+    "size": "wide",
+    "variant": "beatloops"
   },
   {
     "name": "Im.ProveYou",
     "subtitle": "IMS Thesis",
     "tech": ["Laravel"],
-    "url": "https://github.com/improveU/improveyou-website",
-    "size": "large"
+    "url": "https://github.com/improveU/improveyou-website"
   },
   {
     "name": "Personal Webportfolio",
     "tech": ["HTML/SCSS", "JS"],
-    "url": "https://github.com/FireNick44/webportfolio"
-  },
-  {
-    "name": "GitHub Profile",
-    "subtitle": "README",
-    "tech": ["Markdown", "SVG"],
-    "url": "https://github.com/FireNick44/FireNick44"
-  },
-  {
-    "name": "Swiss Transport",
-    "tech": ["C#", "Transport API"],
-    "url": "https://github.com/FireNick44/YS-SwissTransport",
-    "size": "wide"
+    "url": "https://github.com/FireNick44/webportfolio",
+    "size": "tall",
+    "textTop": true
   },
   {
     "name": "Pointer Quartet",
     "tech": ["C++"],
-    "url": "https://github.com/FireNick44/PointerQuartet"
+    "url": "https://github.com/FireNick44/PointerQuartet",
+    "size": "wide",
+    "variant": "ascii"
   },
   {
-    "name": "Web TicTacToe",
-    "tech": ["HTML/SCSS", "TS"],
-    "url": "https://github.com/FireNick44/WebTicTacToe"
+    "name": "Swiss Transport",
+    "tech": ["C#", "Transport API"],
+    "url": "https://github.com/FireNick44/YS-SwissTransport"
   },
   {
     "name": "C++ TicTacToe",
@@ -46,10 +45,16 @@
     "url": "https://github.com/FireNick44/TicTacToe"
   },
   {
+    "name": "Web TicTacToe",
+    "tech": ["HTML/SCSS", "TS"],
+    "url": "https://github.com/FireNick44/WebTicTacToe"
+  },
+  {
     "name": "Guess The Number",
     "subtitle": "First program",
     "tech": ["C++"],
     "url": "https://github.com/FireNick44/GuessTheNumber",
+    "size": "wide",
     "secret": true
   }
 ]

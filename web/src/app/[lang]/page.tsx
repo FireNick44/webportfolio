@@ -20,7 +20,7 @@ export default async function Page({
       <About dict={dict} lang={lang} />
       <Skills dict={dict} />
       <Projects dict={dict} />
-      <Contact dict={dict} />
+      <Contact dict={dict} lang={lang} />
     </>
   );
 }

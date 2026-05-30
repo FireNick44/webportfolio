@@ -7,6 +7,7 @@ import type { Dictionary } from "@/i18n/types";
 import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { usePageTransition } from "@/components/layout/PageTransitionProvider";
+import { usePathname } from "next/navigation";
 import { iconButtonVariants } from "@/components/ui/button-variants";
 import { Monogram } from "@/components/layout/Monogram";
 import { cn } from "@/lib/utils";
@@ -21,7 +22,10 @@ export default function Header({
   lang: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const { navigateTo } = usePageTransition();
+  const pathname = usePathname();
+  const homePath = `/${lang}`;
 
   const items: { id: string; label: string }[] = [
     { id: "me", label: dict.nav.me },
@@ -61,10 +65,16 @@ export default function Header({
         )}
       >
         <a
-          href={`/${lang}`}
+          href={homePath}
           onClick={(e) => {
             e.preventDefault();
-            window.scrollTo({ top: 0, behavior: "smooth" });
+            // On a subpage (technical / datenschutz / impressum) navigate to
+            // the locale's home; on home itself just smooth-scroll to the top.
+            if (pathname === homePath) {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            } else {
+              navigateTo(homePath);
+            }
           }}
           className="text-foreground transition-opacity hover:opacity-70"
           aria-label="Yannic Studer — home"
@@ -73,17 +83,41 @@ export default function Header({
         </a>
 
         <div className="flex items-center gap-3 md:gap-5">
-          {/* Desktop inline nav with an animated underline */}
-          <nav className="hidden items-center gap-6 md:flex">
+          {/* Desktop inline nav with a shared underline that slides between
+              hovered items (direction emerges from layout animation). */}
+          <nav
+            className="hidden items-center gap-6 md:flex"
+            onMouseLeave={() => setHoveredId(null)}
+          >
             {items.map((item) => (
               <button
                 key={item.id}
                 type="button"
                 onClick={() => goTo(item.id)}
-                className="group relative font-mono text-[0.68rem] uppercase tracking-[0.26em] text-current/70 transition-colors hover:text-current"
+                onMouseEnter={() => setHoveredId(item.id)}
+                onFocus={() => setHoveredId(item.id)}
+                onBlur={() => setHoveredId((cur) => (cur === item.id ? null : cur))}
+                className={cn(
+                  "relative font-mono text-[0.68rem] uppercase tracking-[0.26em] transition-colors",
+                  hoveredId === item.id ? "text-current" : "text-current/70",
+                )}
               >
                 {item.label}
-                <span className="absolute -bottom-1 left-0 h-px w-full origin-left scale-x-0 bg-current transition-transform duration-300 ease-[var(--ease-lab)] group-hover:scale-x-100" />
+                <AnimatePresence>
+                  {hoveredId === item.id && (
+                    <motion.span
+                      layoutId="nav-underline"
+                      className="absolute -bottom-1 left-0 right-0 h-px bg-current"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{
+                        layout: { duration: 0.35, ease: EASE },
+                        opacity: { duration: 0.15 },
+                      }}
+                    />
+                  )}
+                </AnimatePresence>
               </button>
             ))}
           </nav>
@@ -92,6 +126,29 @@ export default function Header({
 
           <LanguageSwitcher lang={lang} />
           <ThemeTogglerButton />
+
+          {/* GitHub profile — moved out of the projects grid into the bar. */}
+          <a
+            href="https://github.com/FireNick44/FireNick44"
+            target="_blank"
+            rel="noreferrer noopener"
+            className={cn(
+              iconButtonVariants({ variant: "ghost", size: "sm" }),
+              "group",
+            )}
+            aria-label="GitHub"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              width={17}
+              height={17}
+              fill="currentColor"
+              aria-hidden
+              className="transition-transform duration-300 group-hover:scale-110"
+            >
+              <path d="M12 .5C5.37.5 0 5.78 0 12.29c0 5.21 3.44 9.63 8.2 11.19.6.11.82-.25.82-.56 0-.28-.01-1.02-.02-2C5.67 21.58 5 19.49 5 19.49c-.55-1.36-1.34-1.72-1.34-1.72-1.09-.73.08-.72.08-.72 1.21.08 1.84 1.21 1.84 1.21 1.07 1.79 2.81 1.27 3.5.97.11-.76.42-1.27.76-1.56-2.66-.29-5.47-1.29-5.47-5.74 0-1.27.46-2.31 1.21-3.12-.12-.29-.52-1.46.12-3.05 0 0 .98-.31 3.2 1.19a11.3 11.3 0 0 1 5.83 0c2.22-1.5 3.2-1.19 3.2-1.19.64 1.59.24 2.76.12 3.05.75.81 1.21 1.85 1.21 3.12 0 4.46-2.81 5.45-5.49 5.73.43.36.81 1.08.81 2.18 0 1.57-.01 2.84-.01 3.23 0 .31.21.68.83.56C20.56 21.91 24 17.5 24 12.29 24 5.78 18.63.5 12 .5z" />
+            </svg>
+          </a>
 
           {/* Settings: desktop only — gear spins on hover */}
           <button

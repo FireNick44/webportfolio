@@ -6,7 +6,6 @@ import type { Dictionary } from "@/i18n/types";
 import { useAppStore } from "@/store/useAppStore";
 import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
 import { usePageTransition } from "@/components/layout/PageTransitionProvider";
-import { iconButtonVariants } from "@/components/ui/button-variants";
 import {
   THEME_PRESETS,
   TOKEN_NAMES,
@@ -126,6 +125,10 @@ export default function TechnicalPanel({
   const setRandomizeFlaskShapes = useAppStore(
     (s) => s.setRandomizeFlaskShapes,
   );
+  const dragKeepsChainCollision = useAppStore((s) => s.dragKeepsChainCollision);
+  const setDragKeepsChainCollision = useAppStore(
+    (s) => s.setDragKeepsChainCollision,
+  );
 
   const pathname = usePathname();
   const activeVersion = currentVersionId(pathname ?? "/");
@@ -221,13 +224,18 @@ export default function TechnicalPanel({
 
   return (
     <div className="mx-auto min-h-screen max-w-3xl px-5 pb-24 pt-28 sm:px-8 sm:pt-32">
+      {/* Framed back-link, same style as the legal pages so the "subpage"
+          breadcrumb reads identically across all leaf routes. */}
       <button
         type="button"
         onClick={() => navigateTo(`/${lang}`)}
-        className={cn(iconButtonVariants({ variant: "ghost", size: "sm" }), "mb-8 w-auto gap-2 px-2")}
+        className="group mb-10 inline-flex h-9 items-center gap-2 border border-border px-3 font-mono text-xs uppercase tracking-[0.22em] text-foreground/75 transition-colors hover:border-foreground/70 hover:text-foreground"
       >
-        <ArrowLeft size={16} />
-        <span className="lab-label">{dict.nav.me}</span>
+        <ArrowLeft
+          size={14}
+          className="transition-transform duration-300 ease-[var(--ease-lab)] group-hover:-translate-x-0.5"
+        />
+        {lang === "en" ? "Home" : "Startseite"}
       </button>
 
       <span className="lab-label">— / {dict.nav.technical}</span>
@@ -384,11 +392,40 @@ export default function TechnicalPanel({
                   ))}
                 </div>
               </div>
+
+              {/* Drag-through-chain (advanced playground knob) */}
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="lab-label w-24">Chain bump</span>
+                <div className="flex gap-px bg-border">
+                  {(
+                    [
+                      ["off", false],
+                      ["on", true],
+                    ] as const
+                  ).map(([label, on]) => (
+                    <button
+                      key={label}
+                      type="button"
+                      onClick={() => setDragKeepsChainCollision(on)}
+                      className={cn(
+                        "bg-background px-3 py-2 font-mono text-xs uppercase tracking-[0.18em] transition-colors",
+                        dragKeepsChainCollision === on
+                          ? "text-foreground"
+                          : "text-muted-foreground hover:text-foreground",
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
             <p className="border-t border-border px-5 py-3 text-xs text-muted-foreground">
               Live water alpha (0–1, palette default 0.7) and bottle-shape
               randomisation (rect / round / cone). Shape changes apply on the
-              next layout reseed — currently a full reload.
+              next layout reseed — currently a full reload. Chain bump ON keeps
+              the held flask colliding with other chains while you drag — fun to
+              play with, easy to wedge.
             </p>
           </div>
 

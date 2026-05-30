@@ -36,9 +36,13 @@ describe("off tier → fully static rack", () => {
 });
 
 describe("fieldConfigFor — maxPhysicsSegments per tier", () => {
-  it("high tier simulates every chain link (no static top)", () => {
+  it("high tier caps simulated links (the rest are static rope)", () => {
     const cfg = fieldConfigFor("high", false);
-    expect(cfg.maxPhysicsSegments).toBe(Number.POSITIVE_INFINITY);
+    // Was Infinity (whole chain simulated) — capped to bound awake bodies +
+    // per-frame DOM writes on release. Still higher than the default cap so
+    // high-tier chains articulate more than medium.
+    expect(cfg.maxPhysicsSegments).toBe(8);
+    expect(cfg.maxPhysicsSegments).toBeGreaterThan(MAX_PHYSICS_SEGMENTS);
   });
 
   it("medium tier keeps the default cap", () => {

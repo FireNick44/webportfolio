@@ -12,6 +12,7 @@ export function OutroContent({ dict }: { dict: Dictionary }) {
 
   return (
     <div
+      data-outro
       className="relative z-10 mx-auto max-w-7xl px-5 sm:px-8"
       style={{
         paddingTop: "clamp(9.5rem, 18vw, 14rem)",

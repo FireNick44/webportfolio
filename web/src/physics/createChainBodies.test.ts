@@ -15,8 +15,9 @@ describe("createChainBodies scale", () => {
     // Width thins with depth...
     expect(wHalf).toBeCloseTo(wFull * 0.5, 1);
     // ...but height stays full regardless of scale (length = segments × full h).
-    expect(half.segmentHeights[1]).toBeCloseTo(getSegmentHeight(1), 5);
-    expect(full.segmentHeights[1]).toBeCloseTo(getSegmentHeight(1), 5);
+    // Heights are count-aware (chain of 4 here), so pass the count.
+    expect(half.segmentHeights[1]).toBeCloseTo(getSegmentHeight(1, 4), 5);
+    expect(full.segmentHeights[1]).toBeCloseTo(getSegmentHeight(1, 4), 5);
     expect(CHAIN_SEGMENT_WIDTH).toBeGreaterThan(0);
   });
 });
@@ -34,7 +35,8 @@ describe("createChainBodies skeleton (partial physics)", () => {
     // Overlap-aware: pin sits at the first physics link's TOP = its overlapped
     // centre minus half its height (NOT the end-to-end sum of the static links).
     const staticHeight =
-      linkCenterOffset(staticCount) - getSegmentHeight(staticCount) / 2;
+      linkCenterOffset(staticCount, segmentCount) -
+      getSegmentHeight(staticCount, segmentCount) / 2;
     expect(chain.staticHeight).toBeCloseTo(staticHeight, 5);
 
     // physics sub-chain is pinned at anchorY + staticHeight...
@@ -46,7 +48,10 @@ describe("createChainBodies skeleton (partial physics)", () => {
     expect(chain.segments[0].bounds.min.y).toBeCloseTo(anchorY + staticHeight, 5);
 
     // physics heights continue the full-chain indexing (link 3 of 8)
-    expect(chain.segmentHeights[0]).toBeCloseTo(getSegmentHeight(staticCount), 5);
+    expect(chain.segmentHeights[0]).toBeCloseTo(
+      getSegmentHeight(staticCount, segmentCount),
+      5
+    );
   });
 
   it("defaults to a fully-physics chain when staticCount is 0", () => {

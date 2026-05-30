@@ -2,6 +2,11 @@ import type { NextConfig } from "next";
 import { computeBuildEnv } from "./src/lib/buildEnv";
 
 const isDev = process.env.NODE_ENV !== "production";
+// HTTP LAN preview (`npm run mobile`): browsers honour `upgrade-insecure-requests`
+// even on HTTP origins and try to fetch every subresource via HTTPS, which the
+// LAN server doesn't speak — CSS/fonts/JS all fail. The script sets this env so
+// we drop only that one directive; the rest of the policy stays in force.
+const isLanPreview = process.env.MOBILE_PREVIEW === "1";
 
 // Content-Security-Policy. Everything is same-origin at runtime: next/font
 // self-hosts the Google fonts at build time, Resend is called server-side only,
@@ -19,7 +24,7 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "object-src 'none'",
-  "upgrade-insecure-requests",
+  ...(isLanPreview ? [] : ["upgrade-insecure-requests"]),
 ].join("; ");
 
 const SECURITY_HEADERS = [

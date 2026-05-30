@@ -16,8 +16,7 @@
     "label": "01 / Me",
     "title": "A bit about the person behind the flasks",
     "bio": [
-      "I'm Yannic — a developer who likes building things that genuinely help people, and who's endlessly curious about computers and security.",
-      "I move comfortably between front end and back end, sweat the small details, and live for the moment a clunky workflow finally clicks."
+      "I'm Yannic. Highly into security and complex development, with the urge to set goals without a plan B."
     ]
   },
   "skills": {
@@ -35,7 +34,7 @@
   "contact": {
     "label": "04 / Contact",
     "title": "Let's mix something",
-    "subtitle": "Tell me about your idea. No email or phone to copy down — just write and hit send.",
+    "subtitle": "Want to reach out or talk something through? Drop me a line here. I'll get back within a couple of days.",
     "name": "Name",
     "namePlaceholder": "Your name",
     "email": "Email",
@@ -44,16 +43,27 @@
     "messagePlaceholder": "What are you working on?",
     "send": "Send message",
     "sending": "Sending…",
-    "success": "Thanks — your message is on its way. I'll be in touch soon.",
-    "error": "Something went wrong sending that. Please try again in a moment.",
+    "success": "Got it. Message is on its way, I'll write back soon.",
+    "error": "Couldn't send that. Try again in a moment, or mail me directly at support@sleepingdeveloper.com.",
     "invalid": "Please fill in your name, a valid email and a message."
   },
   "footer": {
-    "thanks": "Thanks for stopping by.",
-    "note": "This corner of the web is still brewing — like everything worth building. ;)",
-    "rights": "© 2026 Yannic Studer",
-    "builtWith": "Built with Next.js, Matter.js & a lot of caffeine.",
-    "backToTop": "Back to top"
+    "thanks": "Thanks for visiting!",
+    "note": "// Website is still a work in progress, changes may occur ;)",
+    "rights": "© {year} Yannic Studer, sleepingdeveloper",
+    "backToTop": "Back to top",
+    "legal": "Legal",
+    "privacy": "Privacy",
+    "impressum": "Imprint",
+    "appearance": "Appearance"
+  },
+  "notify": {
+    "backToTopTitle": "You've reached the end",
+    "backToTopAction": "Top",
+    "shuffleTitle": "You've reached the end",
+    "shuffleBody": "Thanks again. Head back up, or shuffle the style for a fresh look.",
+    "shuffleAction": "Shuffle + top",
+    "dismiss": "Dismiss"
   },
   "menu": {
     "open": "Menu",

@@ -3,7 +3,6 @@ import { FLASK_WIDTH, FLASK_HEIGHT } from "@/physics/constants";
 import {
   FLASK_SHAPE_DEFS,
   FLASK_GLASS_STROKE,
-  withAlpha,
   type FlaskShape,
 } from "@/physics/flaskShapes";
 
@@ -59,16 +58,18 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
     const gradShade = `flask-shade-${id}`;
     const clipId = `liquid-clip-${id}`;
     const rectId = `liquid-rect-${id}`;
-    const dryClipId = `dry-clip-${id}`;
-    const dryRectId = `dry-rect-${id}`;
 
     // Clip rects are generous so they cover even when the liquid rect rotates
     // by ±MAX_LIQUID_TILT_DEG. Sized off the shape's viewBox.
     const [, , vbW, vbH] = def.viewBox.split(" ").map(Number);
     const clipPad = Math.max(vbW, vbH);
 
-    const waterFill =
-      typeof liquidOpacity === "number" ? withAlpha(color, liquidOpacity) : color;
+    // `color` is now a CSS-var ref (var(--flask-cN)) so it follows theme +
+    // shuffle. Alpha is applied via fill-opacity on the path so the var can
+    // stay a clean solid hex/rgb.
+    const waterFill = color;
+    const waterAlpha =
+      typeof liquidOpacity === "number" ? liquidOpacity : 0.7;
     const { iconBox, cork, corkOverlay, band, glass, water, sheens, bodyShade } = def;
 
     return (
@@ -78,7 +79,10 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
           position: "absolute",
           width: FLASK_WIDTH,
           height: FLASK_HEIGHT,
-          willChange: "transform",
+          // Only physics flasks are re-transformed per frame; skeletons are
+          // positioned once, so promoting them to a compositor layer is wasted
+          // GPU memory (~49 idle layers at the high tier).
+          willChange: isSkeleton ? undefined : "transform",
           pointerEvents: "none",
           // Above the hint scrim (z-26) so the demo flask stays bright while the
           // rest dims; only the body is lifted, the chain stays wave-masked.
@@ -156,21 +160,16 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
                 height={clipPad * 2}
               />
             </clipPath>
-            {/* Dry area: covers above the water line. */}
-            <clipPath id={dryClipId}>
-              <rect
-                id={dryRectId}
-                x={-clipPad}
-                y={def.clipY - clipPad * 2}
-                width={clipPad * 3}
-                height={clipPad * 2}
-              />
-            </clipPath>
           </defs>
 
           {/* 1. Liquid fill (bottom layer, clipped to the body interior). */}
           <g clipPath={`url(#${clipId})`}>
-            <path d={water.d} transform={water.transform} fill={waterFill} />
+            <path
+              d={water.d}
+              transform={water.transform}
+              fill={waterFill}
+              fillOpacity={waterAlpha}
+            />
           </g>
 
           {/* 2. Glass body outline — gradient on physics flasks, flat fill on
@@ -222,39 +221,24 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
             fill={`url(#${gradId2})`}
           />
 
-          {/* 5. Skill icon — submerged + dry parts, drawn AFTER the glass body
-              so it reads in FRONT of the glass. */}
+          {/* 5. Skill icon — ONE copy, drawn AFTER the glass body so it reads in
+              FRONT of the glass. (Previously two identical copies clipped to the
+              wet/dry halves of the water line — the split produced no visible
+              difference, so it was collapsed to halve the per-frame icon raster.)
+              The bob (CSS) + the tilt spring (id ref) both still drive it. */}
           {skillIcon && (
-            <>
-              <g clipPath={`url(#${clipId})`}>
-                <g id={`icon-wet-${id}`}>
-                  <g className={bobClass} style={bobStyle}>
-                    <image
-                      href={skillIcon}
-                      x={iconBox.x}
-                      y={iconBox.y}
-                      width={iconBox.w}
-                      height={iconBox.h}
-                      preserveAspectRatio="xMidYMid meet"
-                    />
-                  </g>
-                </g>
+            <g id={`icon-${id}`}>
+              <g className={bobClass} style={bobStyle}>
+                <image
+                  href={skillIcon}
+                  x={iconBox.x}
+                  y={iconBox.y}
+                  width={iconBox.w}
+                  height={iconBox.h}
+                  preserveAspectRatio="xMidYMid meet"
+                />
               </g>
-              <g clipPath={`url(#${dryClipId})`}>
-                <g id={`icon-dry-${id}`}>
-                  <g className={bobClass} style={bobStyle}>
-                    <image
-                      href={skillIcon}
-                      x={iconBox.x}
-                      y={iconBox.y}
-                      width={iconBox.w}
-                      height={iconBox.h}
-                      preserveAspectRatio="xMidYMid meet"
-                    />
-                  </g>
-                </g>
-              </g>
-            </>
+            </g>
           )}
 
           {/* 6. Glass reflections — top sheen drawn over everything. */}

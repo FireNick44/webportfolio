@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { Check, AlertTriangle, Loader2 } from "lucide-react";
 import type { Dictionary } from "@/i18n/types";
 import { Reveal } from "@/components/ui/Reveal";
 import { cn } from "@/lib/utils";
@@ -9,7 +10,13 @@ import { cn } from "@/lib/utils";
 type Status = "idle" | "sending" | "success" | "error";
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
-export default function Contact({ dict }: { dict: Dictionary }) {
+export default function Contact({
+  dict,
+  lang,
+}: {
+  dict: Dictionary;
+  lang: string;
+}) {
   const c = dict.contact;
   const [status, setStatus] = useState<Status>("idle");
 
@@ -22,6 +29,8 @@ export default function Contact({ dict }: { dict: Dictionary }) {
       email: String(fd.get("email") || "").trim(),
       message: String(fd.get("message") || "").trim(),
       company: String(fd.get("company") || ""),
+      // For the auto-reply template — picks EN/DE copy in the route.
+      lang,
     };
 
     if (!data.name || !data.message || !EMAIL_RE.test(data.email)) {
@@ -122,23 +131,39 @@ export default function Contact({ dict }: { dict: Dictionary }) {
                 type="submit"
                 disabled={status === "sending"}
                 whileTap={{ scale: 0.98 }}
-                className="group inline-flex items-center justify-center gap-3 border border-foreground bg-foreground px-7 py-3.5 font-mono text-sm uppercase tracking-[0.22em] text-background transition-colors hover:bg-transparent hover:text-foreground disabled:opacity-50"
+                className="group inline-flex min-w-[200px] items-center justify-center gap-3 border border-foreground bg-foreground px-7 py-3.5 font-mono text-sm uppercase tracking-[0.22em] text-background transition-colors hover:bg-transparent hover:text-foreground disabled:cursor-wait disabled:opacity-60 disabled:hover:bg-foreground disabled:hover:text-background"
               >
-                {status === "sending" ? c.sending : c.send}
+                {status === "sending" && (
+                  <Loader2 size={15} className="animate-spin" aria-hidden />
+                )}
+                <span>{status === "sending" ? c.sending : c.send}</span>
               </motion.button>
 
-              <p
-                aria-live="polite"
-                className={cn(
-                  "text-sm",
-                  status === "success" && "text-accent",
-                  status === "error" && "text-destructive",
-                  (status === "idle" || status === "sending") && "sr-only",
+              <AnimatePresence mode="wait" initial={false}>
+                {(status === "success" || status === "error") && (
+                  <motion.p
+                    key={status}
+                    aria-live="polite"
+                    role={status === "error" ? "alert" : undefined}
+                    initial={{ opacity: 0, x: -8 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 8 }}
+                    transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+                    className={cn(
+                      "inline-flex max-w-prose items-start gap-2 text-sm leading-snug",
+                      status === "success" && "text-accent",
+                      status === "error" && "text-destructive",
+                    )}
+                  >
+                    {status === "success" ? (
+                      <Check size={16} className="mt-0.5 shrink-0" aria-hidden />
+                    ) : (
+                      <AlertTriangle size={16} className="mt-0.5 shrink-0" aria-hidden />
+                    )}
+                    <span>{status === "success" ? c.success : c.error}</span>
+                  </motion.p>
                 )}
-              >
-                {status === "success" && c.success}
-                {status === "error" && c.error}
-              </p>
+              </AnimatePresence>
             </div>
           </form>
         </Reveal>

@@ -5,9 +5,12 @@ import { generateSand } from "@/lib/outro/sand";
 
 const CELL = 14; // px — square pixel size (1:1, never stretched)
 
-// Wavy top edge so the sand reads as a dune, not a hard rectangular cut-off.
+// Wavy top edge so the sand reads as a dune. Deeper multi-peak curve to match
+// the WaveDivider's rhythm — static (no animation, per spec). ViewBox 120×28;
+// curve oscillates between y≈2 and y≈18 (16-unit amplitude) across 3 full
+// waves before closing to the bottom rectangle.
 const WAVE_MASK =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 28' preserveAspectRatio='none'%3E%3Cpath d='M0,12C22,4,38,16,60,11C82,6,98,16,120,11L120,28L0,28Z' fill='%23000'/%3E%3C/svg%3E\")";
+  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 28' preserveAspectRatio='none'%3E%3Cpath d='M0,10 C12,2 24,18 36,10 C48,2 60,18 72,10 C84,2 96,18 108,10 C114,6 117,10 120,10 L120,28 L0,28 Z' fill='%23000'/%3E%3C/svg%3E\")";
 
 export function SandFloor({
   rows = 6,

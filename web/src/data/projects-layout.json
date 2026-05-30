@@ -5,6 +5,7 @@
   "sizes": {
     "default": { "col": 1, "row": 1 },
     "wide": { "col": 2, "row": 1 },
+    "tall": { "col": 1, "row": 2 },
     "large": { "col": 2, "row": 2 }
   }
 }

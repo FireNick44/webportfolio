@@ -49,8 +49,19 @@ export interface Dictionary {
     thanks: string;
     note: string;
     rights: string;
-    builtWith: string;
     backToTop: string;
+    legal: string;
+    privacy: string;
+    impressum: string;
+    appearance: string;
+  };
+  notify: {
+    backToTopTitle: string;
+    backToTopAction: string;
+    shuffleTitle: string;
+    shuffleBody: string;
+    shuffleAction: string;
+    dismiss: string;
   };
   menu: {
     open: string;

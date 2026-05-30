@@ -31,9 +31,12 @@ export default function About({ dict, lang }: { dict: Dictionary; lang?: string 
         </Reveal>
       </div>
 
-      <div className="mt-14 grid gap-10 lg:grid-cols-[1fr_1.25fr] lg:gap-14">
+      <div className="mt-14 grid gap-10 lg:grid-cols-[0.85fr_1.4fr] lg:gap-24">
+        {/* Photo column — sticks while you scroll past the table. Pushed to the
+            LEFT edge of its column (lg:mx-0 inside AboutPhoto), the wider
+            grid-gap then carries the eye across the breathing room to the
+            table on the right. */}
         <div className="lg:sticky lg:top-28 lg:self-start">
-          {/* Spins in, then keeps a subtle scroll-linked tilt + scale. */}
           <AboutPhoto />
         </div>
 

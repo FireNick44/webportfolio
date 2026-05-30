@@ -44,6 +44,25 @@ interface AppState {
    *  cone) per bottle for visual variety. Off → all rectangular. */
   randomizeFlaskShapes: boolean;
   setRandomizeFlaskShapes: (v: boolean) => void;
+  /** Bumped to ask the rack to re-seed its layout without a full reload —
+   *  PhysicsScene watches this and reshuffles flasks/chains/anchors. Used by
+   *  the "shuffle" notification + the #shuffle hash. */
+  flaskShuffleCounter: number;
+  bumpFlaskShuffleCounter: () => void;
+  /** Rack interaction model — "drag" (default: grab + pull a flask) or
+   *  "collide" (cursor acts as a physical pusher that bumps flasks around). */
+  interactionMode: "drag" | "collide";
+  setInteractionMode: (m: "drag" | "collide") => void;
+  /** Advanced playground knob: by default a dragged flask passes through chains
+   *  (no wedge), keeping flask↔flask collision intact. Turn ON to keep the
+   *  chain bit too — fun to play with but lets you easily wedge things. */
+  dragKeepsChainCollision: boolean;
+  setDragKeepsChainCollision: (v: boolean) => void;
+  /** Bumped to ask the boot loader to replay — covers the page in the current
+   *  (just-changed) theme background so a theme swap doesn't read as a jarring
+   *  in-place repaint. Used by the footer's "Shuffle + Top" button. */
+  loaderShowRequest: number;
+  requestLoader: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -75,6 +94,17 @@ export const useAppStore = create<AppState>()(
       randomizeFlaskShapes: true,
       setRandomizeFlaskShapes: (randomizeFlaskShapes) =>
         set({ randomizeFlaskShapes }),
+      flaskShuffleCounter: 0,
+      bumpFlaskShuffleCounter: () =>
+        set((s) => ({ flaskShuffleCounter: s.flaskShuffleCounter + 1 })),
+      interactionMode: "drag",
+      setInteractionMode: (interactionMode) => set({ interactionMode }),
+      dragKeepsChainCollision: false,
+      setDragKeepsChainCollision: (dragKeepsChainCollision) =>
+        set({ dragKeepsChainCollision }),
+      loaderShowRequest: 0,
+      requestLoader: () =>
+        set((s) => ({ loaderShowRequest: s.loaderShowRequest + 1 })),
     }),
     {
       name: STORAGE_KEY,
@@ -89,6 +119,8 @@ export const useAppStore = create<AppState>()(
         graphicsTier: state.graphicsTier,
         liquidOpacity: state.liquidOpacity,
         randomizeFlaskShapes: state.randomizeFlaskShapes,
+        interactionMode: state.interactionMode,
+        dragKeepsChainCollision: state.dragKeepsChainCollision,
       }),
     },
   ),

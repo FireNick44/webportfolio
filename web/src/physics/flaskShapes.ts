@@ -134,11 +134,16 @@ export const FLASK_SHAPE_DEFS: Record<FlaskShape, FlaskShapeDef> = {
     bodyShade: {
       d: "M50.9057 40.5561C50.3344 41.7636 51.2434 50.307 49.9311 52.8022C48.6187 55.2973 9.49454 86.1679 7.82376 91.734C6.15299 97.3 5.81046 189.556 7.72244 192.355C9.63443 195.154 45.2038 194.035 45.2038 194.035V90.0693L58.2714 52.8022V39.5068C58.2714 39.5068 51.477 39.3486 50.9057 40.5561Z",
     },
-    // Cone's cork sits taller in the viewBox than the rect's, so the default
-    // chain-attachment point (top of body hitbox) lands ~75% down the cork.
-    // Lift the constraint point by 22 body-local px so the chain visually
-    // ends near the TOP of the cork.
-    chainAttachOffsetPx: -22,
+    // Cone fills the flask box (its viewBox ~matches the box aspect, so ~0
+    // preserveAspectRatio padding) while rect/round are letterboxed ~18px down.
+    // Without correction the cone's cork therefore sits ~18px HIGHER than the
+    // others and the chain pokes into the flask top. -18 (measured: it lands
+    // the cone cork at the SAME +9px-below-chain-end as the working rect) pulls
+    // it into line. NOTE: applied in BOTH the physics path (createFlaskBody
+    // constraint) AND the static-skeleton path (FlaskChain layout effect) —
+    // they must stay in sync or cone skeletons hang differently than cone
+    // physics flasks (that desync was the long-standing "edged flask" bug).
+    chainAttachOffsetPx: -18,
   },
 };
 

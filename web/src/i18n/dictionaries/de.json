@@ -9,21 +9,20 @@
   "hero": {
     "greeting": "Hallo Welt, ich bin",
     "name": "Yannic Studer",
-    "tagline": "Softwareentwickler & digitaler Tüftler.",
+    "tagline": "Softwareentwickler & digitaler Denker.",
     "scroll": "Scrollen"
   },
   "about": {
     "label": "01 / Über mich",
-    "title": "Ein bisschen zur Person hinter den Gläsern",
+    "title": "Ein bisschen zur Person hinter dem Bildschirm",
     "bio": [
-      "Ich bin Yannic — Entwickler, der gern Dinge baut, die Menschen wirklich weiterhelfen, und der sich für Computer und Security begeistert.",
-      "Ich bewege mich sicher zwischen Front- und Backend, habe ein Auge fürs Detail und lebe für den Moment, in dem ein umständlicher Ablauf endlich rundläuft."
+      "Ich bin Yannic. Stark interessiert an Security und komplexer Entwicklung, mit dem Drang, mir Ziele ohne Plan B zu setzen."
     ]
   },
   "skills": {
     "label": "02 / Skills",
     "title": "Schwebend in Lösung",
-    "subtitle": "Jedes Glas enthält ein Werkzeug, mit dem ich arbeite — an seiner eigenen Kette.",
+    "subtitle": "Jedes Glas enthält ein Werkzeug, mit dem ich arbeite, an seiner eigenen Kette.",
     "hint": "Bring die Gläser in Bewegung"
   },
   "projects": {
@@ -35,7 +34,7 @@
   "contact": {
     "label": "04 / Kontakt",
     "title": "Lass uns etwas zusammenbrauen",
-    "subtitle": "Erzähl mir von deiner Idee. Keine E-Mail oder Nummer zum Abtippen — einfach schreiben und absenden.",
+    "subtitle": "Du willst mich kontaktieren oder ein Thema ansprechen? Schreib mir hier. Ich melde mich in den nächsten Tagen.",
     "name": "Name",
     "namePlaceholder": "Dein Name",
     "email": "E-Mail",
@@ -44,16 +43,27 @@
     "messagePlaceholder": "Woran arbeitest du gerade?",
     "send": "Nachricht senden",
     "sending": "Wird gesendet…",
-    "success": "Danke — deine Nachricht ist unterwegs. Ich melde mich bald.",
-    "error": "Beim Senden ist etwas schiefgelaufen. Bitte versuche es gleich nochmal.",
+    "success": "Angekommen. Ich melde mich bald.",
+    "error": "Hat nicht geklappt. Probier es gleich nochmal, oder schreib mir direkt an support@sleepingdeveloper.com.",
     "invalid": "Bitte Name, eine gültige E-Mail und eine Nachricht ausfüllen."
   },
   "footer": {
-    "thanks": "Danke fürs Vorbeischauen.",
-    "note": "Diese Ecke des Webs köchelt noch — wie alles, was sich lohnt. ;)",
-    "rights": "© 2026 Yannic Studer",
-    "builtWith": "Gebaut mit Next.js, Matter.js & viel Koffein.",
-    "backToTop": "Nach oben"
+    "thanks": "Danke fürs Vorbeikommen!",
+    "note": "// Website ist noch in Arbeit, Änderungen jederzeit möglich ;)",
+    "rights": "© {year} Yannic Studer, sleepingdeveloper",
+    "backToTop": "Nach oben",
+    "legal": "Rechtliches",
+    "privacy": "Datenschutz",
+    "impressum": "Impressum",
+    "appearance": "Appearance"
+  },
+  "notify": {
+    "backToTopTitle": "Du bist am Ende angekommen",
+    "backToTopAction": "Nach oben",
+    "shuffleTitle": "Du bist am Ende angekommen",
+    "shuffleBody": "Danke nochmal. Geh wieder nach oben, oder misch den Look für eine neue Variante.",
+    "shuffleAction": "Mischen + nach oben",
+    "dismiss": "Schließen"
   },
   "menu": {
     "open": "Menü",

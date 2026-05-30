@@ -19,7 +19,7 @@
   { "id": "springboot", "name": "Spring Boot", "svgPath": "/skills/springboot.svg", "color": "#6db33f" },
   { "id": "mongodb", "name": "MongoDB", "svgPath": "/skills/mongoDB.svg", "color": "#075850" },
   { "id": "postgresql", "name": "PostgreSQL", "svgPath": "/skills/postgresSQL.svg", "color": "#3e6f97" },
-  { "id": "docker", "name": "Docker", "svgPath": "/skills/docker.svg", "color": "#0794e3" },
+  { "id": "docker", "name": "Docker", "svgPath": "/skills/docker.svg", "color": "#2496ED" },
   { "id": "git", "name": "Git", "svgPath": "/skills/git.svg", "color": "#f34f29" },
   { "id": "figma", "name": "Figma", "svgPath": "/skills/figma.svg", "color": "#898897" },
   { "id": "visual-studio", "name": "Visual Studio", "svgPath": "/skills/visualstudio.svg", "color": "#966dc8" },

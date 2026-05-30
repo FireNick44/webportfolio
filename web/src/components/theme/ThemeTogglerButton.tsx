@@ -29,10 +29,23 @@ export function ThemeTogglerButton({
   // The light/dark toggle is also the "escape hatch" back to the default Lab
   // palette: clear any active preset + token overrides, otherwise their inline
   // <html> vars would mask the theme flip and the toggle would appear dead.
+  // Also drop the `#shuffle=…` hash that shuffleTheme writes — otherwise the
+  // URL still advertises a random seed even though we're back on clean light
+  // or dark, and a copy/paste would re-apply the old random theme on load.
   const toggleToTheme = (t: "light" | "dark") => {
     setPreset(null);
     clearTokenOverrides();
     setTheme(t);
+    if (
+      typeof window !== "undefined" &&
+      window.location.hash.startsWith("#shuffle")
+    ) {
+      history.replaceState(
+        null,
+        "",
+        window.location.pathname + window.location.search,
+      );
+    }
   };
 
   // Persisted theme only resolves on the client; render a stable icon for the

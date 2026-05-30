@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useScroll, useSpring } from "motion/react";
 
 const SECTIONS = [
@@ -19,11 +20,18 @@ const SECTIONS = [
  * scrollbar can't be removed, so showing this too would be a redundant second
  * scroll indicator.
  */
+// Routes that don't have the four portfolio sections (me/skills/projects/
+// contact). The timeline would never light up, so hide it entirely instead of
+// showing a dead right-edge bar.
+const HIDE_ON = /^\/[a-z]{2}\/(datenschutz|impressum|technical)(\/|$)/;
+
 export default function ScrollTimeline({
   labels,
 }: {
   labels: Record<string, string>;
 }) {
+  const pathname = usePathname();
+  const hidden = pathname ? HIDE_ON.test(pathname) : false;
   const { scrollYProgress } = useScroll();
   const fill = useSpring(scrollYProgress, {
     stiffness: 120,
@@ -52,6 +60,8 @@ export default function ScrollTimeline({
 
   const activeSection = SECTIONS.find((s) => s.id === active);
   const label = (activeSection && labels[activeSection.key]) ?? active;
+
+  if (hidden) return null;
 
   return (
     <nav

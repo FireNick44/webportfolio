@@ -63,5 +63,28 @@ export default function AppStateProvider({
     document.documentElement.setAttribute("lang", lang);
   }, [lang]);
 
+  // `#shuffle` (random) or `#shuffle=<seed>` (reproduce an exact shared look)
+  // → apply once per fresh load. Bare #shuffle is session-guarded so a refresh
+  // doesn't re-roll; a seeded hash always rebuilds that seed (shareable links).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const hash = window.location.hash;
+    const m = hash.match(/^#shuffle(?:=([0-9a-z]+))?$/i);
+    if (!m) return;
+    const seed = m[1] ? parseInt(m[1], 36) : undefined;
+    if (seed === undefined) {
+      // Bare #shuffle — random, only once per session.
+      try {
+        if (sessionStorage.getItem("ys-shuffled")) return;
+        sessionStorage.setItem("ys-shuffled", "1");
+      } catch {
+        /* ignore */
+      }
+    }
+    import("@/lib/shuffleTheme").then(({ shuffleTheme }) => {
+      shuffleTheme(seed);
+    });
+  }, []);
+
   return <>{children}</>;
 }

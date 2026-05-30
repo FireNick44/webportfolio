@@ -64,8 +64,10 @@ describe("generateFlasks (field)", () => {
     const ghosts = withBg.filter((x) => x.layer >= firstSkelTier);
     expect(ghosts.every((x) => x.isSkeleton && x.skillIcon === undefined)).toBe(true);
     // background depth now reaches the top, not just the deep bottom.
+    // Chain length is screen-space here = chainLength(segments) * scale (chain
+    // bodies are uniformly scaled per layer; see createChainBodies.ts).
     const depth = (x: (typeof withBg)[number]) =>
-      x.anchorY + chainLength(x.segments);
+      x.anchorY + chainLength(x.segments) * x.scale;
     expect(ghosts.some((x) => depth(x) < 0.45 * vp.height)).toBe(true);
   });
 
@@ -78,7 +80,7 @@ describe("generateFlasks (field)", () => {
     const big: FieldConfig = { ...FIELD, flaskCount: 200, maxPhysicsFlasks: 200 };
     const f = generateFlasks(big, vp, skills, 42);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     const avg = (xs: typeof f) =>
       xs.reduce((s, x) => s + x.segments, 0) / Math.max(1, xs.length);
     const shallow = f.filter((x) => bodyY(x) < 0.4 * vp.height);
@@ -89,7 +91,7 @@ describe("generateFlasks (field)", () => {
   it("orders flasks back-to-front by depth (lower bodies render behind)", () => {
     const f = generateFlasks(FIELD, vp, skills, 42);
     const depth = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments);
+      x.anchorY + chainLength(x.segments) * x.scale;
     // within a layer, earlier (rendered-first / behind) entries hang lower
     for (let i = 1; i < f.length; i++) {
       if (f[i].layer !== f[i - 1].layer) continue;
@@ -148,7 +150,7 @@ describe("generateFlasks (field randomness)", () => {
     const big: FieldConfig = { ...FIELD, flaskCount: 240, maxPhysicsFlasks: 240 };
     const f = generateFlasks(big, vp, skills, 42);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     const ys = f.map(bodyY).sort((a, b) => a - b);
     const median = ys[Math.floor(ys.length / 2)];
     // The bulk must NOT sit within a narrow band around the median (a visible
@@ -162,14 +164,14 @@ describe("generateFlasks (field randomness)", () => {
   it("fills the lower third of the section (no wasted bottom)", () => {
     const f = generateFlasks({ ...FIELD, bgSkeletons: 14 }, vp, skills, 42);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     expect(f.some((x) => bodyY(x) > 0.66 * vp.height)).toBe(true);
   });
 
   it("mixes flask sizes across heights — big flasks hang high AND low", () => {
     const f = generateFlasks(FIELD, vp, skills, 42);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     const big = f.filter((x) => x.scale >= 0.82); // front (large) tiers
     expect(big.some((x) => bodyY(x) < 0.4 * vp.height)).toBe(true);
     expect(big.some((x) => bodyY(x) > 0.6 * vp.height)).toBe(true);
@@ -179,7 +181,7 @@ describe("generateFlasks (field randomness)", () => {
     const waveH = 130;
     const f = generateFlasks(FIELD, vp, skills, 42, undefined, waveH);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     for (const x of f) {
       expect(bodyY(x)).toBeGreaterThanOrEqual(waveH); // below the top wave
       expect(bodyY(x)).toBeLessThanOrEqual(vp.height - waveH + 1e-6); // above bottom wave
@@ -189,7 +191,7 @@ describe("generateFlasks (field randomness)", () => {
   it("paints higher physics flasks in front, all skeletons behind them", () => {
     const f = generateFlasks({ ...FIELD, bgSkeletons: 10 }, vp, skills, 42);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     const firstPhysics = f.findIndex((x) => !x.isSkeleton);
     expect(firstPhysics).toBeGreaterThan(0); // skeletons lead (painted behind)
     expect(f.slice(0, firstPhysics).every((x) => x.isSkeleton)).toBe(true);
@@ -231,7 +233,7 @@ describe("generateFlasks (field randomness)", () => {
     const sparse: FieldConfig = { ...FIELD, flaskCount: 12, maxPhysicsFlasks: 12 };
     const f = generateFlasks(sparse, vp, skills, 42);
     const bodyY = (x: (typeof f)[number]) =>
-      x.anchorY + chainLength(x.segments) + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
+      x.anchorY + chainLength(x.segments) * x.scale + (FLASK_HITBOX_HEIGHT * x.scale) / 2;
     for (let i = 0; i < f.length; i++) {
       for (let j = i + 1; j < f.length; j++) {
         const a = f[i];

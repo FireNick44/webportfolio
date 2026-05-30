@@ -6,7 +6,7 @@ import { ReefScene } from "./ReefScene";
 import { OutroContent } from "./OutroContent";
 import { OutroFooterBar } from "./OutroFooterBar";
 
-export default function OutroSection({ dict }: { dict: Dictionary; lang: string }) {
+export default function OutroSection({ dict, lang }: { dict: Dictionary; lang: string }) {
   return (
     <footer className="relative text-[#f5f0e6]">
       {/* Underwater block: wavy transition in, the reef scene, and the thanks text. */}
@@ -28,7 +28,7 @@ export default function OutroSection({ dict }: { dict: Dictionary; lang: string 
       </div>
 
       {/* Licensing strip "under the sand". */}
-      <OutroFooterBar dict={dict} />
+      <OutroFooterBar dict={dict} lang={lang} />
     </footer>
   );
 }

@@ -38,6 +38,27 @@
   --accent: #1f6f63; /* muted lab-glass teal — used sparingly */
   --accent-foreground: #ffffff;
   --destructive: #b3261e;
+  /* Flask water palette (8 colours). pickFlaskColor() picks an INDEX in
+     contrast to the icon hue; the SVG fill uses these vars so the palette can
+     differ per theme. Alpha is applied separately via fill-opacity (the
+     liquidOpacity store slider). Light variants are slightly muted so they
+     read on bone background without screaming. */
+  --flask-c0: #d24a4a; /* red */
+  --flask-c1: #3a8ed4; /* blue */
+  --flask-c2: #4ab87a; /* green */
+  --flask-c3: #d49c2c; /* amber */
+  --flask-c4: #9a4cd0; /* magenta */
+  --flask-c5: #d27838; /* orange */
+  --flask-c6: #2cb29c; /* teal */
+  --flask-c7: #d057a0; /* pink */
+  /* 5-band gradient behind the flask rack (FlaskBackdrop). Top → bottom in
+     order; randomTheme overrides these with a harmonised hue family per
+     shuffle. Light scheme: muted lavender→indigo. */
+  --skills-bg-0: #aab2e0;
+  --skills-bg-1: #989ed9;
+  --skills-bg-2: #8689ce;
+  --skills-bg-3: #7475bf;
+  --skills-bg-4: #6464b0;
 }
 
 [data-theme="dark"] {
@@ -54,6 +75,22 @@
   --accent: #7fe3d0; /* glowing reagent teal */
   --accent-foreground: #0a0b0c;
   --destructive: #ff6b61;
+  /* Vivid dark palette — same hues as light but brighter to pop on the
+     lab-bench black background. */
+  --flask-c0: #ff5656;
+  --flask-c1: #56c8ff;
+  --flask-c2: #56ff82;
+  --flask-c3: #ffc83c;
+  --flask-c4: #c856ff;
+  --flask-c5: #ff8c3c;
+  --flask-c6: #3cffdc;
+  --flask-c7: #ff64b4;
+  /* Dark scheme: the original blue→purple terrain. */
+  --skills-bg-0: #697bfa;
+  --skills-bg-1: #6b67e9;
+  --skills-bg-2: #6d53d7;
+  --skills-bg-3: #6e3dc4;
+  --skills-bg-4: #6f23b0;
 }
 
 /* Respect system preference when the user has made no explicit choice */
@@ -72,6 +109,19 @@
     --accent: #7fe3d0;
     --accent-foreground: #0a0b0c;
     --destructive: #ff6b61;
+    --flask-c0: #ff5656;
+    --flask-c1: #56c8ff;
+    --flask-c2: #56ff82;
+    --flask-c3: #ffc83c;
+    --flask-c4: #c856ff;
+    --flask-c5: #ff8c3c;
+    --flask-c6: #3cffdc;
+    --flask-c7: #ff64b4;
+    --skills-bg-0: #697bfa;
+    --skills-bg-1: #6b67e9;
+    --skills-bg-2: #6d53d7;
+    --skills-bg-3: #6e3dc4;
+    --skills-bg-4: #6f23b0;
   }
 }
 
@@ -96,6 +146,28 @@
   border-color: var(--border);
 }
 
+/* Per-section accent (custom/shuffled themes only). A shuffle sets
+   --accent-<section> on :root; each section maps its local --accent to its var
+   with an `inherit` fallback, so on the default light/dark themes (where those
+   vars are unset) every section just inherits the base --accent → uniform.
+   Anything inside a section using `text-accent`/`bg-accent`/etc. picks up the
+   section-local value via the cascade. */
+#me {
+  --accent: var(--accent-me, inherit);
+}
+#skills {
+  --accent: var(--accent-skills, inherit);
+}
+#projects {
+  --accent: var(--accent-projects, inherit);
+}
+#contact {
+  --accent: var(--accent-contact, inherit);
+}
+footer {
+  --accent: var(--accent-footer, inherit);
+}
+
 html {
   scroll-behavior: smooth;
   /* The scroll container is <html>, so the body rule alone doesn't stop the
@@ -109,6 +181,13 @@ body {
   overscroll-behavior-y: none;
   font-feature-settings: "ss01", "cv01";
   @apply antialiased font-sans transition-colors duration-500;
+}
+
+/* Tailwind v4 reset made <button> default to cursor: default, which feels off
+   for clearly clickable buttons (back-to-top, theme/lang toggles, ...). Bring
+   the pointer cursor back for any enabled, non-disabled button. */
+button:not(:disabled):not([aria-disabled="true"]) {
+  cursor: pointer;
 }
 
 /* While the theme view-transition runs, freeze all colour transitions so the
@@ -161,14 +240,25 @@ html.vt-no-transition * {
    the `boot-vanish` animation is a pure-CSS failsafe that fades it out even if
    JS never runs, so the z-1000 overlay can never brick the page. */
 .boot-loader {
+  /* Visible by default. NO transition on the show direction so a JS-triggered
+     replay (footer Shuffle+Top) snaps the curtain down immediately instead of
+     fading in over 600ms — otherwise the scroll behind it is partially
+     visible. Fade-out lives on the [data-hidden="true"] rule below. */
   opacity: 1;
-  transition: opacity 0.6s ease, visibility 0s linear 0.6s;
   animation: boot-vanish 0.6s ease 4s forwards; /* no-JS / stuck-JS failsafe */
 }
 .boot-loader[data-hidden="true"] {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
+  /* Fade-out lives here — applies when going FROM visible TO hidden, the only
+     direction we want animated. */
+  transition: opacity 0.6s ease, visibility 0s linear 0.6s;
+  /* JS already hid the loader — kill the pure-CSS `boot-vanish` failsafe so it
+     can't re-fire at t=4s on an already-hidden element. Firefox Android has been
+     seen to resolve the failsafe's implicit `from` against the base opacity:1
+     instead of the cascaded 0, flashing the loader back for ~0.6s. */
+  animation: none;
 }
 .boot-logo path {
   fill: transparent;
@@ -244,6 +334,8 @@ html.vt-no-transition * {
     opacity: 0.6;
     mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.95' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/%3E%3C/svg%3E");
+    /* Zoom the 160px noise tile up so the grain reads coarser/larger. */
+    background-size: 280px 280px;
   }
 }
 
