@@ -8,7 +8,7 @@ import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import type { Dictionary } from "@/i18n/types";
 import { buildInfo } from "@/lib/buildInfo";
-import { shuffleTheme, scrollToTop } from "@/lib/shuffleTheme";
+import { shuffleTheme, scrollToTop } from "@/lib/theme/shuffleTheme";
 import { useAppStore } from "@/lib/store/useAppStore";
 
 const GITHUB_URL = "https://github.com/FireNick44";

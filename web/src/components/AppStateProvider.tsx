@@ -2,7 +2,7 @@
 
 import { ReactNode, useEffect } from "react";
 
-import { applyTokenOverrides } from "@/lib/themePresets";
+import { applyTokenOverrides } from "@/lib/theme/applyTokenOverrides";
 import { useAppStore, STORAGE_KEY } from "@/lib/store/useAppStore";
 
 export default function AppStateProvider({
@@ -82,7 +82,7 @@ export default function AppStateProvider({
         /* ignore */
       }
     }
-    import("@/lib/shuffleTheme").then(({ shuffleTheme }) => {
+    import("@/lib/theme/shuffleTheme").then(({ shuffleTheme }) => {
       shuffleTheme(seed);
     });
   }, []);

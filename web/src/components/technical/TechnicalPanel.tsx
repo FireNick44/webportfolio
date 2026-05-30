@@ -8,12 +8,8 @@ import { usePageTransition } from "@/components/layout/PageTransitionProvider";
 import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
 import type { Dictionary } from "@/i18n/types";
 import { buildInfo } from "@/lib/buildInfo";
-import {
-  THEME_PRESETS,
-  TOKEN_NAMES,
-  type ThemePreset,
-  type TokenName,
-} from "@/lib/themePresets";
+import { THEME_PRESETS, type ThemePreset } from "@/lib/theme/presets";
+import { TOKEN_NAMES, type TokenName } from "@/lib/theme/tokenNames";
 import { cn } from "@/lib/utils";
 import { versions, currentVersionId } from "@/lib/versions";
 import { useAppStore } from "@/lib/store/useAppStore";

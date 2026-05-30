@@ -1,7 +1,9 @@
 "use client";
 
-import { randomTheme, applyTokenOverrides } from "@/lib/themePresets";
 import { useAppStore } from "@/lib/store/useAppStore";
+
+import { applyTokenOverrides } from "./applyTokenOverrides";
+import { randomTheme } from "./randomTheme";
 
 /** Apply a generated theme (harmony palette, WCAG-guarded contrast, per-section
  *  accents, vivid flask palette) + reshuffle the flask layout in place. With a
