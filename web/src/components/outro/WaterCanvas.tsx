@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useRef, type RefObject } from "react";
+
+import type { PointerField } from "@/hooks/usePointerField";
 import { generateBubbles } from "@/lib/outro/bubbles";
 import { repel } from "@/lib/outro/cursorPhysics";
-import type { PointerField } from "@/hooks/usePointerField";
 
 // A live bubble: persistent position + a push velocity the cursor adds to.
 interface Bubble {

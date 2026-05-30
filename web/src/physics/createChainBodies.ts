@@ -1,4 +1,5 @@
 import Matter from "matter-js";
+
 import {
   CHAIN_SEGMENT_COUNT,
   CHAIN_SEGMENT_WIDTH,

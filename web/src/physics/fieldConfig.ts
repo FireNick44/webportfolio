@@ -1,5 +1,6 @@
-import { LAYER_SCALE, MAX_PHYSICS_SEGMENTS } from "./constants";
 import type { GraphicsTier } from "@/lib/outro/tiers";
+
+import { LAYER_SCALE, MAX_PHYSICS_SEGMENTS } from "./constants";
 
 export interface FieldConfig {
   /** Total flasks to attempt to place. */

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+
 import type { ReactNode } from "react";
 
 // The physics scene touches window/document/RAF and must never render on the

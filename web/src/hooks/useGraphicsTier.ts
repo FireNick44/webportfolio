@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAppStore } from "@/store/useAppStore";
+
 import { resolveGraphicsTier, type GraphicsTier } from "@/lib/outro/tiers";
+import { useAppStore } from "@/store/useAppStore";
 
 /** The effective scene tier: the user's choice, capped by device + reduced-motion. */
 export function useGraphicsTier(): GraphicsTier {

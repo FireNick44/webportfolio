@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { versions, getLatest, currentVersionId } from "./versions";
 
 describe("versions manifest", () => {

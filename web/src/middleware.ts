@@ -5,11 +5,12 @@
 // fully supported by the adapter. Revert to proxy.ts once Netlify ships proxy
 // support. Next will log a "renamed to proxy" deprecation warning at build —
 // that's expected, not an error. See [[webportfolio-netlify-proxy]].
-import type { NextRequest } from "next/server";
-import { NextResponse } from "next/server";
 import { match as matchLocale } from "@formatjs/intl-localematcher";
+import { NextResponse } from "next/server";
 
 import { defaultLocale, locales } from "./i18n/config";
+
+import type { NextRequest } from "next/server";
 
 // Parse an Accept-Language header into language tags ordered by q-weight.
 // Done by hand (instead of `negotiator`) because Netlify edge functions run on

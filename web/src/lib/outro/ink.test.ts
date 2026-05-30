@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { isTap, classifyTap, enoughOnTaps, INK_WINDOW } from "./ink";
 
 describe("isTap (tap vs scroll)", () => {

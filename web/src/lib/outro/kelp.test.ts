@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { generateKelp, KELP_PALETTE } from "./kelp";
 
 describe("generateKelp", () => {

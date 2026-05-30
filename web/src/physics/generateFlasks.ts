@@ -1,5 +1,3 @@
-import type { FieldConfig } from "./fieldConfig";
-import { FLASK_SHAPES, type FlaskShape } from "./flaskShapes";
 import {
   FLASK_WIDTH,
   FLASK_HEIGHT,
@@ -10,6 +8,9 @@ import {
   chainLength,
   segmentsForLength,
 } from "./constants";
+import { FLASK_SHAPES, type FlaskShape } from "./flaskShapes";
+
+import type { FieldConfig } from "./fieldConfig";
 
 export interface FlaskConfig {
   xPct: number;

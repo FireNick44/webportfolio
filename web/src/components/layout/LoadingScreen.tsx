@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { useAppStore } from "@/store/useAppStore";
+
 import { Y_PATH, S_PATH } from "./Monogram";
 
 // How long the overlay stays before hiding. MIN lets the line-draw → fill effect

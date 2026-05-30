@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useEffect, useState } from "react";
+
 import arts from "@/data/pointerQuartetArt.json";
 import type { SizeSpan } from "@/lib/projectsLayout";
 

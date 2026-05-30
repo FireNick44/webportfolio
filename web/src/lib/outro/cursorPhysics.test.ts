@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { repel, advanceRipple, lerp } from "./cursorPhysics";
 
 describe("repel", () => {

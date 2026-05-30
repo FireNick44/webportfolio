@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowUp, Mail, Shuffle } from "lucide-react";
-import type { Dictionary } from "@/i18n/types";
-import { WaveDivider } from "@/components/ui/WaveDivider";
+import Link from "next/link";
+
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import { WaveDivider } from "@/components/ui/WaveDivider";
+import type { Dictionary } from "@/i18n/types";
 import { buildInfo } from "@/lib/buildInfo";
 import { shuffleTheme, scrollToTop } from "@/lib/shuffleTheme";
 import { useAppStore } from "@/store/useAppStore";

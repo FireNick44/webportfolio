@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { generateSand, SAND_PALETTE } from "./sand";
 
 describe("generateSand", () => {

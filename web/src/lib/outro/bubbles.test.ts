@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+
 import { generateBubbles } from "./bubbles";
 
 const bounds = { width: 800, height: 400 };

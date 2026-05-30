@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
 import { getDictionary, type Locale } from "@/i18n/dictionary";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,

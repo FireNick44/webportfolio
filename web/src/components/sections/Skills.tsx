@@ -1,10 +1,11 @@
 "use client";
 
-import { useRef } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
-import type { Dictionary } from "@/i18n/types";
-import { Reveal } from "@/components/ui/Reveal";
+import { useRef } from "react";
+
 import PhysicsSceneClient from "@/components/physics/PhysicsSceneClient";
+import { Reveal } from "@/components/ui/Reveal";
+import type { Dictionary } from "@/i18n/types";
 
 // Five-band SVG terrain behind the flask rack. Inlined (not an external file)
 // so the 5 path fills can reference theme CSS vars — a shuffle that recolours

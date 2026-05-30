@@ -1,5 +1,6 @@
-import type { NextConfig } from "next";
 import { computeBuildEnv } from "./src/lib/buildEnv";
+
+import type { NextConfig } from "next";
 
 const isDev = process.env.NODE_ENV !== "production";
 // HTTP LAN preview (`npm run mobile`): browsers honour `upgrade-insecure-requests`

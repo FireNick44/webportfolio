@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion, type Variants } from "motion/react";
 import { ChevronDown } from "lucide-react";
-import type { Dictionary } from "@/i18n/types";
-import { useAppStore } from "@/store/useAppStore";
+import { motion, type Variants } from "motion/react";
+import { useEffect, useState } from "react";
+
 import { BubblesBackdrop } from "@/components/bubbles/BubblesBackdrop";
 import { WaveDivider } from "@/components/ui/WaveDivider";
+import type { Dictionary } from "@/i18n/types";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/useAppStore";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 

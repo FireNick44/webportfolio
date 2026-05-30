@@ -1,21 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useGraphicsTier } from "@/hooks/useGraphicsTier";
-import { useSceneActive } from "@/hooks/useSceneActive";
-import { usePointerField } from "@/hooks/usePointerField";
-import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
+
 import { BubblesBackdrop } from "@/components/bubbles/BubblesBackdrop";
 import { ByeSand } from "@/components/layout/ByeSand";
-import { WaterCanvas } from "./WaterCanvas";
-import { Octopus } from "./Octopus";
-import { Coral } from "./Coral";
-import { Rook } from "./Rook";
-import { Crab } from "./Crab";
-import { Kelp } from "./Kelp";
-import { SandFloor } from "./SandFloor";
-import { InkCloud, type InkHandle } from "./InkCloud";
+import { useGraphicsTier } from "@/hooks/useGraphicsTier";
+import { usePointerField } from "@/hooks/usePointerField";
+import { useSceneActive } from "@/hooks/useSceneActive";
 import { isTap } from "@/lib/outro/ink";
+import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
+
+import { Coral } from "./Coral";
+import { Crab } from "./Crab";
+import { InkCloud, type InkHandle } from "./InkCloud";
+import { Kelp } from "./Kelp";
+import { Octopus } from "./Octopus";
+import { Rook } from "./Rook";
+import { SandFloor } from "./SandFloor";
+import { WaterCanvas } from "./WaterCanvas";
+
 
 const BUBBLE_COUNT: Record<GraphicsTier, number> = {
   off: 0,

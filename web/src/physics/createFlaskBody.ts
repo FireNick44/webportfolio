@@ -1,4 +1,5 @@
 import Matter from "matter-js";
+
 import {
   FLASK_HITBOX_WIDTH,
   FLASK_HITBOX_HEIGHT,

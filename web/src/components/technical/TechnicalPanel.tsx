@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { ArrowLeft, RotateCcw, Check } from "lucide-react";
-import type { Dictionary } from "@/i18n/types";
-import { useAppStore } from "@/store/useAppStore";
-import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+
 import { usePageTransition } from "@/components/layout/PageTransitionProvider";
+import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import type { Dictionary } from "@/i18n/types";
+import { buildInfo } from "@/lib/buildInfo";
 import {
   THEME_PRESETS,
   TOKEN_NAMES,
@@ -13,9 +15,8 @@ import {
   type TokenName,
 } from "@/lib/themePresets";
 import { cn } from "@/lib/utils";
-import { usePathname } from "next/navigation";
 import { versions, currentVersionId } from "@/lib/versions";
-import { buildInfo } from "@/lib/buildInfo";
+import { useAppStore } from "@/store/useAppStore";
 
 type Row = [string, string];
 

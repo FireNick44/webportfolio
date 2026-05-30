@@ -1,12 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { generateFlasks, chainLength } from "./generateFlasks";
-import type { FieldConfig } from "./fieldConfig";
+
 import {
   TOP_LINE,
   MIN_SAME_LAYER_DISTANCE_PCT,
   FLASK_HITBOX_WIDTH,
   FLASK_HITBOX_HEIGHT,
 } from "./constants";
+import { generateFlasks, chainLength } from "./generateFlasks";
+
+import type { FieldConfig } from "./fieldConfig";
 
 const FIELD: FieldConfig = {
   flaskCount: 30, maxPhysicsFlasks: 18, maxPhysicsSegments: 6,

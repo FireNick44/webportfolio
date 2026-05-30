@@ -1,9 +1,10 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+
 import { locales, localeMetadata, type Locale } from "@/i18n/config";
-import { useAppStore } from "@/store/useAppStore";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/useAppStore";
 
 export function LanguageSwitcher({ lang }: { lang: string }) {
   const pathname = usePathname();

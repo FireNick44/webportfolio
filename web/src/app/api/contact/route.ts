@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { ContactEmail } from "@/lib/email/ContactEmail";
+
 import { ContactAutoReplyEmail } from "@/lib/email/ContactAutoReplyEmail";
+import { ContactEmail } from "@/lib/email/ContactEmail";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 

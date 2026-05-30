@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
+import { useEffect, useRef, useState } from "react";
 
 /**
  * Diagnostic overlay for the flask rack (advanced mode). Draws Matter.js body

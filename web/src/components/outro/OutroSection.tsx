@@ -1,10 +1,11 @@
 "use client";
 
-import type { Dictionary } from "@/i18n/types";
 import { WaveDivider } from "@/components/ui/WaveDivider";
-import { ReefScene } from "./ReefScene";
+import type { Dictionary } from "@/i18n/types";
+
 import { OutroContent } from "./OutroContent";
 import { OutroFooterBar } from "./OutroFooterBar";
+import { ReefScene } from "./ReefScene";
 
 export default function OutroSection({ dict, lang }: { dict: Dictionary; lang: string }) {
   return (

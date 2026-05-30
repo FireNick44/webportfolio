@@ -1,5 +1,6 @@
-import type { MetadataRoute } from "next";
 import { locales, defaultLocale } from "@/i18n/config";
+
+import type { MetadataRoute } from "next";
 
 const SITE = "https://a36.dev";
 

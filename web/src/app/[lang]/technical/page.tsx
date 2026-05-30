@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
-import { getDictionary } from "@/i18n/dictionary";
-import { type Locale } from "@/i18n/config";
 import TechnicalPanel from "@/components/technical/TechnicalPanel";
+import { type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Technical",

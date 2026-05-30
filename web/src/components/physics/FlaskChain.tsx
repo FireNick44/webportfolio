@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useCallback, useContext, useMemo } from "react";
 import Matter from "matter-js";
-import ChainLinkSVG from "./ChainLinkSVG";
-import SkeletonChainSVG from "./SkeletonChainSVG";
-import FlaskSVG from "./FlaskSVG";
-import { createChainBodies, type ChainResult } from "@/physics/createChainBodies";
-import { createFlaskBody, type FlaskResult } from "@/physics/createFlaskBody";
+import { useEffect, useRef, useCallback, useContext, useMemo } from "react";
+
 import { FrameLoopContext } from "@/hooks/useFrameLoop";
-import { FLASK_SHAPE_DEFS, type FlaskShape } from "@/physics/flaskShapes";
 import {
   CHAIN_SEGMENT_COUNT,
   CHAIN_SEGMENT_WIDTH,
@@ -23,6 +18,13 @@ import {
   chainLength,
   newChainGroup,
 } from "@/physics/constants";
+import { createChainBodies, type ChainResult } from "@/physics/createChainBodies";
+import { createFlaskBody, type FlaskResult } from "@/physics/createFlaskBody";
+import { FLASK_SHAPE_DEFS, type FlaskShape } from "@/physics/flaskShapes";
+
+import ChainLinkSVG from "./ChainLinkSVG";
+import FlaskSVG from "./FlaskSVG";
+import SkeletonChainSVG from "./SkeletonChainSVG";
 
 // Min tilt change (deg) before we rewrite the clipped water / icon transforms.
 // Below this the visual change is sub-pixel, so skipping the write keeps an

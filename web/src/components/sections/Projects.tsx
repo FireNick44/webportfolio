@@ -1,5 +1,8 @@
 "use client";
 
+import { ArrowUpRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Image from "next/image";
 import {
   useEffect,
   useRef,
@@ -7,16 +10,14 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react";
-import Image from "next/image";
-import { AnimatePresence, motion } from "motion/react";
-import { ArrowUpRight } from "lucide-react";
-import projects from "@/data/projects.json";
-import layout from "@/data/projects-layout.json";
-import { resolveSpan, type ProjectsLayout } from "@/lib/projectsLayout";
-import type { Dictionary } from "@/i18n/types";
-import { Reveal } from "@/components/ui/Reveal";
+
 import BeatloopsCard from "@/components/sections/projects/BeatloopsCard";
 import PointerQuartetCard from "@/components/sections/projects/PointerQuartetCard";
+import { Reveal } from "@/components/ui/Reveal";
+import layout from "@/data/projects-layout.json";
+import projects from "@/data/projects.json";
+import type { Dictionary } from "@/i18n/types";
+import { resolveSpan, type ProjectsLayout } from "@/lib/projectsLayout";
 
 const L = layout as ProjectsLayout;
 

@@ -1,7 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import { Pointer } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 
 /**
  * First-run interaction hint for the flask rack: a soft dimming scrim with an

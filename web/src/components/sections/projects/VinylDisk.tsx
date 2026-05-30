@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { motion } from "motion/react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 
 // Spinning vinyl disc ported from /Users/yannic/dev/beatloops (VinylDisk.tsx).
 // Renders a 15×15 grid clipped to a circle: a static groove layer below, a

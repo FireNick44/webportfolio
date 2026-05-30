@@ -1,11 +1,12 @@
 "use client";
 
-import * as React from "react";
 import { Moon, Sun } from "lucide-react";
-import { useAppStore } from "@/store/useAppStore";
+import * as React from "react";
+
 import { ThemeToggler, type Resolved } from "@/components/theme/ThemeToggler";
 import { iconButtonVariants, type IconButtonVariantProps } from "@/components/ui/button-variants";
 import { cn } from "@/lib/utils";
+import { useAppStore } from "@/store/useAppStore";
 
 type Props = React.ComponentProps<"button"> &
   IconButtonVariantProps & {

@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { Menu, Settings, X } from "lucide-react";
-import type { Dictionary } from "@/i18n/types";
-import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
-import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { usePageTransition } from "@/components/layout/PageTransitionProvider";
+import { AnimatePresence, motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { iconButtonVariants } from "@/components/ui/button-variants";
+import { useEffect, useState } from "react";
+
+import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Monogram } from "@/components/layout/Monogram";
+import { usePageTransition } from "@/components/layout/PageTransitionProvider";
+import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import { iconButtonVariants } from "@/components/ui/button-variants";
+import type { Dictionary } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.76, 0, 0.24, 1] as const;

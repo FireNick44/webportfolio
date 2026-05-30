@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
 import Matter from "matter-js";
+import { useEffect, useRef } from "react";
+
 import { CAT_CHAIN, CAT_MOUSE, CAT_WALL } from "@/physics/constants";
 import { useAppStore } from "@/store/useAppStore";
 

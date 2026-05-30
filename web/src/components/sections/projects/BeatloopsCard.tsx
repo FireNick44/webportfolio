@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
 import { ArrowUpRight } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from "react";
+
 import VinylDisk from "@/components/sections/projects/VinylDisk";
 import type { SizeSpan } from "@/lib/projectsLayout";
 

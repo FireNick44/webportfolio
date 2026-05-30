@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState, type RefObject } from "react";
+
 import type { PointerField } from "@/hooks/usePointerField";
-import { useAppStore } from "@/store/useAppStore";
-import type { InkHandle } from "./InkCloud";
 import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP, INK_DASH_DELAY } from "@/lib/outro/ink";
 import { smoothSpeed, nextMode, FLEE_EXIT_SPEED, SPOOK_MS, type OctoMode } from "@/lib/outro/octopusMotion";
+import { useAppStore } from "@/store/useAppStore";
+
+import type { InkHandle } from "./InkCloud";
 
 /**
  * Cursor-aware octopus (reacts to the real cursor — we never move it):

@@ -1,14 +1,16 @@
-import type { Metadata, Viewport } from "next";
 import { ReactNode } from "react";
+
 import AppStateProvider from "@/components/AppStateProvider";
 import Header from "@/components/layout/Header";
-import OutroSection from "@/components/outro/OutroSection";
 import LoadingScreen from "@/components/layout/LoadingScreen";
-import ScrollTimeline from "@/components/layout/ScrollTimeline";
 import { PageTransitionProvider } from "@/components/layout/PageTransitionProvider";
-import { getDictionary } from "@/i18n/dictionary";
+import ScrollTimeline from "@/components/layout/ScrollTimeline";
+import OutroSection from "@/components/outro/OutroSection";
 import { type Locale, locales, defaultLocale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
+
+import type { Metadata, Viewport } from "next";
 
 export const dynamicParams = false;
 

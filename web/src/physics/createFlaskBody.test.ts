@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest";
 import Matter from "matter-js";
-import { createFlaskBody } from "./createFlaskBody";
+import { describe, it, expect } from "vitest";
+
 import { FLASK_HITBOX_HEIGHT } from "./constants";
+import { createFlaskBody } from "./createFlaskBody";
 
 describe("createFlaskBody scale", () => {
   it("scales the trapezoid hitbox by scale", () => {

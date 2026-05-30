@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "react";
-import { generateKelp } from "@/lib/outro/kelp";
+
 import type { PointerField } from "@/hooks/usePointerField";
+import { generateKelp } from "@/lib/outro/kelp";
 
 const FALLOFF = 95; // px — smooth ramp zone around a strand's box
 const AMP_DEG = 3.5; // deg — slight (no left↔right flip)

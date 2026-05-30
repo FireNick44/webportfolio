@@ -27,7 +27,7 @@ export function createFrameLoop(deps: FrameLoopDeps) {
         const dt = performance.now() - s0;
         if (dt > SLOW_STEP_MS && t - lastSlowLog > LOG_THROTTLE_MS) {
           lastSlowLog = t;
-          // eslint-disable-next-line no-console
+           
           console.warn(
             `[physics] slow step ${dt.toFixed(1)}ms (budget ${FIXED.toFixed(1)}ms)`,
           );

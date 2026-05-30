@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef, type CSSProperties } from "react";
 import { motion, useScroll, useTransform } from "motion/react";
+import { useRef, type CSSProperties } from "react";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -28,7 +29,7 @@ export function BubblesBackdrop({
 
   return (
     <div ref={ref} aria-hidden className={cn("overflow-hidden", className)}>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      { }
       <motion.img
         src="/svg/intro-bg.svg"
         alt=""

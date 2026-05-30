@@ -1,6 +1,7 @@
 "use client";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
 import Matter from "matter-js";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+
 import { createFrameLoop, type FrameLoop } from "@/physics/frameLoop";
 
 /** One rAF drives Engine.update (fixed timestep) then every registered flask

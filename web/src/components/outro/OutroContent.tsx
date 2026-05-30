@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "motion/react";
+
 import type { Dictionary } from "@/i18n/types";
 
 const EASE = [0.22, 1, 0.36, 1] as const;

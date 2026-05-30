@@ -1,5 +1,7 @@
 "use client";
 
+import { motion, useAnimationControls } from "motion/react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   useCallback,
@@ -8,8 +10,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { motion, useAnimationControls } from "motion/react";
 
 const EASE = [0.76, 0, 0.24, 1] as const;
 const SLIDE_IN = 0.4;

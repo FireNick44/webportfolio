@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og";
+
 import { Y_PATH, S_PATH } from "@/components/layout/Monogram";
 
 // Static OG image for social cards. Lab-bench black bg + the YS monogram in

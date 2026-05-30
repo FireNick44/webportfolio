@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
 import { fontVariables } from "@/lib/fonts";
+
+import type { ReactNode } from "react";
 import "./globals.css";
 
 // Applies the persisted theme + token overrides before paint (no FOUC). Lives

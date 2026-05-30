@@ -1,7 +1,8 @@
 import { describe, it, expect } from "vitest";
+
+import { MAX_PHYSICS_SEGMENTS } from "./constants";
 import { FIELD_BY_TIER, fieldConfigFor } from "./fieldConfig";
 import { generateFlasks } from "./generateFlasks";
-import { MAX_PHYSICS_SEGMENTS } from "./constants";
 
 describe("FIELD_BY_TIER", () => {
   it("off has no physics flasks (static rack)", () => {

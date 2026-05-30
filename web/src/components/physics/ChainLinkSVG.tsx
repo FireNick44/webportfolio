@@ -1,5 +1,7 @@
 import { forwardRef } from "react";
+
 import { CHAIN_SEGMENT_WIDTH } from "@/physics/constants";
+
 import {
   CAP_W,
   CAP_H,

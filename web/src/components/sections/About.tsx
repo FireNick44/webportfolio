@@ -1,7 +1,7 @@
-import type { Dictionary } from "@/i18n/types";
-import { Reveal } from "@/components/ui/Reveal";
-import { SkillsTable } from "@/components/sections/SkillsTable";
 import { AboutPhoto } from "@/components/sections/AboutPhoto";
+import { SkillsTable } from "@/components/sections/SkillsTable";
+import { Reveal } from "@/components/ui/Reveal";
+import type { Dictionary } from "@/i18n/types";
 
 export default function About({ dict, lang }: { dict: Dictionary; lang?: string }) {
   return (

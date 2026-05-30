@@ -1,10 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { createChainBodies } from "./createChainBodies";
+
 import {
   CHAIN_SEGMENT_WIDTH,
   getSegmentHeight,
   linkCenterOffset,
 } from "./constants";
+import { createChainBodies } from "./createChainBodies";
 
 describe("createChainBodies scale", () => {
   it("scales segment WIDTH by scale but keeps HEIGHT (length) independent", () => {

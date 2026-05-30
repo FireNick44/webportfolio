@@ -1,5 +1,5 @@
-import skillsTableEn from "@/data/skills-table.json";
 import skillsTableDe from "@/data/skills-table.de.json";
+import skillsTableEn from "@/data/skills-table.json";
 
 // Skills table ported from the 2024 portfolio — categories, each split into
 // "//comment"-labelled groups of items. Data lives in `skills-table.json` (en)

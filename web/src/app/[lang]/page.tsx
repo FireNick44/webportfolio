@@ -1,10 +1,10 @@
-import { getDictionary } from "@/i18n/dictionary";
-import { type Locale } from "@/i18n/config";
-import Hero from "@/components/sections/Hero";
 import About from "@/components/sections/About";
-import Skills from "@/components/sections/Skills";
-import Projects from "@/components/sections/Projects";
 import Contact from "@/components/sections/Contact";
+import Hero from "@/components/sections/Hero";
+import Projects from "@/components/sections/Projects";
+import Skills from "@/components/sections/Skills";
+import { type Locale } from "@/i18n/config";
+import { getDictionary } from "@/i18n/dictionary";
 
 export default async function Page({
   params,

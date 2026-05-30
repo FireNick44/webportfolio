@@ -1,5 +1,5 @@
-import localFont from "next/font/local";
 import { Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 
 // The signature display face, carried over from the 2024 portfolio.
 export const berlin = localFont({

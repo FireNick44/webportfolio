@@ -1,5 +1,8 @@
 "use client";
 
+import { Pointer } from "lucide-react";
+import Matter from "matter-js";
+import { AnimatePresence, motion } from "motion/react";
 import {
   useRef,
   useState,
@@ -8,22 +11,22 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import { AnimatePresence, motion } from "motion/react";
-import { Pointer } from "lucide-react";
-import Matter from "matter-js";
-import { usePhysicsEngine } from "@/hooks/usePhysicsEngine";
-import { useFrameLoop, FrameLoopContext } from "@/hooks/useFrameLoop";
-import { useMousePhysics } from "@/hooks/useMousePhysics";
-import { useGraphicsTier } from "@/hooks/useGraphicsTier";
-import { useAppStore } from "@/store/useAppStore";
+
 import { WaveDivider } from "@/components/ui/WaveDivider";
-import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
-import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/physics/constants";
-import FlaskChain from "./FlaskChain";
-import ChainGradients from "./ChainGradients";
-import { generateFlasks } from "@/physics/generateFlasks";
-import { fieldConfigFor } from "@/physics/fieldConfig";
 import skills from "@/data/skills.json";
+import { useFrameLoop, FrameLoopContext } from "@/hooks/useFrameLoop";
+import { useGraphicsTier } from "@/hooks/useGraphicsTier";
+import { useMousePhysics } from "@/hooks/useMousePhysics";
+import { usePhysicsEngine } from "@/hooks/usePhysicsEngine";
+import { WALL_FILTER, MOBILE_BREAKPOINT, MAX_RACK_WIDTH } from "@/physics/constants";
+import { fieldConfigFor } from "@/physics/fieldConfig";
+import { generateFlasks } from "@/physics/generateFlasks";
+import { useAppStore } from "@/store/useAppStore";
+
+import ChainGradients from "./ChainGradients";
+import FlaskChain from "./FlaskChain";
+import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
+
 
 // The wavy "surface" the flasks hang from. Black/white (the page background) so
 // the monochrome frame stays consistent — colour lives only in the flask liquids.

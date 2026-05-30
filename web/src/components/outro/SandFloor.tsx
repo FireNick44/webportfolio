@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+
 import { generateSand } from "@/lib/outro/sand";
 
 const CELL = 14; // px — square pixel size (1:1, never stretched)

@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { AnimatePresence, motion, useScroll, useSpring } from "motion/react";
+import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const SECTIONS = [
   { id: "me", key: "me" },

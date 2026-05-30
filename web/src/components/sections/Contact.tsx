@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 import { Check, AlertTriangle, Loader2 } from "lucide-react";
-import type { Dictionary } from "@/i18n/types";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
+
 import { Reveal } from "@/components/ui/Reveal";
+import type { Dictionary } from "@/i18n/types";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "sending" | "success" | "error";

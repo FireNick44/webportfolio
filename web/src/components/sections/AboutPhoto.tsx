@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
 import { motion, useScroll, useSpring, useTransform } from "motion/react";
+import Image from "next/image";
+import { useRef } from "react";
 
 /**
  * The round profile photo. Spins into place (instead of a plain fade) the first
