@@ -11,7 +11,6 @@ import {
   FLASK_HEIGHT,
   FLASK_HITBOX_HEIGHT,
   FLASK_CHAIN_GAP,
-  MAX_LIQUID_TILT_DEG,
   MAX_PHYSICS_SEGMENTS,
   getSegmentHeight,
   linkCenterOffset,
@@ -20,24 +19,12 @@ import {
 } from "@/lib/physics/constants";
 import { createChainBodies, type ChainResult } from "@/lib/physics/createChainBodies";
 import { createFlaskBody, type FlaskResult } from "@/lib/physics/createFlaskBody";
+import { syncFlaskFrame, type SyncDeadbandRefs } from "@/lib/physics/flaskChainSync";
 import { FLASK_SHAPE_DEFS, type FlaskShape } from "@/lib/physics/flaskShapes";
 
 import ChainLinkSVG from "./ChainLinkSVG";
 import FlaskSVG from "./FlaskSVG";
 import SkeletonChainSVG from "./SkeletonChainSVG";
-
-// Min tilt change (deg) before we rewrite the clipped water / icon transforms.
-// Below this the visual change is sub-pixel, so skipping the write keeps an
-// awake-but-steady flask from re-rasterising its clipped interior every frame.
-const LIQUID_WRITE_EPSILON = 0.1;
-const ICON_WRITE_EPSILON = 0.1;
-// Min position/angle change before we rewrite a chain link or flask wrapper's
-// `transform`. Matter's rigid length-0 constraints keep bodies micro-jittering
-// sub-pixel forever (they never go below Matter's motion sleep threshold), so
-// syncDom would otherwise write ~11k identical-looking transforms/sec on a
-// visually idle rack. Sub-pixel/sub-degree ε is imperceptible and bounded lag.
-const TRANSFORM_PX_EPSILON = 0.3;
-const TRANSFORM_DEG_EPSILON = 0.15;
 
 interface Props {
   engine: Matter.Engine;
@@ -102,26 +89,17 @@ export default function FlaskChain({
   // of this component (no deps → stable across re-renders + resizes).
   const group = useMemo(() => newChainGroup(), []);
 
-  // Spring state for icon rotation (delayed overshoot)
-  const iconAngleRef = useRef(0);
-  const iconVelRef = useRef(0);
-  // Last tilt (deg) actually written to the DOM for the water clip + the icon.
-  // The water/icon live inside <clipPath>s, so rewriting their transform forces
-  // a re-clip + re-raster of the flask's whole layer texture — the dominant
-  // per-frame paint cost. We skip the write when the angle hasn't moved a
-  // visible amount, so an awake-but-steady flask (settling, or a neighbour the
-  // drag merely nudged) stops repainting its interior. Init out-of-range so the
-  // first frame always writes.
-  const lastLiquidDegRef = useRef(Number.POSITIVE_INFINITY);
-  const lastIconDegRef = useRef(Number.POSITIVE_INFINITY);
-  // Per-link + flask-wrapper last-written transform, for the sub-pixel deadband
-  // above. `undefined` slot = never written → first frame always writes.
-  const lastChainTransformsRef = useRef<
-    ({ x: number; y: number; a: number } | undefined)[]
-  >([]);
-  const lastFlaskTransformRef = useRef<
-    { x: number; y: number; a: number } | undefined
-  >(undefined);
+  // Per-frame deadband state — collapsed into a single mutable bag so the sync
+  // helper can read/write it without re-allocating refs per field. Init values
+  // are out-of-range so the first frame after spawn always writes.
+  const deadbandRef = useRef<SyncDeadbandRefs>({
+    lastChainTransforms: [],
+    lastFlaskTransform: undefined,
+    lastLiquidDeg: Number.POSITIVE_INFINITY,
+    lastIconDeg: Number.POSITIVE_INFINITY,
+    iconAngle: 0,
+    iconVel: 0,
+  });
 
   const isStatic = isSkeleton;
   // Skeleton chains: only the bottom MAX_PHYSICS_SEGMENTS links are simulated;
@@ -209,8 +187,8 @@ export default function FlaskChain({
     // the next frame writes the new spawn positions even if they happen to fall
     // within ε of the previous cached values (stale otherwise = element renders
     // at (0,0) on remount).
-    lastChainTransformsRef.current = [];
-    lastFlaskTransformRef.current = undefined;
+    deadbandRef.current.lastChainTransforms = [];
+    deadbandRef.current.lastFlaskTransform = undefined;
 
     // Tell the drag handler how far the flask can travel from its anchor — used
     // to clamp the drag target so a fast/far pull can't overstretch the stiff
@@ -314,101 +292,18 @@ export default function FlaskChain({
 
   const syncDom = useCallback(() => {
     if (!bodiesRef.current) return;
-    const { chain, flask } = bodiesRef.current;
-
-    // Skip DOM sync when flask body is sleeping — nothing moved
-    if (flask.body.isSleeping) return;
-
-    // Chain links: UNIFORM scale (X and Y) so cap rings stay proportional on
-    // back layers — previously this was scaleX-only, which gave back-layer
-    // caps a tall-thin pill look (29×scale wide but still 33 tall). The
-    // physics body is also scaled uniformly (createChainBodies multiplies
-    // height by scale), so the wrapper's visual content + the body bounds
-    // match. Physics body i maps to chain-link (staticCount + i); the static
-    // top occupies the earlier refs and is positioned once, not per frame.
-    for (let i = 0; i < chain.segments.length; i++) {
-      const el = chainRefs.current[staticCount + i];
-      if (!el) continue;
-      const seg = chain.segments[i];
-      const h = chain.segmentHeights[i]; // UNSCALED — sizes the wrapper box
-      const x = seg.position.x - CHAIN_SEGMENT_WIDTH / 2;
-      const y = seg.position.y - h / 2;
-      const angleDeg = seg.angle * (180 / Math.PI);
-      // Sub-pixel deadband: 99%+ of these writes are micro-jitter (Matter never
-      // sleeps rigid-rope bodies). Skip when the change is imperceptible; bounded
-      // lag = ε. Real swings (>0.3px between frames) write normally.
-      const last = lastChainTransformsRef.current[i];
-      if (
-        !last ||
-        Math.abs(x - last.x) >= TRANSFORM_PX_EPSILON ||
-        Math.abs(y - last.y) >= TRANSFORM_PX_EPSILON ||
-        Math.abs(angleDeg - last.a) >= TRANSFORM_DEG_EPSILON
-      ) {
-        lastChainTransformsRef.current[i] = { x, y, a: angleDeg };
-        el.style.transform = `translate(${x}px, ${y}px) rotate(${angleDeg}deg) scale(${scale})`;
-      }
-    }
-
-    // Flask: full scale on both axes
-    const flaskEl = flaskRef.current;
-    if (flaskEl) {
-      const fb = flask.body;
-      const x = fb.position.x - FLASK_WIDTH / 2;
-      const y = fb.position.y - FLASK_HEIGHT / 2;
-      const angleDeg = fb.angle * (180 / Math.PI);
-      // Same sub-pixel deadband as the chain links. Water/icon below have their
-      // own (independent) gates on the clamped tilt, so they still update if the
-      // angle nudged just enough for the surface to need re-leveling.
-      const lastF = lastFlaskTransformRef.current;
-      if (
-        !lastF ||
-        Math.abs(x - lastF.x) >= TRANSFORM_PX_EPSILON ||
-        Math.abs(y - lastF.y) >= TRANSFORM_PX_EPSILON ||
-        Math.abs(angleDeg - lastF.a) >= TRANSFORM_DEG_EPSILON
-      ) {
-        lastFlaskTransformRef.current = { x, y, a: angleDeg };
-        flaskEl.style.transform = `translate(${x}px, ${y}px) rotate(${angleDeg}deg) scale(${scale})`;
-      }
-
-      // Counter-rotate the liquid so its surface stays level — but NORMALISE to
-      // [-180,180] first. Matter accumulates fb.angle unbounded, so a flip/spin
-      // leaves it at 360°+ and the clamp would pin the water (and the icon that
-      // chases it) tilted forever, even once the flask settles back upright.
-      const normDeg = (((-angleDeg + 180) % 360) + 360) % 360 - 180;
-      const clampedDeg = Math.max(
-        -MAX_LIQUID_TILT_DEG,
-        Math.min(MAX_LIQUID_TILT_DEG, normDeg)
-      );
-      const pivot = FLASK_SHAPE_DEFS[shape].pivot;
-      // Only re-clip the water when the surface angle visibly changed (~0.1°).
-      // A flask hanging steady (clampedDeg unchanged) then writes nothing →
-      // its translucent interior isn't repainted every frame.
-      if (Math.abs(clampedDeg - lastLiquidDegRef.current) >= LIQUID_WRITE_EPSILON) {
-        lastLiquidDegRef.current = clampedDeg;
-        const rotateAttr = `rotate(${clampedDeg}, ${pivot.x}, ${pivot.y})`;
-        liquidRectRef.current?.setAttribute("transform", rotateAttr);
-      }
-
-      // Icon spring: chases water angle with delay + overshoot. The maths is
-      // cheap and always runs (keeps the spring live); only the DOM write — the
-      // expensive part, since the icon halves are clipped — is gated on the
-      // rendered angle actually moving, so the spring stops repainting once it
-      // damps out even while the body is still technically awake.
-      const dt = 1 / 60;
-      const stiffness = 4.5;
-      const damping = 0.55;
-      const target = clampedDeg;
-      const spring = (target - iconAngleRef.current) * stiffness;
-      const damp = -iconVelRef.current * damping;
-      iconVelRef.current += (spring + damp) * dt * 60;
-      iconAngleRef.current += iconVelRef.current * dt;
-      if (Math.abs(iconAngleRef.current - lastIconDegRef.current) >= ICON_WRITE_EPSILON) {
-        lastIconDegRef.current = iconAngleRef.current;
-        const iconRotate = `rotate(${iconAngleRef.current}, ${pivot.x}, ${pivot.y})`;
-        iconRef.current?.setAttribute("transform", iconRotate);
-      }
-    }
-  }, [scale, staticCount]);
+    syncFlaskFrame({
+      bodies: bodiesRef.current,
+      chainEls: chainRefs.current,
+      flaskEl: flaskRef.current,
+      liquidRectEl: liquidRectRef.current,
+      iconEl: iconRef.current,
+      staticCount,
+      scale,
+      shape,
+      deadband: deadbandRef.current,
+    });
+  }, [scale, staticCount, shape]);
 
   // Subscribe to the shared frame loop only for physics layers while active
   useEffect(() => {
