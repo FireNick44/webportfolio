@@ -208,6 +208,13 @@ export default function PhysicsScene({ backdrop }: { backdrop?: ReactNode }) {
         userSelect: "none",
         WebkitUserSelect: "none",
         touchAction: "pan-y",
+        // Pre-warm the compositor layer. Brave/Chromium otherwise allocates a
+        // new layer the first time the sticky child engages on scroll-in, and
+        // the area flashes the page bg colour (warm bone) for a frame before
+        // the rack content paints in. translateZ(0) promotes the layer at
+        // mount so the first scroll is just a position change, not a layer
+        // create + raster.
+        transform: "translateZ(0)",
       }}
     >
       {backdrop}
