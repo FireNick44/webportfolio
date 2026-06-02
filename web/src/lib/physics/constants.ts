@@ -103,6 +103,12 @@ export const FLASK_CHAIN_GAP = 14;
 
 // Depth layers
 export const DEPTH_LAYERS = 3;
+/** Mobile splits its (same-size) skill flasks into this many collision depth
+ *  bands — a dragged flask only bumps same-band neighbours, passing through the
+ *  rest (the desktop layer feel without shrinking icons). Must be ≤ DEPTH_LAYERS
+ *  (the number of CAT_LAYER categories). Lower = each drag bumps MORE neighbours
+ *  (reads as "collidey"); higher = sparser bumping. Tune on a real device. */
+export const MOBILE_COLLIDE_BANDS = 3;
 export const CAT_LAYER = [0x0002, 0x0004, 0x0008] as const;
 export const CAT_MOUSE = 0x0010;
 export const CAT_WALL = 0x0020;

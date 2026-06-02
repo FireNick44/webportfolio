@@ -130,6 +130,17 @@ describe("generateFlasks (column / mobile)", () => {
     // random placement → many distinct x positions, not a few fixed columns
     expect(new Set(xs).size).toBeGreaterThan(8);
   });
+
+  it("bands foreground flasks into multiple collision layers (desktop-style depth collision, one visual size)", () => {
+    const f = generateFlasks(COLUMN, { width: 390, height: 1800 }, skills, 42);
+    const fg = f.filter((x) => x.layer === 0);
+    // Visual size stays uniform (all foreground at layer 0's scale)…
+    expect(new Set(fg.map((x) => x.scale)).size).toBe(1);
+    // …but collisionLayer spreads across >1 band, each a valid CAT_LAYER index.
+    const bands = new Set(fg.map((x) => x.collisionLayer));
+    expect(bands.size).toBeGreaterThan(1);
+    expect(fg.every((x) => x.collisionLayer! >= 0 && x.collisionLayer! < 3)).toBe(true);
+  });
 });
 
 describe("generateFlasks (field randomness)", () => {

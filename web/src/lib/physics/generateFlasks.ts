@@ -3,6 +3,8 @@ import { mulberry32 } from "@/lib/utils/mulberry32";
 import {
   BODY_OVERLAP_PAD,
   chainLength,
+  DEPTH_LAYERS,
+  MOBILE_COLLIDE_BANDS,
   FLASK_HEIGHT,
   FLASK_HITBOX_HEIGHT,
   FLASK_WIDTH,
@@ -28,7 +30,14 @@ export interface FlaskConfig {
   color: string;
   scale: number;
   isSkeleton: boolean;
+  /** Visual/foreground tier: 0 = foreground (icon-bearing), >0 = back depth
+   *  bands (decorative skeletons). Drives scale + paint stacking. */
   layer: number;
+  /** Collision band — which `CAT_LAYER` the body collides within (same-band
+   *  flasks bump, cross-band pass through). Defaults to `layer` when unset; the
+   *  mobile column sets it independently so skill flasks keep one visual size
+   *  but still collide in desktop-style depth layers. */
+  collisionLayer?: number;
   skillIcon?: string;
   /** One of three bottle silhouettes (rect/round/cone). Picked from rng so the
    *  layout is reproducible; falls back to "rect" when randomisation is off. */
@@ -360,7 +369,15 @@ export function generateFlasks(
     const { segments, anchorY, bodyY } = solveChain(target, scale0);
     const xPct = sampleX(0, scale0, bodyY);
     placed.push({ xpx: xPct * viewport.width, bodyY, scale: scale0, layer: 0 });
-    out.push(makeFlask(xPct, 0, anchorY, segments));
+    const flask = makeFlask(xPct, 0, anchorY, segments);
+    // Collision depth band (visual size stays scale0 — `layer`/scale/placement
+    // all stay at the foreground tier 0). Split the column into DEPTH_LAYERS
+    // bands by hanging depth so a dragged flask only bumps same-band neighbours
+    // and passes through the rest — the desktop layer-collision feel, without
+    // shrinking icons. FlaskChain uses `collisionLayer` purely for the filter.
+    const bands = Math.min(MOBILE_COLLIDE_BANDS, DEPTH_LAYERS);
+    flask.collisionLayer = Math.min(bands - 1, Math.floor(frac * bands));
+    out.push(flask);
   }
   const bgCount = Math.max(0, config.flaskCount - foreground);
   for (let i = 0; i < bgCount; i++) {

@@ -34,6 +34,10 @@ interface Props {
   color?: string;
   segmentCount?: number;
   layer?: number;
+  /** Collision band (which CAT_LAYER the bodies collide within). Defaults to
+   *  `layer`. Mobile sets this independently of the visual `layer` so skill
+   *  flasks stay one size but collide in desktop-style depth bands. */
+  collisionLayer?: number;
   skillIcon?: string;
   active?: boolean;
   noFlaskCollision?: boolean;
@@ -60,6 +64,7 @@ export default function FlaskChain({
   color,
   segmentCount = CHAIN_SEGMENT_COUNT,
   layer = 0,
+  collisionLayer,
   skillIcon,
   active = true,
   noFlaskCollision = false,
@@ -158,13 +163,16 @@ export default function FlaskChain({
     const ax = anchorRef.current.x;
     const ay = anchorRef.current.y;
 
+    // Collision band: defaults to the visual `layer`, but mobile overrides it so
+    // same-size skill flasks still collide in desktop-style depth bands.
+    const collLayer = collisionLayer ?? layer;
     const chain = createChainBodies(
       ax,
       ay,
       segmentCount,
       scale,
       staticCount,
-      layer,
+      collLayer,
       group,
     );
     // segmentHeights stores UNSCALED heights (for wrapper sizing); the physics
@@ -177,7 +185,7 @@ export default function FlaskChain({
       lastH,
       scale,
       noFlaskCollision,
-      layer,
+      collLayer,
       FLASK_SHAPE_DEFS[shape].chainAttachOffsetPx ?? 0,
       group,
     );
@@ -245,6 +253,7 @@ export default function FlaskChain({
     segmentCount,
     staticCount,
     layer,
+    collisionLayer,
     instanceId,
     isStatic,
     noFlaskCollision,

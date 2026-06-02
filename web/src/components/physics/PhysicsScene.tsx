@@ -236,6 +236,7 @@ export default function PhysicsScene({ backdrop }: { backdrop?: ReactNode }) {
               color={cfg.color}
               segmentCount={cfg.segments}
               layer={cfg.layer}
+              collisionLayer={cfg.collisionLayer}
               scale={cfg.scale}
               maxPhysicsSegments={config.maxPhysicsSegments}
               isSkeleton={cfg.isSkeleton}
@@ -243,13 +244,14 @@ export default function PhysicsScene({ backdrop }: { backdrop?: ReactNode }) {
               shape={cfg.shape}
               liquidOpacity={liquidOpacity}
               active={active}
-              // Desktop: flasks collide — bumping is the fun. Mobile: NO
-              // collision. The dense column shoves itself off-screen with
-              // collision on; separation comes from the placement spread +
-              // depth (sampleX/conflicts), not Matter collision.
-              // noFlaskCollision drops the flask mask to walls-only, which
-              // also kills flask↔chain hits (chain↔chain is already off).
-              noFlaskCollision={isMobile}
+              // Both desktop AND mobile collide now — bumping is the fun. On
+              // mobile, generateFlasks bands skill flasks into DEPTH_LAYERS
+              // collision groups (via cfg.collisionLayer) so a dragged flask
+              // only shoves its same-band neighbours and passes through the
+              // rest — the dense column no longer shoves itself off-screen the
+              // way blanket same-layer collision did, but it's no longer the
+              // old walls-only pass-through-everything either.
+              noFlaskCollision={false}
               iconBob={
                 animateIcons
                   ? { delay: (i * 0.41) % 2.6, dur: 2.0 + ((i * 0.29) % 1.3) }
