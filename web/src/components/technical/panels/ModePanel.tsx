@@ -2,7 +2,7 @@
 
 import { RotateCcw } from "lucide-react";
 
-import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import { ThemeModeSwitch } from "@/components/theme/ThemeModeSwitch";
 import { PanelHead } from "@/components/technical/panelPrimitives";
 import type { Dictionary } from "@/i18n/types";
 import { useAppStore } from "@/lib/store/useAppStore";
@@ -21,7 +21,7 @@ export default function ModePanel({ dict }: { dict: Dictionary }) {
       <div className="flex flex-wrap items-center gap-x-8 gap-y-5 p-5">
         <div className="flex items-center gap-3">
           <span className="lab-label">{dict.menu.theme}</span>
-          <ThemeTogglerButton variant="outline" />
+          <ThemeModeSwitch dict={dict} />
         </div>
 
         <button

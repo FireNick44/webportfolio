@@ -69,6 +69,10 @@
     "open": "Menü",
     "close": "Schliessen",
     "theme": "Design",
+    "themeLight": "Hell",
+    "themeDark": "Dunkel",
+    "themeDevice": "System",
+    "themeRandom": "Zufall",
     "language": "Sprache"
   }
 }

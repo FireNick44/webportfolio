@@ -4,7 +4,7 @@ import { ArrowUp, Mail, Shuffle } from "lucide-react";
 import Link from "next/link";
 
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
-import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import { ThemeModeSwitch } from "@/components/theme/ThemeModeSwitch";
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import type { Dictionary } from "@/i18n/types";
 import { buildInfo } from "@/lib/buildInfo";
@@ -191,7 +191,7 @@ export function OutroFooterBar({
                 <span className="font-mono text-[0.62rem] uppercase tracking-[0.22em] text-current/55">
                   {dict.menu.theme}
                 </span>
-                <ThemeTogglerButton size="sm" />
+                <ThemeModeSwitch dict={dict} />
               </li>
             </ul>
           </div>

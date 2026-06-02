@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import { LanguageSwitcher } from "@/components/layout/LanguageSwitcher";
 import { Monogram } from "@/components/layout/Monogram";
 import { usePageTransition } from "@/components/layout/PageTransitionProvider";
-import { ThemeTogglerButton } from "@/components/theme/ThemeTogglerButton";
+import { ThemeCycleButton } from "@/components/theme/ThemeCycleButton";
 import { iconButtonVariants } from "@/components/ui/button-variants";
 import type { Dictionary } from "@/i18n/types";
 import { cn } from "@/lib/utils";
@@ -126,7 +126,7 @@ export default function Header({
           <div className="hidden h-4 w-px bg-border md:block" />
 
           <LanguageSwitcher lang={lang} />
-          <ThemeTogglerButton />
+          <ThemeCycleButton dict={dict} />
 
           {/* GitHub profile — moved out of the projects grid into the bar. */}
           <a
@@ -244,9 +244,41 @@ export default function Header({
               </button>
               <div className="flex items-center gap-5">
                 <LanguageSwitcher lang={lang} />
-                <ThemeTogglerButton variant="outline" />
+                <ThemeCycleButton variant="outline" dict={dict} />
               </div>
             </div>
+
+            {/* Legal links — so the impressum/privacy pages are reachable from
+                the mobile overlay too (footer only shows on the home page). */}
+            <ul className="mx-5 flex items-center justify-center gap-4 pb-6 font-mono text-[0.62rem] uppercase tracking-[0.22em] text-current/55 sm:mx-8">
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    navigateTo(`/${lang}/datenschutz`);
+                  }}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {dict.footer.privacy}
+                </button>
+              </li>
+              <li aria-hidden className="text-current/30">
+                ·
+              </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(false);
+                    navigateTo(`/${lang}/impressum`);
+                  }}
+                  className="transition-colors hover:text-foreground"
+                >
+                  {dict.footer.impressum}
+                </button>
+              </li>
+            </ul>
           </motion.div>
         )}
       </AnimatePresence>

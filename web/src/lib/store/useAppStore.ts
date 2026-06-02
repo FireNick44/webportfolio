@@ -10,9 +10,20 @@ export interface DeviceInfo {
   screen: { width: number; height: number };
 }
 
+/** User-facing theme choice. `theme` below is the *resolved* light/dark scheme
+ *  that actually drives `data-theme`; `themeMode` is what the user picked:
+ *  - "light"/"dark" — pinned scheme
+ *  - "device"        — follow the OS `prefers-color-scheme` (live)
+ *  - "random"        — a generated palette (see shuffleTheme), seed in `?shuffle=` */
+export type ThemeMode = "light" | "dark" | "device" | "random";
+
 interface AppState {
   theme: "light" | "dark";
   setTheme: (theme: "light" | "dark") => void;
+  /** What the user picked in the theme switch (see ThemeMode). Resolves to
+   *  `theme` for the actual scheme; persisted so the choice survives reloads. */
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => void;
   /** Active theme preset name (e.g. "lab-dark", "mocha"); null = no preset. */
   preset: string | null;
   setPreset: (preset: string | null) => void;
@@ -70,6 +81,8 @@ export const useAppStore = create<AppState>()(
     (set) => ({
       theme: "dark",
       setTheme: (theme) => set({ theme }),
+      themeMode: "dark",
+      setThemeMode: (themeMode) => set({ themeMode }),
       preset: null,
       setPreset: (preset) => set({ preset }),
       tokenOverrides: {},
@@ -112,6 +125,7 @@ export const useAppStore = create<AppState>()(
       // fresh page load (resets per full load), not on client-side navigation.
       partialize: (state) => ({
         theme: state.theme,
+        themeMode: state.themeMode,
         language: state.language,
         preset: state.preset,
         tokenOverrides: state.tokenOverrides,

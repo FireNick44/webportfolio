@@ -37,6 +37,16 @@ export const SKILLS_BG_VARS = Array.from(
   (_, i) => `--skills-bg-${i}`,
 );
 
+/** Hero bubbles backdrop: gradient top/bottom + two bubble fill colours. Only
+ *  `randomTheme` sets these; otherwise the inlined intro SVG falls back to its
+ *  original blue palette (so the default hero is unchanged). */
+export const HERO_VAR_NAMES = [
+  "--hero-grad-top",
+  "--hero-grad-bottom",
+  "--hero-bubble-a",
+  "--hero-bubble-b",
+] as const;
+
 /** Per-section accent vars. globals.css maps each section's local
  *  `--accent` to these (with an `inherit` fallback so a section reverts
  *  to the base accent when its var is unset — i.e. on the default

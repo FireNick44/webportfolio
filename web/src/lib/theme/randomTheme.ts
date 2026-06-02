@@ -30,31 +30,34 @@ export function randomTheme(seed?: number): {
   )[Math.floor(rng() * 4)];
   const hues = harmonyHues(baseHue, scheme);
 
-  // bg tinted by the base hue; fg a near-neutral, low-sat tint of a harmony
-  // hue. Large light/dark luminance gap → readable; WCAG guard below
-  // enforces it.
+  // bg + fg both carry a real hue tint (not the near-black/near-white of the
+  // stock Lab themes) — the canvas and the *text colour* are coloured, kept
+  // readable by the WCAG guard below. fg is a deep/pale tint of a harmony hue,
+  // bg a richer tint of the base hue. Large light/dark luminance gap → readable.
   const fgHue = hues[hues.length - 1];
   let bg: string, fg: string, card: string, muted: string, accentFg: string;
   if (dark) {
-    bg = hslToHex(baseHue, rand(0.12, 0.3), rand(0.06, 0.11));
-    card = hslToHex(baseHue, rand(0.12, 0.28), rand(0.1, 0.15));
-    muted = hslToHex(baseHue, rand(0.1, 0.22), rand(0.12, 0.18));
-    fg = hslToHex(fgHue, rand(0.05, 0.16), rand(0.88, 0.95));
+    bg = hslToHex(baseHue, rand(0.28, 0.5), rand(0.08, 0.14));
+    card = hslToHex(baseHue, rand(0.26, 0.46), rand(0.12, 0.18));
+    muted = hslToHex(baseHue, rand(0.22, 0.4), rand(0.15, 0.22));
+    fg = hslToHex(fgHue, rand(0.12, 0.28), rand(0.86, 0.93));
     accentFg = hslToHex(baseHue, 0.2, 0.07);
   } else {
-    bg = hslToHex(baseHue, rand(0.15, 0.35), rand(0.9, 0.96));
-    card = hslToHex(baseHue, rand(0.12, 0.3), rand(0.94, 0.98));
-    muted = hslToHex(baseHue, rand(0.12, 0.26), rand(0.86, 0.92));
-    fg = hslToHex(fgHue, rand(0.18, 0.38), rand(0.08, 0.15));
+    bg = hslToHex(baseHue, rand(0.3, 0.55), rand(0.86, 0.93));
+    card = hslToHex(baseHue, rand(0.24, 0.48), rand(0.9, 0.96));
+    muted = hslToHex(baseHue, rand(0.24, 0.44), rand(0.82, 0.9));
+    fg = hslToHex(fgHue, rand(0.3, 0.55), rand(0.1, 0.18));
     accentFg = "#ffffff";
   }
 
   // WCAG AA guard: if fg/bg contrast < 4.5:1, push fg toward the extreme
-  // (lighter on dark, darker on light) in small steps until it passes.
-  let fgL = dark ? rand(0.88, 0.95) : rand(0.08, 0.15);
-  for (let guard = 0; guard < 12 && contrastRatio(fg, bg) < 4.5; guard++) {
+  // (lighter on dark, darker on light) in small steps until it passes. The
+  // recompute keeps a visible saturation so forced fixes stay coloured, not
+  // grey/black/white.
+  let fgL = dark ? rand(0.86, 0.93) : rand(0.1, 0.18);
+  for (let guard = 0; guard < 16 && contrastRatio(fg, bg) < 4.5; guard++) {
     fgL = dark ? Math.min(1, fgL + 0.03) : Math.max(0, fgL - 0.03);
-    fg = hslToHex(fgHue, dark ? 0.1 : 0.28, fgL);
+    fg = hslToHex(fgHue, dark ? 0.18 : 0.42, fgL);
   }
 
   const accent = hslToHex(
@@ -128,6 +131,21 @@ export function randomTheme(seed?: number): {
     const s = dark ? 0.55 - i * 0.03 : 0.5 - i * 0.03;
     tokens[`--skills-bg-${i}`] = hslToHex(h, Math.max(0.1, s), l);
   }
+
+  // Hero bubbles backdrop (top-of-page intro SVG). The hero text is pinned light
+  // in BOTH schemes, so the gradient stays DEEP (low lightness) regardless of
+  // scheme — only the hue randomises. Two translucent bubble fills picked from
+  // the harmony family, brighter than the gradient so they read in front.
+  const heroHue = hues[2 % hues.length];
+  const heroHue2 = (heroHue + rand(12, 40)) % 360;
+  tokens["--hero-grad-top"] = hslToHex(heroHue, rand(0.6, 0.85), rand(0.16, 0.26));
+  tokens["--hero-grad-bottom"] = hslToHex(heroHue2, rand(0.7, 0.95), rand(0.4, 0.52));
+  tokens["--hero-bubble-a"] = hslToHex(hues[0], rand(0.55, 0.8), rand(0.55, 0.66));
+  tokens["--hero-bubble-b"] = hslToHex(
+    hues[1 % hues.length],
+    rand(0.4, 0.7),
+    rand(0.78, 0.88),
+  );
 
   return { scheme: dark ? "dark" : "light", tokens, seed: usedSeed };
 }

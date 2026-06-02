@@ -1,5 +1,6 @@
 import {
   FLASK_VAR_NAMES,
+  HERO_VAR_NAMES,
   SECTION_ACCENT_VARS,
   SKILLS_BG_VARS,
   TOKEN_NAMES,
@@ -18,6 +19,7 @@ export function applyTokenOverrides(overrides: Record<string, string>) {
     ...FLASK_VAR_NAMES,
     ...SECTION_ACCENT_VARS,
     ...SKILLS_BG_VARS,
+    ...HERO_VAR_NAMES,
   ]) {
     const v = overrides[name];
     if (v) root.style.setProperty(name, v);

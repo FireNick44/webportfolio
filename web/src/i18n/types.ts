@@ -67,6 +67,10 @@ export interface Dictionary {
     open: string;
     close: string;
     theme: string;
+    themeLight: string;
+    themeDark: string;
+    themeDevice: string;
+    themeRandom: string;
     language: string;
   };
 }

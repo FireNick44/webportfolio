@@ -69,6 +69,10 @@
     "open": "Menu",
     "close": "Close",
     "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeDevice": "System",
+    "themeRandom": "Random",
     "language": "Language"
   }
 }

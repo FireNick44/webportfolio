@@ -197,6 +197,14 @@ html.vt-no-transition * {
   transition: none !important;
 }
 
+/* Disable the default root cross-fade so only our clip-path wipe shows during a
+   theme swap (header toggle + footer theme switch). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
 /* Desktop only: hide the native scrollbar — the left timeline is the scroll
    indicator/nav. Wheel + trackpad scrolling still work. Well-supported &
    stable in modern browsers. */

@@ -5,12 +5,16 @@ import { useRef, type CSSProperties } from "react";
 
 import { cn } from "@/lib/utils";
 
+import { INTRO_BUBBLES_SVG } from "./introBubblesMarkup";
+
 /**
- * The animated bubbles SVG background (src/svg/intro-bg.svg), embedded via <img>
- * so its SMIL animation runs. It has a gentle scroll-linked PARALLAX so it
- * drifts slower than the page (reads as sitting "further back"); scaled up a
- * touch so the parallax shift never reveals its edges. Only the SVG parallaxes —
- * the canvas bubbles (WaterCanvas) are separate.
+ * The animated bubbles SVG background, INLINED (not an <img>) so its gradient +
+ * bubble fills can read the theme's `--hero-*` CSS vars — a random theme recolours
+ * them, otherwise they fall back to the original blue palette. SMIL animation
+ * still runs inline. Has a gentle scroll-linked PARALLAX so it drifts slower than
+ * the page (reads as sitting "further back"); scaled up a touch so the parallax
+ * shift never reveals its edges. Only the SVG parallaxes — the canvas bubbles
+ * (WaterCanvas) are separate.
  */
 export function BubblesBackdrop({
   className,
@@ -29,12 +33,10 @@ export function BubblesBackdrop({
 
   return (
     <div ref={ref} aria-hidden className={cn("overflow-hidden", className)}>
-      { }
-      <motion.img
-        src="/svg/intro-bg.svg"
-        alt=""
+      <motion.div
         style={{ y, ...imgStyle }}
-        className={cn("absolute inset-0 h-full w-full scale-[1.5] object-cover", op)}
+        className={cn("absolute inset-0 h-full w-full scale-[1.5]", op)}
+        dangerouslySetInnerHTML={{ __html: INTRO_BUBBLES_SVG }}
       />
     </div>
   );
