@@ -49,9 +49,20 @@ export function SkillsTable({ lang }: { lang?: string }) {
                     </span>
                   )}
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    {g.items.map((it) => (
-                      <li key={it}>{it}</li>
-                    ))}
+                    {g.items.map((it) =>
+                      // Items starting with "//" render as sub-labels inside a
+                      // group, matching the group-label comment styling.
+                      it.startsWith("//") ? (
+                        <li
+                          key={it}
+                          className="pt-1.5 font-mono text-xs text-muted-foreground/70"
+                        >
+                          {it}
+                        </li>
+                      ) : (
+                        <li key={it}>{it}</li>
+                      ),
+                    )}
                   </ul>
                 </div>
               ))}

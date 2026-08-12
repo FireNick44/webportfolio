@@ -3,23 +3,24 @@
     {
       "title": "Coding & Frameworks",
       "groups": [
-        { "label": "//basics+++", "items": ["HTML / CSS, SCSS", "JavaScript", "C#, C++", "Laravel"] },
-        { "label": "//basics++", "items": ["TypeScript", "Vue.js, Angular", "PHP"] },
-        { "label": "//basics", "items": ["Java, SQL", "Python"] }
+        { "label": "//basics+++", "items": ["Java, TypeScript", "React, React Native", "HTML / CSS, SCSS"] },
+        { "label": "//basics++", "items": ["Vue.js, Angular", "Laravel, Tauri", "C#, SQL"] },
+        { "label": "//basics", "items": ["Python, Electron", "PHP, C++"] }
       ]
     },
     {
       "title": "Software",
       "groups": [
-        { "label": "//coding", "items": ["Visual Studio, VS Code", "WebStorm, PhpStorm", "IntelliJ IDEA"] },
-        { "label": "//office", "items": ["Microsoft Office, Adobe Creative Cloud"] }
+        { "label": "//coding", "items": ["IntelliJ IDEA", "WebStorm, PhpStorm", "VS Code, Visual Studio"] },
+        { "label": "//office", "items": ["Microsoft Office,", "Adobe Creative Cloud", "Figma, Notion"] },
+        { "label": "//vibe", "items": ["Claude, Ghostty", "Spotify, Brave"] }
       ]
     },
     {
       "title": "OS",
       "groups": [
-        { "label": "//daily driver", "items": ["macOS"] },
-        { "label": "//still learning <3", "items": ["Linux", "Garuda, Kali, Raspbian,", "Ubuntu, EndeavourOS"] },
+        { "label": "//daily driver", "items": ["macOS", "//my infrastructure", "Proxmox"] },
+        { "label": "//still learning <3", "items": ["Linux, Kali", "Garuda, Raspbian,", "Ubuntu, EndeavourOS"] },
         { "label": "//we don't talk about it", "items": ["Windows"] }
       ]
     },
