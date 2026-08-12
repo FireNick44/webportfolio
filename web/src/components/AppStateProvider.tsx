@@ -55,8 +55,9 @@ export default function AppStateProvider({
     applyTokenOverrides(tokenOverrides);
   }, [tokenOverrides]);
 
-  // <html> lives in the root layout now; keep its theme + lang attributes synced
-  // here (the anti-flash script sets the initial data-theme before paint).
+  // Keep <html data-theme> synced to the resolved theme (the anti-flash script
+  // sets the initial value before paint; `lang` is server-rendered by the
+  // [lang] layout and needs no client patching).
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
@@ -72,10 +73,6 @@ export default function AppStateProvider({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, [themeMode, setTheme]);
-
-  useEffect(() => {
-    document.documentElement.setAttribute("lang", lang);
-  }, [lang]);
 
   // `?shuffle=<seed>` (reproduce an exact shared look) or bare `?shuffle` →
   // apply the random theme once per fresh load. Bare `?shuffle` is session-

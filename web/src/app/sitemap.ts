@@ -6,7 +6,9 @@ const SITE = "https://a36.dev";
 
 // Per-locale entries for each public route, with hreflang alternates so search
 // engines pair the language variants. Keep in sync with the app's routes.
-const ROUTES = ["", "/technical"] as const;
+// Only indexable routes belong here — /technical, /impressum and /datenschutz
+// are all `robots: noindex`, so listing them would send crawlers mixed signals.
+const ROUTES = [""] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const now = new Date();

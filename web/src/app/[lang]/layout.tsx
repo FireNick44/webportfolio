@@ -8,9 +8,16 @@ import ScrollTimeline from "@/components/layout/ScrollTimeline";
 import OutroSection from "@/components/outro/OutroSection";
 import { type Locale, locales, defaultLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/dictionary";
+import { fontVariables } from "@/lib/fonts";
 import { buildJsonLd } from "@/lib/seo/jsonLd";
 
 import type { Metadata, Viewport } from "next";
+import "../globals.css";
+
+// Applies the persisted theme + token overrides before paint (no FOUC). The
+// script content is constant, so React never re-injects it when this layout
+// re-renders on a locale switch — it only matters pre-hydration anyway.
+const ANTIFLASH = `(function(){try{var s=localStorage.getItem('yannic-portfolio-v1');var th='dark';if(s){var t=JSON.parse(s);var st=t&&t.state;if(st){var m=st.themeMode;if(m==='device'){th=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';}else if(m==='light'||m==='dark'){th=m;}else if(st.theme==='dark'||st.theme==='light'){th=st.theme;}var ov=st.tokenOverrides;if(ov)for(var k in ov)document.documentElement.style.setProperty(k,ov[k]);}}document.documentElement.setAttribute('data-theme',th);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`;
 
 export const dynamicParams = false;
 
@@ -82,21 +89,38 @@ export default async function LangLayout({
     description: `Yannic Studer — ${dict.hero.tagline}`,
   });
 
+  // This IS the root layout (there is no src/app/layout.tsx): the <html> shell
+  // lives here so the server renders the correct lang attribute per locale —
+  // patching it client-side after hydration left crawlers and screen readers
+  // seeing lang="en" on German pages.
   return (
-    <AppStateProvider lang={lang}>
-      <PageTransitionProvider>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <ScrollTimeline labels={dict.nav as unknown as Record<string, string>} />
-        <LoadingScreen />
-        <div className="flex min-h-screen flex-col">
-          <Header dict={dict} lang={lang} />
-          <main className="grow">{children}</main>
-          <OutroSection dict={dict} lang={lang} />
-        </div>
-      </PageTransitionProvider>
-    </AppStateProvider>
+    <html
+      lang={lang}
+      data-theme="dark"
+      data-scroll-behavior="smooth"
+      className={fontVariables}
+      suppressHydrationWarning
+    >
+      <body suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{ __html: ANTIFLASH }} />
+        <AppStateProvider lang={lang}>
+          <PageTransitionProvider>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+            />
+            <ScrollTimeline
+              labels={dict.nav as unknown as Record<string, string>}
+            />
+            <LoadingScreen label={dict.loader.calibrating} />
+            <div className="flex min-h-screen flex-col">
+              <Header dict={dict} lang={lang} />
+              <main className="grow">{children}</main>
+              <OutroSection dict={dict} lang={lang} />
+            </div>
+          </PageTransitionProvider>
+        </AppStateProvider>
+      </body>
+    </html>
   );
 }

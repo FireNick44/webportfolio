@@ -3,8 +3,11 @@ import { ImageResponse } from "next/og";
 import { Y_PATH, S_PATH } from "@/components/layout/Monogram";
 
 // Static OG image for social cards. Lab-bench black bg + the YS monogram in
-// bone, accent teal dot — matches the loader/header treatment. Next runs this
-// at build time and serves the result at /opengraph-image.<ext>.
+// bone, accent teal dot — matches the loader/header treatment. Lives in the
+// [lang] segment (not the app root): the root-level convention never made it
+// into the rendered <head> alongside [lang]/layout's generateMetadata, and its
+// /opengraph-image URL was locale-redirected to a 404 by the middleware. Here
+// Next injects og:image/twitter:image per locale at /{lang}/opengraph-image.
 
 export const alt = "Yannic Studer — Software Developer";
 export const size = { width: 1200, height: 630 };

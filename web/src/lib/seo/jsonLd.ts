@@ -44,7 +44,7 @@ export function buildJsonLd({ lang, title, description }: JsonLdInput) {
         name: "Yannic Studer",
         alternateName: "Yannic",
         url: `${SITE}/`,
-        image: `${SITE}/opengraph-image`,
+        image: `${SITE}/${lang}/opengraph-image`,
         jobTitle: JOB_TITLE[lang] ?? JOB_TITLE.en,
         description: `Yannic Studer — ${description}`,
         sameAs: SAME_AS,
@@ -68,7 +68,10 @@ export function buildJsonLd({ lang, title, description }: JsonLdInput) {
         inLanguage: lang,
         isPartOf: { "@id": WEBSITE_ID },
         about: { "@id": PERSON_ID },
-        primaryImageOfPage: { "@type": "ImageObject", url: `${SITE}/opengraph-image` },
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: `${SITE}/${lang}/opengraph-image`,
+        },
       },
     ],
   };
