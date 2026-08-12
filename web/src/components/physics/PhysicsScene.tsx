@@ -53,7 +53,14 @@ const ICON_BOB_CSS =
 // re-freeze the rack; resets on hard reload.
 let hasActivatedRack = false;
 
-export default function PhysicsScene({ backdrop }: { backdrop?: ReactNode }) {
+export default function PhysicsScene({
+  backdrop,
+  labels,
+}: {
+  backdrop?: ReactNode;
+  /** Localized UI strings for the overlay + mode toggle. */
+  labels: { activate: string; drag: string; collide: string };
+}) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const engine = usePhysicsEngine();
   const [dims, setDims] = useState({ width: 0, height: 0 });
@@ -261,7 +268,10 @@ export default function PhysicsScene({ backdrop }: { backdrop?: ReactNode }) {
           ))}
       </FrameLoopContext.Provider>
 
-      <InteractionModeToggle activated={activated} />
+      <InteractionModeToggle
+        activated={activated}
+        labels={{ drag: labels.drag, collide: labels.collide }}
+      />
       <PushCursorIndicator />
 
       {/* Waves: rendered AFTER the flasks so the bottles tuck behind them top
@@ -287,7 +297,11 @@ export default function PhysicsScene({ backdrop }: { backdrop?: ReactNode }) {
 
       {/* Click-to-activate gate. Mounted last so it stacks above everything in
           the rack until dismissed. */}
-      <ActivationOverlay show={!activated} onActivate={activateRack} />
+      <ActivationOverlay
+        show={!activated}
+        onActivate={activateRack}
+        label={labels.activate}
+      />
     </div>
   );
 }

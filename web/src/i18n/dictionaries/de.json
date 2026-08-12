@@ -23,7 +23,13 @@
     "label": "02 / Skills",
     "title": "Schwebend in Lösung",
     "subtitle": "Jedes Glas enthält ein Werkzeug, mit dem ich arbeite, an seiner eigenen Kette.",
-    "hint": "Bring die Gläser in Bewegung"
+    "hint": "Bring die Gläser in Bewegung",
+    "activate": "Klicken zum Aktivieren",
+    "modeDrag": "Ziehen",
+    "modePush": "Schubsen"
+  },
+  "loader": {
+    "calibrating": "arbeitsbereich wird kalibriert"
   },
   "projects": {
     "label": "03 / Ausgewählte Arbeiten",

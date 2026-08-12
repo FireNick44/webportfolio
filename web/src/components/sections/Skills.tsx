@@ -34,7 +34,14 @@ export default function Skills({ dict }: { dict: Dictionary }) {
           a taller scroll-through section (170vh) so the 3-per-row grid has room
           to hang on long chains. Heights match PhysicsScene's container. */}
       <div className="relative h-[120vh] md:h-screen">
-        <PhysicsSceneClient backdrop={<FlaskBackdrop />} />
+        <PhysicsSceneClient
+          backdrop={<FlaskBackdrop />}
+          labels={{
+            activate: dict.skills.activate,
+            drag: dict.skills.modeDrag,
+            collide: dict.skills.modePush,
+          }}
+        />
       </div>
     </section>
   );

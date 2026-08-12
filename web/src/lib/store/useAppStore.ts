@@ -36,10 +36,14 @@ interface AppState {
   setLanguage: (language: string) => void;
   deviceInfo: DeviceInfo | null;
   setDeviceInfo: (info: DeviceInfo) => void;
-  isHeroLoaded: boolean;
-  setIsHeroLoaded: (loaded: boolean) => void;
   hasShownLoader: boolean;
   setHasShownLoader: (shown: boolean) => void;
+  /** True once the hero's letter-rise intro has fully played this session.
+   *  Client-side navigation back to the home page remounts Hero; when set,
+   *  the hero renders in its settled state instead of replaying the intro
+   *  (the view-transition snapshot would swallow the short greeting fade). */
+  heroIntroPlayed: boolean;
+  setHeroIntroPlayed: () => void;
   /** Advanced/diagnostic mode: hides the rack's top wave + shows physics debug. */
   advanced: boolean;
   setAdvanced: (advanced: boolean) => void;
@@ -94,10 +98,10 @@ export const useAppStore = create<AppState>()(
       setLanguage: (language) => set({ language }),
       deviceInfo: null,
       setDeviceInfo: (info) => set({ deviceInfo: info }),
-      isHeroLoaded: false,
-      setIsHeroLoaded: (loaded) => set({ isHeroLoaded: loaded }),
       hasShownLoader: false,
       setHasShownLoader: (shown) => set({ hasShownLoader: shown }),
+      heroIntroPlayed: false,
+      setHeroIntroPlayed: () => set({ heroIntroPlayed: true }),
       advanced: false,
       setAdvanced: (advanced) => set({ advanced }),
       graphicsTier: "medium",

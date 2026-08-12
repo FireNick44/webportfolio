@@ -40,7 +40,12 @@ export default function ScrollTimeline({
   });
   const [active, setActive] = useState<string>("me");
 
+  // Re-bind on every route change: this component lives in the [lang] layout
+  // and never remounts, so observers created once would keep watching the
+  // section nodes of a previous page (or none, if the first load was a
+  // subpage) after client-side navigation.
   useEffect(() => {
+    if (hidden) return;
     const observers: IntersectionObserver[] = [];
     for (const s of SECTIONS) {
       const el = document.getElementById(s.id);
@@ -56,7 +61,7 @@ export default function ScrollTimeline({
       observers.push(io);
     }
     return () => observers.forEach((o) => o.disconnect());
-  }, []);
+  }, [pathname, hidden]);
 
   const activeSection = SECTIONS.find((s) => s.id === active);
   const label = (activeSection && labels[activeSection.key]) ?? active;

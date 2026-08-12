@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 export default function ModePanel({ dict }: { dict: Dictionary }) {
   const advanced = useAppStore((s) => s.advanced);
   const setAdvanced = useAppStore((s) => s.setAdvanced);
-  const setHasShownLoader = useAppStore((s) => s.setHasShownLoader);
+  const requestLoader = useAppStore((s) => s.requestLoader);
 
   return (
     <div className="border border-border">
@@ -49,7 +49,7 @@ export default function ModePanel({ dict }: { dict: Dictionary }) {
 
         <button
           type="button"
-          onClick={() => setHasShownLoader(false)}
+          onClick={() => requestLoader()}
           className="inline-flex items-center gap-2 border border-border px-3 py-2 font-mono text-xs uppercase tracking-[0.2em] transition-colors hover:bg-muted"
         >
           <RotateCcw size={14} />

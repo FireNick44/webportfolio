@@ -27,19 +27,25 @@ export default function Hero({ dict }: { dict: Dictionary }) {
   // the user instead of being wasted behind the loading screen. Fallback timer
   // guarantees it reveals even if the loader flag never flips.
   const hasShownLoader = useAppStore((s) => s.hasShownLoader);
-  const [ready, setReady] = useState(hasShownLoader);
+  // Intro plays once per session. On client-side navigation back to the home
+  // page Hero remounts; replaying would race the view-transition snapshot
+  // (the greeting's short fade finishes invisibly behind it), so once played
+  // the hero renders directly in its settled state (initial={false} below).
+  const introPlayed = useAppStore((s) => s.heroIntroPlayed);
+  const setHeroIntroPlayed = useAppStore((s) => s.setHeroIntroPlayed);
+  const [ready, setReady] = useState(hasShownLoader || introPlayed);
   useEffect(() => {
-    if (hasShownLoader) {
+    if (hasShownLoader || introPlayed) {
       setReady(true);
       return;
     }
     const t = setTimeout(() => setReady(true), 2200);
     return () => clearTimeout(t);
-  }, [hasShownLoader]);
+  }, [hasShownLoader, introPlayed]);
 
   // Once the reveal lands, drop the per-letter clip masks so the text shadow
   // isn't cut off at each letter box.
-  const [done, setDone] = useState(false);
+  const [done, setDone] = useState(introPlayed);
   const name = dict.hero.name;
   const chars = [...name];
 
@@ -57,7 +63,7 @@ export default function Hero({ dict }: { dict: Dictionary }) {
         style={{ textShadow: "0 2px 28px rgba(8,12,40,0.45)" }}
       >
         <motion.span
-          initial={{ opacity: 0, y: 12 }}
+          initial={introPlayed ? false : { opacity: 0, y: 12 }}
           animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
           transition={{ duration: 0.6, delay: 0.15, ease: EASE }}
           className="mb-5 font-mono text-[0.7rem] uppercase tracking-[0.28em] text-current/80"
@@ -68,7 +74,7 @@ export default function Hero({ dict }: { dict: Dictionary }) {
         {/* Name — each letter rises out of a clipping mask, staggered. */}
         <motion.h1
           variants={nameContainer}
-          initial="hidden"
+          initial={introPlayed ? false : "hidden"}
           animate={ready ? "show" : "hidden"}
           aria-label={name}
           // The per-letter overflow-hidden masks clip the inherited text-shadow
@@ -94,7 +100,12 @@ export default function Hero({ dict }: { dict: Dictionary }) {
                 variants={charUp}
                 className="inline-block"
                 onAnimationComplete={
-                  i === chars.length - 1 ? () => setDone(true) : undefined
+                  i === chars.length - 1
+                    ? () => {
+                        setDone(true);
+                        setHeroIntroPlayed();
+                      }
+                    : undefined
                 }
               >
                 {ch === " " ? " " : ch}
@@ -104,7 +115,7 @@ export default function Hero({ dict }: { dict: Dictionary }) {
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={introPlayed ? false : { opacity: 0, y: 16 }}
           animate={ready ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
           transition={{ duration: 0.7, delay: 0.7, ease: EASE }}
           className="mt-6 max-w-md text-balance text-current/90"
@@ -114,7 +125,7 @@ export default function Hero({ dict }: { dict: Dictionary }) {
       </div>
 
       <motion.div
-        initial={{ opacity: 0 }}
+        initial={introPlayed ? false : { opacity: 0 }}
         animate={ready ? { opacity: 1 } : { opacity: 0 }}
         transition={{ delay: 1.0, duration: 0.6 }}
         className="absolute bottom-28 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-[#f5f0e6]/80"

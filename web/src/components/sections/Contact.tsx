@@ -100,6 +100,7 @@ export default function Contact({
                   name="name"
                   type="text"
                   required
+                  maxLength={100}
                   placeholder={c.namePlaceholder}
                   className={fieldCls}
                 />
@@ -110,6 +111,7 @@ export default function Contact({
                   name="email"
                   type="email"
                   required
+                  maxLength={254}
                   placeholder={c.emailPlaceholder}
                   className={fieldCls}
                 />
@@ -122,6 +124,7 @@ export default function Contact({
                 name="message"
                 required
                 rows={5}
+                maxLength={2000}
                 placeholder={c.messagePlaceholder}
                 className={cn(fieldCls, "resize-none")}
               />

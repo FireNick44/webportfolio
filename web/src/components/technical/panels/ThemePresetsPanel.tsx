@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 // edits (those would otherwise visibly clobber the new preset's tokens).
 export default function ThemePresetsPanel() {
   const setTheme = useAppStore((s) => s.setTheme);
+  const setThemeMode = useAppStore((s) => s.setThemeMode);
   const preset = useAppStore((s) => s.preset);
   const setPreset = useAppStore((s) => s.setPreset);
   const setTokenOverrides = useAppStore((s) => s.setTokenOverrides);
@@ -21,6 +22,10 @@ export default function ThemePresetsPanel() {
 
   const applyPreset = (p: ThemePreset) => {
     setTheme(p.scheme);
+    // Pin the mode to the preset's scheme too — leaving it on "device" lets
+    // the OS colour-scheme listener re-impose the wrong scheme later (half-
+    // applied preset), and "random" keeps the wrong switch position lit.
+    setThemeMode(p.scheme);
     setPreset(p.id);
     if (p.tokens) {
       const map: Record<string, string> = {};

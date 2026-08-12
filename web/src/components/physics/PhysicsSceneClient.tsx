@@ -13,8 +13,10 @@ const PhysicsScene = dynamic(() => import("./PhysicsScene"), {
 
 export default function PhysicsSceneClient({
   backdrop,
+  labels,
 }: {
   backdrop?: ReactNode;
+  labels: { activate: string; drag: string; collide: string };
 }) {
-  return <PhysicsScene backdrop={backdrop} />;
+  return <PhysicsScene backdrop={backdrop} labels={labels} />;
 }

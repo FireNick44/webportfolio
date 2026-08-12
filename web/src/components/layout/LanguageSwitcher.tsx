@@ -16,7 +16,10 @@ export function LanguageSwitcher({ lang }: { lang: string }) {
     setLanguage(l);
     const segments = pathname.split("/");
     segments[1] = l;
-    router.push(segments.join("/") || `/${l}`);
+    // Carry query + hash across the locale swap — dropping them would lose
+    // shareable state like the `?shuffle=<seed>` random-theme link.
+    const suffix = window.location.search + window.location.hash;
+    router.push((segments.join("/") || `/${l}`) + suffix);
   };
 
   return (

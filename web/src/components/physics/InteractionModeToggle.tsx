@@ -5,10 +5,7 @@ import { motion } from "motion/react";
 
 import { useAppStore } from "@/lib/store/useAppStore";
 
-const MODES = [
-  { id: "drag", label: "Drag" },
-  { id: "collide", label: "Push" },
-] as const;
+const MODE_IDS = ["drag", "collide"] as const;
 
 /** Per-mode mini-animation rendered inside each toggle button while the rack
  *  is NOT yet activated. Replaces the old full-rack FlaskHint scrim — each
@@ -61,8 +58,11 @@ function ModeMini({
  *  Hidden on touch (`hidden md:flex`). */
 export default function InteractionModeToggle({
   activated,
+  labels,
 }: {
   activated: boolean;
+  /** Localized labels keyed by mode id (drag / collide). */
+  labels: Record<(typeof MODE_IDS)[number], string>;
 }) {
   const mode = useAppStore((s) => s.interactionMode);
   const setMode = useAppStore((s) => s.setInteractionMode);
@@ -75,13 +75,17 @@ export default function InteractionModeToggle({
       onMouseDown={stop}
     >
       <div className="flex items-center gap-1 rounded-full border border-white/15 bg-black/40 p-1 text-xs backdrop-blur">
-        {MODES.map(({ id, label }) => {
+        {MODE_IDS.map((id) => {
+          const label = labels[id];
           const active = mode === id;
           return (
             <button
               key={id}
               type="button"
               aria-pressed={active}
+              // Inside the rack's aria-hidden container — must not be
+              // keyboard-focusable (aria-hidden-focus), pointer-only by design.
+              tabIndex={-1}
               onClick={() => setMode(id)}
               className="relative flex items-center gap-1.5 rounded-full px-3 py-1"
             >

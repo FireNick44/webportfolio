@@ -17,7 +17,7 @@ const MAX_VISIBLE = 3500;
 // swap so the user sees a clean colour transition rather than an in-place flash.
 const REPLAY_VISIBLE = 1400;
 
-export default function LoadingScreen() {
+export default function LoadingScreen({ label }: { label: string }) {
   const setHasShownLoader = useAppStore((s) => s.setHasShownLoader);
   const loaderShowRequest = useAppStore((s) => s.loaderShowRequest);
   // Visible by default so the overlay is in the FIRST (server-rendered) paint and
@@ -87,7 +87,7 @@ export default function LoadingScreen() {
       </svg>
 
       <span className="font-mono text-[0.65rem] uppercase tracking-[0.32em] text-muted-foreground/70">
-        calibrating workspace
+        {label}
       </span>
     </div>
   );

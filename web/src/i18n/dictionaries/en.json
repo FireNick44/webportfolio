@@ -23,7 +23,13 @@
     "label": "02 / Skills",
     "title": "Suspended in solution",
     "subtitle": "Every flask holds a tool I work with, hanging on its own chain.",
-    "hint": "Stir up the flasks"
+    "hint": "Stir up the flasks",
+    "activate": "Click to activate",
+    "modeDrag": "Drag",
+    "modePush": "Push"
+  },
+  "loader": {
+    "calibrating": "calibrating workspace"
   },
   "projects": {
     "label": "03 / Selected work",

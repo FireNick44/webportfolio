@@ -6,14 +6,16 @@ import { useAppStore } from "@/lib/store/useAppStore";
 // "Store state" tab — raw JSON dump of the Zustand store, with action
 // functions stripped (typeof v === "function" is replaced with undefined and
 // disappears via JSON.stringify). Useful for debugging persistence + token
-// override state without opening DevTools.
+// override state without opening DevTools. Subscribes via the hook (not
+// getState()) so the dump stays live while visible.
 export default function StoreTab() {
+  const state = useAppStore();
   return (
     <div className="mt-8 border border-border">
       <PanelHead>Store state</PanelHead>
       <pre className="overflow-x-auto p-4 font-mono text-xs leading-relaxed text-muted-foreground">
         {JSON.stringify(
-          useAppStore.getState(),
+          state,
           (k, v) => (typeof v === "function" ? undefined : v),
           2,
         )}

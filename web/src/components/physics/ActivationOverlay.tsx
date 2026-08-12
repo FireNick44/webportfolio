@@ -10,9 +10,11 @@ import { AnimatePresence, motion } from "motion/react";
 export default function ActivationOverlay({
   show,
   onActivate,
+  label,
 }: {
   show: boolean;
   onActivate: () => void;
+  label: string;
 }) {
   return (
     <AnimatePresence>
@@ -20,6 +22,10 @@ export default function ActivationOverlay({
         <motion.button
           type="button"
           onClick={onActivate}
+          // The rack container is aria-hidden (decorative, pointer-only); a
+          // focusable child inside it is an aria-hidden-focus violation, so
+          // keep this mouse/touch-only.
+          tabIndex={-1}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -31,7 +37,7 @@ export default function ActivationOverlay({
           className="absolute inset-0 z-40 flex cursor-pointer items-center justify-center bg-black/55 backdrop-blur-[2px]"
         >
           <span className="rounded-full border border-white/30 bg-white/10 px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white/90 shadow-[0_0_24px_rgba(0,0,0,0.4)] backdrop-blur-sm">
-            Click to activate
+            {label}
           </span>
         </motion.button>
       )}

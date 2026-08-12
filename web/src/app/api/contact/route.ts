@@ -6,6 +6,13 @@ import { ContactEmail } from "@/lib/email/ContactEmail";
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+// Size limits (mirrored as maxLength on the form fields in Contact.tsx):
+// unbounded input would let anyone stuff megabytes into the email body, and
+// `name` is interpolated into the subject line.
+const MAX_NAME = 100;
+const MAX_EMAIL = 254; // RFC 5321 upper bound
+const MAX_MESSAGE = 2000;
+
 export async function POST(req: NextRequest) {
   let payload: {
     name?: string;
@@ -28,7 +35,15 @@ export async function POST(req: NextRequest) {
   // Honeypot — bots fill hidden fields. Pretend success, send nothing.
   if (payload.company) return NextResponse.json({ ok: true });
 
-  if (!name || !email || !message || !EMAIL_RE.test(email)) {
+  if (
+    !name ||
+    !email ||
+    !message ||
+    !EMAIL_RE.test(email) ||
+    name.length > MAX_NAME ||
+    email.length > MAX_EMAIL ||
+    message.length > MAX_MESSAGE
+  ) {
     return NextResponse.json({ ok: false, error: "invalid" }, { status: 400 });
   }
 

@@ -22,6 +22,12 @@ export interface Dictionary {
     title: string;
     subtitle: string;
     hint: string;
+    activate: string;
+    modeDrag: string;
+    modePush: string;
+  };
+  loader: {
+    calibrating: string;
   };
   projects: {
     label: string;

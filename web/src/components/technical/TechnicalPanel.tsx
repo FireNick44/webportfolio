@@ -61,7 +61,6 @@ export default function TechnicalPanel({
         {lang === "en" ? "Home" : "Startseite"}
       </button>
 
-      <span className="lab-label">— / {dict.nav.technical}</span>
       <h1 className="mt-4 font-display text-4xl font-bold tracking-tight sm:text-5xl">
         {dict.nav.technical}
       </h1>

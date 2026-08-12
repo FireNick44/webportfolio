@@ -52,16 +52,10 @@ export function middleware(request: NextRequest) {
     );
   }
 
-  const segments = pathname.split("/");
-  const first = segments[1];
-  if (first && !(locales as readonly string[]).includes(first)) {
-    segments[1] = defaultLocale;
-    return NextResponse.redirect(new URL(segments.join("/"), request.url));
-  }
 }
 
 export const config = {
   matcher: [
-    "/((?!api|_next/static|_next/image|favicon.ico|skills|img|svg|fonts|manifest.json|v/|.*\\..*).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|skills|img|svg|fonts|v/|.*\\..*).*)",
   ],
 };

@@ -44,6 +44,12 @@ export default function Header({
 
   const goTo = (id: string) => {
     setOpen(false);
+    // On subpages (technical / legal) the section ids don't exist — route back
+    // to the locale home with the section hash so the browser lands on it.
+    if (pathname !== homePath) {
+      navigateTo(`${homePath}#${id}`);
+      return;
+    }
     setTimeout(() => {
       document
         .getElementById(id)
