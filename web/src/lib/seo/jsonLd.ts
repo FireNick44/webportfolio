@@ -9,7 +9,8 @@ const SITE = "https://a36.dev";
 // Order doesn't matter; quantity + authority of these does.
 const SAME_AS: string[] = [
   "https://github.com/FireNick44",
-  // TODO: add LinkedIn, X/Twitter, Mastodon, dev.to, Instagram, etc. as the
+  "https://www.linkedin.com/in/yannic-studer-4781a71b5",
+  // TODO: add X/Twitter, Mastodon, dev.to, Instagram, etc. as the
   // user provides them — each one strengthens the entity-recognition signal.
 ];
 
