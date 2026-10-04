@@ -2,6 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
+import type { SceneFrame } from "@/lib/outro/sceneLoop";
+
+import { useSceneLoop } from "./SceneLoopContext";
+
 /**
  * A big creature that occasionally cruises across the scene — left→right or
  * right→left at random, flipped to face the way it's swimming — on a randomized,
@@ -10,7 +14,7 @@ import { useEffect, useRef } from "react";
  */
 export function Rook() {
   const elRef = useRef<HTMLImageElement>(null);
-  const rafRef = useRef(0);
+  const loop = useSceneLoop();
   const st = useRef({
     active: false,
     t0: 0,
@@ -21,12 +25,12 @@ export function Rook() {
     nextAt: 0,
     init: false,
     dir: 1 as 1 | -1,
+    parked: false, // off-screen transform already written (write it once, not per frame)
   });
 
   useEffect(() => {
     const el = elRef.current;
     if (!el) return;
-    const scene = el.parentElement;
 
     const begin = (now: number, H: number) => {
       const s = st.current;
@@ -39,10 +43,16 @@ export function Rook() {
       s.dir = Math.random() < 0.5 ? 1 : -1; // L→R or R→L
     };
 
-    const frame = (now: number) => {
-      const rect = scene?.getBoundingClientRect();
-      const W = rect?.width || 1000;
-      const H = rect?.height || 800;
+    const park = () => {
+      const s = st.current;
+      if (s.parked) return;
+      s.parked = true;
+      el.style.transform = "translate(-99999px,0)";
+    };
+
+    const frame = ({ now, width, height }: SceneFrame) => {
+      const W = width || 1000;
+      const H = height || 800;
       const s = st.current;
 
       if (!s.init) {
@@ -57,8 +67,9 @@ export function Rook() {
         if (p >= 1) {
           s.active = false;
           s.nextAt = now + 300000 + Math.random() * 300000; // rare: once every ~5–10 min
-          el.style.transform = "translate(-99999px,0)";
+          park();
         } else {
+          s.parked = false;
           const ww = el.offsetWidth || 240;
           const span = W + ww * 2 + 120;
           // dir=1: off-left → off-right; dir=-1: off-right → off-left.
@@ -68,13 +79,11 @@ export function Rook() {
           el.style.transform = `translate(${x}px, ${y}px) scaleX(${-s.dir})`;
         }
       } else {
-        el.style.transform = "translate(-99999px,0)"; // parked off-screen
+        park(); // parked off-screen — no per-frame style write while waiting
       }
-      rafRef.current = requestAnimationFrame(frame);
     };
-    rafRef.current = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, []);
+    return loop.subscribe(frame);
+  }, [loop]);
 
   return (
     // eslint-disable-next-line @next/next/no-img-element

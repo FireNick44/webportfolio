@@ -4,6 +4,9 @@ import { useEffect, useMemo, useRef, type CSSProperties, type RefObject } from "
 
 import type { PointerField } from "@/lib/hooks/usePointerField";
 import { generateKelp } from "@/lib/outro/kelp";
+import type { SceneFrame } from "@/lib/outro/sceneLoop";
+
+import { useSceneLoop } from "./SceneLoopContext";
 
 const FALLOFF = 95; // px — smooth ramp zone around a strand's box
 const AMP_DEG = 3.5; // deg — slight (no left↔right flip)
@@ -41,8 +44,8 @@ export function Kelp({
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rafRef = useRef(0);
   const ampRef = useRef<number[]>([]);
+  const loop = useSceneLoop();
 
   // High tier: strands near the cursor sway a touch more — a gentle wave that
   // eases in as the cursor nears and eases out as it leaves (never snaps).
@@ -50,13 +53,15 @@ export function Kelp({
     if (!reactive || !pointer) return;
     const cont = containerRef.current;
     if (!cont) return;
-    const tick = (now: number) => {
+    const tick = ({ now }: SceneFrame) => {
       const p = pointer.current;
-      const cr = cont.getBoundingClientRect();
       const active = !!p && p.active;
       // Cursor in container-local coords (offset* boxes below are also local).
-      const cx = active ? p.clientX - cr.left : -99999;
-      const cy = active ? p.clientY - cr.top : -99999;
+      // The pointer field is already scene-local; this container is anchored
+      // at the scene's left edge, so only its top offset needs subtracting —
+      // an offset read, not a per-frame bounding-rect measurement.
+      const cx = active ? p.x - cont.offsetLeft : -99999;
+      const cy = active ? p.y - cont.offsetTop : -99999;
       for (let i = 0; i < wrapRefs.current.length; i++) {
         const el = wrapRefs.current[i];
         if (!el) continue;
@@ -75,11 +80,9 @@ export function Kelp({
         el.style.transform =
           amp > 0.003 ? `rotate(${amp * AMP_DEG * Math.sin(now / WAVE_MS + i * 0.6)}deg)` : "";
       }
-      rafRef.current = requestAnimationFrame(tick);
     };
-    rafRef.current = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [reactive, pointer]);
+    return loop.subscribe(tick);
+  }, [reactive, pointer, loop]);
 
   return (
     <div ref={containerRef} aria-hidden className={className}>

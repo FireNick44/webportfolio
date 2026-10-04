@@ -1,11 +1,17 @@
 import { forwardRef } from "react";
 
-import { FLASK_WIDTH, FLASK_HEIGHT } from "@/lib/physics/constants";
+import {
+  FLASK_WIDTH,
+  FLASK_HEIGHT,
+  FLASK_HITBOX_WIDTH,
+  FLASK_HITBOX_HEIGHT,
+} from "@/lib/physics/constants";
 import {
   FLASK_SHAPE_DEFS,
   FLASK_GLASS_STROKE,
   type FlaskShape,
 } from "@/lib/physics/flaskShapes";
+import { TOUCH_HIT_PAD } from "@/lib/physics/grabSelection";
 
 interface Props {
   id: string;
@@ -42,9 +48,9 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
     ref,
   ) => {
     const def = FLASK_SHAPE_DEFS[shape];
-    // The bob wraps the icon image as a CHILD of icon-wet/icon-dry, because
-    // syncDom REPLACES the transform attribute on those <g>s every frame — a
-    // child wrapper composes (rotate from parent, translateY here) untouched.
+    // The bob wraps the icon image as a CHILD of the #icon-<id> layer, because
+    // syncDom REPLACES that layer's transform (the tilt spring) — a child
+    // wrapper composes (rotate from parent, translateY here) untouched.
     const bobClass = iconBob !== undefined ? "flask-icon-bob" : undefined;
     const bobStyle =
       iconBob !== undefined
@@ -64,6 +70,12 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
     // by ±MAX_LIQUID_TILT_DEG. Sized off the shape's viewBox.
     const [, , vbW, vbH] = def.viewBox.split(" ").map(Number);
     const clipPad = Math.max(vbW, vbH);
+    // viewBox → px mapping of the <svg> below (preserveAspectRatio default =
+    // xMidYMid meet): uniform scale, centred. Lets the HTML icon layer sit
+    // exactly where the SVG <image> used to.
+    const vbScale = Math.min(FLASK_WIDTH / vbW, FLASK_HEIGHT / vbH);
+    const vbOffX = (FLASK_WIDTH - vbW * vbScale) / 2;
+    const vbOffY = (FLASK_HEIGHT - vbH * vbScale) / 2;
 
     // `color` is now a CSS-var ref (var(--flask-cN)) so it follows theme +
     // shuffle. Alpha is applied via fill-opacity on the path so the var can
@@ -222,27 +234,7 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
             fill={`url(#${gradId2})`}
           />
 
-          {/* 5. Skill icon — ONE copy, drawn AFTER the glass body so it reads in
-              FRONT of the glass. (Previously two identical copies clipped to the
-              wet/dry halves of the water line — the split produced no visible
-              difference, so it was collapsed to halve the per-frame icon raster.)
-              The bob (CSS) + the tilt spring (id ref) both still drive it. */}
-          {skillIcon && (
-            <g id={`icon-${id}`}>
-              <g className={bobClass} style={bobStyle}>
-                <image
-                  href={skillIcon}
-                  x={iconBox.x}
-                  y={iconBox.y}
-                  width={iconBox.w}
-                  height={iconBox.h}
-                  preserveAspectRatio="xMidYMid meet"
-                />
-              </g>
-            </g>
-          )}
-
-          {/* 6. Glass reflections — top sheen drawn over everything. */}
+          {/* 5. Glass reflections — top sheen drawn over everything. */}
           {sheens.map((s, i) => (
             <path
               key={i}
@@ -252,6 +244,73 @@ const FlaskSVG = forwardRef<HTMLDivElement, Props>(
             />
           ))}
         </svg>
+
+        {/* 6. Skill icon — an HTML layer OVER the svg, not an SVG <image>.
+            CSS transforms on SVG children can't be composited, so the idle bob
+            (and the tilt spring's per-frame rotate) re-rasterised the entire
+            flask texture every frame: ~27 flask repaints/frame while the rack
+            was on screen. As HTML with its own layer, the bob is a GPU-only
+            animation and the rotate is a compositor-only transform write.
+            #icon-<id> is what syncDom rotates; transform-origin = the shape's
+            pivot in px. Trade-off: the icon now paints above the sheens. */}
+        {skillIcon && (
+          <div
+            id={`icon-${id}`}
+            style={{
+              position: "absolute",
+              inset: 0,
+              transformOrigin: `${vbOffX + def.pivot.x * vbScale}px ${vbOffY + def.pivot.y * vbScale}px`,
+              willChange: "transform",
+              pointerEvents: "none",
+            }}
+          >
+            <div
+              className={bobClass}
+              style={{
+                position: "absolute",
+                left: vbOffX + iconBox.x * vbScale,
+                top: vbOffY + iconBox.y * vbScale,
+                width: iconBox.w * vbScale,
+                height: iconBox.h * vbScale,
+                // Promote at mount: the bob is paused until the rack is on
+                // screen, and a compositor layer created at animation start
+                // would put 27 layer rasters into the scroll-in frame.
+                willChange: bobClass ? "transform" : undefined,
+                ...bobStyle,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={skillIcon}
+                alt=""
+                draggable={false}
+                style={{ display: "block", width: "100%", height: "100%", objectFit: "contain" }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* 7. Touch hit layer — the ONLY pointer-events target inside a flask.
+            Sized to the Matter hitbox + TOUCH_HIT_PAD, centred like the body.
+            `touch-action: none` here (inside the rack's `pan-y` container)
+            means a touch that lands on a bottle is never taken over by the
+            browser as a scroll, so useMousePhysics can drag it in ANY
+            direction; it still hands strongly vertical swipes back to the
+            page via a JS pan. Skeletons aren't grabbable → no layer. */}
+        {!isSkeleton && (
+          <div
+            data-flask-hit=""
+            style={{
+              position: "absolute",
+              left: (FLASK_WIDTH - FLASK_HITBOX_WIDTH) / 2 - TOUCH_HIT_PAD,
+              top: (FLASK_HEIGHT - FLASK_HITBOX_HEIGHT) / 2 - TOUCH_HIT_PAD,
+              width: FLASK_HITBOX_WIDTH + TOUCH_HIT_PAD * 2,
+              height: FLASK_HITBOX_HEIGHT + TOUCH_HIT_PAD * 2,
+              pointerEvents: "auto",
+              touchAction: "none",
+            }}
+          />
+        )}
       </div>
     );
   },

@@ -1,4 +1,8 @@
 export interface Dictionary {
+  meta: {
+    /** Localised <title> for the home route (SEO: en/de must not share a title). */
+    title: string;
+  };
   nav: {
     me: string;
     skills: string;

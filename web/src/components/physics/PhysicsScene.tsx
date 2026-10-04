@@ -12,7 +12,7 @@ import {
 
 import { WaveDivider } from "@/components/ui/WaveDivider";
 import skills from "@/data/skills.json";
-import { FrameLoopContext, useFrameLoop } from "@/lib/hooks/useFrameLoop";
+import { useFrameLoop } from "@/lib/hooks/useFrameLoop";
 import { useGraphicsTier } from "@/lib/hooks/useGraphicsTier";
 import { useMousePhysics } from "@/lib/hooks/useMousePhysics";
 import { usePhysicsEngine } from "@/lib/hooks/usePhysicsEngine";
@@ -27,7 +27,7 @@ import { useAppStore } from "@/lib/store/useAppStore";
 
 import ActivationOverlay from "./ActivationOverlay";
 import ChainGradients from "./ChainGradients";
-import FlaskChain from "./FlaskChain";
+import FlaskRack from "./FlaskRack";
 import InteractionModeToggle from "./InteractionModeToggle";
 import PhysicsDebugOverlay from "./PhysicsDebugOverlay";
 import PushCursorIndicator from "./PushCursorIndicator";
@@ -133,8 +133,12 @@ export default function PhysicsScene({
     () => fieldConfigFor(tier, isMobile),
     [tier, isMobile],
   );
+  // Regenerate on "have dims at all" + height, NOT on every width change
+  // (resize translates bodies instead — see FlaskChain). Plain boolean so the
+  // dependency list is compiler-friendly.
+  const hasDims = dims.width > 0;
   const flasks = useMemo(() => {
-    if (dims.width === 0) return [];
+    if (!hasDims) return [];
     const skillPaths = skills.map((s) => s.svgPath);
     // svgPath → dominant icon colour, so flask water is picked to contrast.
     const colorByPath = Object.fromEntries(
@@ -153,7 +157,7 @@ export default function PhysicsScene({
       randomizeShapes,
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dims.width > 0, dims.height, layoutSeed, randomizeShapes, config]);
+  }, [hasDims, dims.height, layoutSeed, randomizeShapes, config]);
 
   useEffect(() => {
     if (dims.width === 0) return;
@@ -231,42 +235,21 @@ export default function PhysicsScene({
       {/* Shared gradient defs every ChainLinkSVG points at — one source instead
           of ~3000 per-link clones at peak density (see ChainGradients.tsx). */}
       <ChainGradients />
-      <FrameLoopContext.Provider value={loop}>
-        {dims.width > 0 &&
-          flasks.map((cfg, i) => (
-            <FlaskChain
-              key={`flask-${i}`}
-              engine={engine}
-              anchorX={rackOffsetX + cfg.xPct * rackWidth}
-              anchorY={cfg.anchorY}
-              instanceId={`flask-${i}`}
-              color={cfg.color}
-              segmentCount={cfg.segments}
-              layer={cfg.layer}
-              collisionLayer={cfg.collisionLayer}
-              scale={cfg.scale}
-              maxPhysicsSegments={config.maxPhysicsSegments}
-              isSkeleton={cfg.isSkeleton}
-              skillIcon={cfg.skillIcon}
-              shape={cfg.shape}
-              liquidOpacity={liquidOpacity}
-              active={active}
-              // Both desktop AND mobile collide now — bumping is the fun. On
-              // mobile, generateFlasks bands skill flasks into DEPTH_LAYERS
-              // collision groups (via cfg.collisionLayer) so a dragged flask
-              // only shoves its same-band neighbours and passes through the
-              // rest — the dense column no longer shoves itself off-screen the
-              // way blanket same-layer collision did, but it's no longer the
-              // old walls-only pass-through-everything either.
-              noFlaskCollision={false}
-              iconBob={
-                animateIcons
-                  ? { delay: (i * 0.41) % 2.6, dur: 2.0 + ((i * 0.29) % 1.3) }
-                  : undefined
-              }
-            />
-          ))}
-      </FrameLoopContext.Provider>
+      {/* Memoised: the chains must NOT re-render when `active`/mode/etc flip
+          (see FlaskRack). Every prop below is referentially stable across
+          those re-renders. */}
+      {hasDims && (
+        <FlaskRack
+          engine={engine}
+          loop={loop}
+          flasks={flasks}
+          rackOffsetX={rackOffsetX}
+          rackWidth={rackWidth}
+          maxPhysicsSegments={config.maxPhysicsSegments}
+          liquidOpacity={liquidOpacity}
+          animateIcons={animateIcons}
+        />
+      )}
 
       <InteractionModeToggle
         activated={activated}

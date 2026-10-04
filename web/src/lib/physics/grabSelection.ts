@@ -4,6 +4,14 @@ import Matter from "matter-js";
 // directly on one.
 export const GRAB_RADIUS = 56;
 
+// Touch hit layer padding (px, flask-local, before layer scale): each physics
+// flask renders an invisible `[data-flask-hit]` box this much larger than its
+// Matter hitbox on every side. A finger landing on it commits to the flask
+// (touch-action: none → the browser never turns that gesture into a scroll),
+// so re-grabbing a bottle can't fall back to page scroll. Bigger = easier to
+// catch a swinging bottle, but more of the section stops native-scrolling.
+export const TOUCH_HIT_PAD = 12;
+
 /** Drag-mode pickable: flasks and individual chain links. */
 export function isGrabbable(b: Matter.Body): boolean {
   return (

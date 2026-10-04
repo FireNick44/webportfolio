@@ -16,11 +16,22 @@ const MAX_DRAG_REACH = 100;
 // Touch only: pixels a finger must travel before we resolve drag-vs-scroll.
 // Below this on release → a tap (nudge). Past it, the dominant axis decides:
 // horizontal commits a drag, vertical lets the page scroll (touch-action pan-y).
+// Applies to touches in the GAPS / on chains (the container's `pan-y` area).
 const TOUCH_SLOP = 14;
 // Horizontal bias: a vertical-intended swipe with slight horizontal jitter
 // should resolve as scroll, not falsely commit a drag. Require dx to dominate
 // dy by 30 % before we lock in a drag; otherwise it's a scroll.
 const TOUCH_AXIS_BIAS = 1.3;
+// Touches that land ON a bottle (`[data-flask-hit]`, touch-action: none — the
+// browser can't scroll that gesture) resolve by TARGET, not direction: any
+// pull past this smaller slop is a drag, down/diagonal included (bottles hang
+// on chains, pulling down is the natural gesture). Tune on a real thumb.
+const TOUCH_FLASK_SLOP = 8;
+// …unless the pull is STRONGLY vertical: |dy| > |dx| × this → the user was
+// swiping the page and happened to land on a bottle. We hand that back as a
+// JS-driven pan (scrollBy following the finger). Trade-off: that one swipe
+// has no fling momentum. 2.2 ≈ steeper than ~65° from horizontal.
+const TOUCH_VERTICAL_ESCAPE = 2.2;
 // Sideways velocity a tap imparts, so a pure tap still makes a flask swing.
 const TAP_NUDGE_VX = 3;
 
@@ -46,9 +57,18 @@ export function useMousePhysics(
 ) {
   const constraintRef = useRef<Matter.Constraint | null>(null);
   // Touch gesture lock: on touch we DON'T grab on pointerdown — we record the
-  // start point and wait for the first move to read intent (horizontal → drag,
-  // vertical → let the page scroll). Stays null on mouse (no scroll conflict).
-  const pendingRef = useRef<{ x0: number; y0: number } | null>(null);
+  // start point and wait for the first move to read intent. `onFlask` = the
+  // touch landed on a bottle's hit layer (touch-action: none): then the drag
+  // commits in any direction except a strongly vertical pull, which becomes a
+  // JS pan. Off-bottle: horizontal → drag, vertical → native scroll (pan-y).
+  // Stays null on mouse (no scroll conflict).
+  const pendingRef = useRef<{ x0: number; y0: number; onFlask: boolean } | null>(
+    null,
+  );
+  // JS pan escape hatch: a vertical swipe that started on a bottle. The browser
+  // can't scroll it (touch-action: none was decided at touch start), so we
+  // scroll the page ourselves from pointermove until release.
+  const panRef = useRef<{ lastY: number } | null>(null);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -199,8 +219,15 @@ export function useMousePhysics(
       const p = pendingRef.current;
       if (p && !constraintRef.current) {
         const moved = Math.hypot(e.clientX - p.x0, e.clientY - p.y0);
-        if (moved < TOUCH_SLOP) tapNudge(p.x0, p.y0);
+        const slop = p.onFlask ? TOUCH_FLASK_SLOP : TOUCH_SLOP;
+        if (moved < slop) tapNudge(p.x0, p.y0);
       }
+      panRef.current = null;
+      endDrag();
+    };
+
+    const onPointerCancel = () => {
+      panRef.current = null;
       endDrag();
     };
 
@@ -211,8 +238,12 @@ export function useMousePhysics(
         // Mouse: no scroll conflict — grab immediately for instant response.
         startDrag(e.clientX, e.clientY);
       } else {
-        // Touch/pen: defer. Record the start; the first move decides drag vs scroll.
-        pendingRef.current = { x0: e.clientX, y0: e.clientY };
+        // Touch/pen: defer. Record the start + whether it landed on a bottle's
+        // hit layer; the first move decides drag vs scroll.
+        const onFlask =
+          e.target instanceof Element &&
+          e.target.closest("[data-flask-hit]") !== null;
+        pendingRef.current = { x0: e.clientX, y0: e.clientY, onFlask };
       }
     };
 
@@ -232,11 +263,35 @@ export function useMousePhysics(
         moveDrag(e.clientX, e.clientY);
         return;
       }
+      // JS pan (vertical swipe that started on a bottle): scroll the page by
+      // the finger delta. `instant` — html has scroll-behavior: smooth, which
+      // would otherwise animate every step and lag the finger.
+      const pan = panRef.current;
+      if (pan) {
+        const delta = pan.lastY - e.clientY;
+        pan.lastY = e.clientY;
+        if (delta !== 0) window.scrollBy({ top: delta, behavior: "instant" });
+        return;
+      }
       // Touch gesture lock: resolve a pending touch once it's past the slop.
       const p = pendingRef.current;
       if (p) {
         const dx = e.clientX - p.x0;
         const dy = e.clientY - p.y0;
+        if (p.onFlask) {
+          // On a bottle: the browser won't scroll this gesture, so we own it.
+          if (Math.max(Math.abs(dx), Math.abs(dy)) < TOUCH_FLASK_SLOP) return;
+          pendingRef.current = null;
+          if (Math.abs(dy) > Math.abs(dx) * TOUCH_VERTICAL_ESCAPE) {
+            // Strongly vertical → they meant to scroll. Pan from here; the
+            // slop distance already travelled is not replayed (feels fine).
+            panRef.current = { lastY: e.clientY };
+            return;
+          }
+          startDrag(p.x0, p.y0);
+          moveDrag(e.clientX, e.clientY);
+          return;
+        }
         if (Math.max(Math.abs(dx), Math.abs(dy)) < TOUCH_SLOP) return; // still ambiguous
         if (Math.abs(dx) > Math.abs(dy) * TOUCH_AXIS_BIAS) {
           // Horizontal intent → commit the drag. Grab at the ORIGINAL touch
@@ -263,7 +318,7 @@ export function useMousePhysics(
     };
 
     const onVisibility = () => {
-      if (document.visibilityState === "hidden") endDrag();
+      if (document.visibilityState === "hidden") onPointerCancel();
     };
     // Critical: the decorative backdrop is an <img>, which is draggable by
     // default — without this, pressing it starts a native image drag-and-drop
@@ -295,8 +350,8 @@ export function useMousePhysics(
     // drag.
     window.addEventListener("pointermove", onPointerMove);
     window.addEventListener("pointerup", onPointerUp);
-    window.addEventListener("pointercancel", endDrag);
-    window.addEventListener("blur", endDrag);
+    window.addEventListener("pointercancel", onPointerCancel);
+    window.addEventListener("blur", onPointerCancel);
     // Scroll behaviour depends on mode: drag → cancel any active drag (avoids
     // a stuck constraint as the page scrolls under the cursor); collide →
     // re-sync the cursor body so it tracks the rack rect (rack is sticky, but
@@ -321,8 +376,8 @@ export function useMousePhysics(
       container.removeEventListener("dragstart", onDragStart);
       window.removeEventListener("pointermove", onPointerMove);
       window.removeEventListener("pointerup", onPointerUp);
-      window.removeEventListener("pointercancel", endDrag);
-      window.removeEventListener("blur", endDrag);
+      window.removeEventListener("pointercancel", onPointerCancel);
+      window.removeEventListener("blur", onPointerCancel);
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibility);
       endDrag();

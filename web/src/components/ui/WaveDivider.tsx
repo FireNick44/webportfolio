@@ -1,3 +1,9 @@
+"use client";
+
+import { useRef } from "react";
+
+import { useSmilPause } from "@/lib/hooks/useSmilPause";
+
 // Animated wave divider. Each wave is several layered oscillators (mixed
 // sin/cos, random freq/phase/amplitude) summed and then NORMALISED to a
 // controlled amplitude band — like stacking synth/"DJ" waveforms — so the shape
@@ -97,12 +103,24 @@ export function WaveDivider({
   const rng = mulberry32(seed);
   const back = makeWave(rng, 64, 16);
   const front = makeWave(rng, 52, 20);
+  // Two SMIL path morphs per divider, five dividers on the page: pause the
+  // ones that are scrolled away instead of re-tessellating them every frame.
+  const ref = useRef<HTMLDivElement>(null);
+  useSmilPause(ref);
 
   return (
     <div
+      ref={ref}
       aria-hidden
       className={className}
-      style={{ lineHeight: 0, transform: flip ? "scaleY(-1)" : undefined }}
+      // Own compositor layer: the SMIL path morph repaints every frame while
+      // on screen; contained to this strip instead of invalidating the parent
+      // (inside the flask rack that parent is a 120vh promoted layer).
+      style={{
+        lineHeight: 0,
+        transform: flip ? "scaleY(-1)" : undefined,
+        willChange: "transform",
+      }}
     >
       <svg
         viewBox="0 0 1440 120"

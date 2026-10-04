@@ -30,17 +30,25 @@ export default function FlaskBackdrop() {
       aria-hidden
       className="pointer-events-none absolute inset-0 overflow-hidden"
     >
-      <motion.svg
-        style={{ y }}
-        viewBox="0 0 900 600"
-        preserveAspectRatio="xMidYMid slice"
-        shapeRendering="crispEdges"
-        className="absolute inset-0 h-full w-full scale-[1.5]"
+      {/* The parallax `y` lives on an HTML wrapper with its own compositor
+          layer: moving it is then a GPU-only transform update. Put directly on
+          the <svg> (no layer of its own) every scroll frame re-painted this
+          full-size terrain into the rack container's layer. */}
+      <motion.div
+        style={{ y, willChange: "transform" }}
+        className="absolute inset-0"
       >
-        {BG_PATHS.map((d, i) => (
-          <path key={i} d={d} fill={`var(--skills-bg-${i})`} />
-        ))}
-      </motion.svg>
+        <svg
+          viewBox="0 0 900 600"
+          preserveAspectRatio="xMidYMid slice"
+          shapeRendering="crispEdges"
+          className="absolute inset-0 h-full w-full scale-[1.5]"
+        >
+          {BG_PATHS.map((d, i) => (
+            <path key={i} d={d} fill={`var(--skills-bg-${i})`} />
+          ))}
+        </svg>
+      </motion.div>
     </div>
   );
 }

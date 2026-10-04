@@ -39,7 +39,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { lang } = await params;
   const dict = await getDictionary(lang as Locale);
-  const title = "Yannic Studer — Software Developer";
+  // Localised: Search Console had /de as "crawled – currently not indexed"
+  // while /en was indexed. Both routes shipped the identical English <title>,
+  // which makes /de read as a near-duplicate of /en to Google.
+  const title = dict.meta.title;
   // Lead with the name so "Yannic Studer" sits at the start of the meta
   // description — branded-query CTR and entity recognition both lean on it.
   const description = `Yannic Studer — ${dict.hero.tagline}`;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { BubblesBackdrop } from "@/components/bubbles/BubblesBackdrop";
 import { ByeSand } from "@/components/layout/ByeSand";
@@ -8,6 +8,7 @@ import { useGraphicsTier } from "@/lib/hooks/useGraphicsTier";
 import { usePointerField } from "@/lib/hooks/usePointerField";
 import { useSceneActive } from "@/lib/hooks/useSceneActive";
 import { isTap } from "@/lib/outro/ink";
+import { createSceneLoop } from "@/lib/outro/sceneLoop";
 import { atLeast, type GraphicsTier } from "@/lib/outro/tiers";
 
 import { Coral } from "./Coral";
@@ -17,6 +18,7 @@ import { Kelp } from "./Kelp";
 import { Octopus } from "./Octopus";
 import { Rook } from "./Rook";
 import { SandFloor } from "./SandFloor";
+import { SceneLoopContext } from "./SceneLoopContext";
 import { WaterCanvas } from "./WaterCanvas";
 
 
@@ -33,6 +35,23 @@ export function ReefScene() {
   const inkRef = useRef<InkHandle | null>(null);
   const tier = useGraphicsTier();
   const active = useSceneActive(containerRef);
+
+  // ONE rAF for every creature: measures the scene rect once per frame, then
+  // runs each subscriber (Rook, Crab, Octopus, Kelp, WaterCanvas). Starts on the
+  // first subscribe, stops on the last — creatures unmount when the scene is
+  // off-screen (`active`), so nothing runs while the reef isn't visible.
+  const loop = useMemo(
+    () =>
+      createSceneLoop({
+        schedule: (cb) => requestAnimationFrame(cb),
+        cancel: (id) => cancelAnimationFrame(id),
+      }),
+    [],
+  );
+  useEffect(() => {
+    loop.setTarget(containerRef.current);
+    return () => loop.setTarget(null);
+  }, [loop]);
 
   // Real mouse present? The octopus's cursor-awareness keys off this, NOT the
   // graphics tier — the AI is a few vector ops/frame, not a perf cost.
@@ -109,6 +128,7 @@ export function ReefScene() {
   }, [creaturesOn]);
 
   return (
+    <SceneLoopContext.Provider value={loop}>
     <div
       ref={containerRef}
       aria-hidden
@@ -163,5 +183,6 @@ export function ReefScene() {
       {creaturesOn && <InkCloud ref={inkRef} />}
       {creaturesOn && <Octopus pointer={pointer} tapRef={tapRef} inkRef={inkRef} />}
     </div>
+    </SceneLoopContext.Provider>
   );
 }

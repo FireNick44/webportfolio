@@ -5,6 +5,9 @@ import { useEffect, useRef, type RefObject } from "react";
 import type { PointerField } from "@/lib/hooks/usePointerField";
 import { generateBubbles } from "@/lib/outro/bubbles";
 import { repel } from "@/lib/outro/cursorPhysics";
+import type { SceneFrame } from "@/lib/outro/sceneLoop";
+
+import { useSceneLoop } from "./SceneLoopContext";
 
 // A live bubble: persistent position + a push velocity the cursor adds to.
 interface Bubble {
@@ -37,7 +40,7 @@ export function WaterCanvas({
   enableCursor?: boolean;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef(0);
+  const loop = useSceneLoop();
   const bubblesRef = useRef<Bubble[]>([]);
 
   useEffect(() => {
@@ -73,10 +76,8 @@ export function WaterCanvas({
     const ro = new ResizeObserver(resize);
     ro.observe(canvas);
 
-    let last = performance.now();
-    const frame = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
+    const frame = ({ now, dtMs }: SceneFrame) => {
+      const dt = dtMs / 1000; // seconds, clamped by the scene loop
       ctx.clearRect(0, 0, w, h);
 
       const p = enableCursor ? pointer?.current : null;
@@ -122,15 +123,14 @@ export function WaterCanvas({
         ctx.stroke();
       }
 
-      rafRef.current = requestAnimationFrame(frame);
     };
-    rafRef.current = requestAnimationFrame(frame);
+    const unsubscribe = loop.subscribe(frame);
 
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      unsubscribe();
       ro.disconnect();
     };
-  }, [active, bubbleCount, seed, pointer, enableCursor]);
+  }, [active, bubbleCount, seed, pointer, enableCursor, loop]);
 
   return <canvas ref={canvasRef} aria-hidden className="pointer-events-none absolute inset-0 z-[1] h-full w-full" />;
 }

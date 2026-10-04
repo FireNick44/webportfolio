@@ -7,7 +7,13 @@ export default function About({ dict, lang }: { dict: Dictionary; lang?: string 
   return (
     <section
       id="me"
-      className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36"
+      // `overflow-x-clip`: AboutPhoto spins in from -250deg, and a rotated
+      // square's bounding box is up to 1.41x wider than its column. On mobile
+      // (photo = full column width) that briefly extends the document's
+      // scrollable width and the page can be dragged sideways. `clip` (not
+      // `hidden`) so no scroll container is created and the `lg:sticky` photo
+      // column below still sticks to the viewport.
+      className="relative mx-auto max-w-7xl overflow-x-clip px-5 py-28 sm:px-8 sm:py-36"
     >
       {/* Centered intro at the top (label + title + bio). Lifted out of the
           right column so the photo and skills table can sit side-by-side below

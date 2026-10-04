@@ -5,22 +5,6 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { PointerField } from "@/lib/hooks/usePointerField";
 import { classifyTap, enoughOnTaps, INK_TAPS, INK_WINDOW, INK_COOLDOWN, INK_DROP, INK_DASH_DELAY } from "@/lib/outro/ink";
 import { smoothSpeed, nextMode, FLEE_EXIT_SPEED, SPOOK_MS, type OctoMode } from "@/lib/outro/octopusMotion";
-import { useAppStore } from "@/lib/store/useAppStore";
-
-import type { InkHandle } from "./InkCloud";
-
-/**
- * Cursor-aware octopus (reacts to the real cursor — we never move it):
- *  - cursor still → curious: it loops AROUND the cursor on a wobbly,
- *    randomised orbit (radius + angular speed vary, re-seeded each session);
- *  - cursor moving → afraid: it steers away (quicker the more scared it is),
- *    and persistent close hunting builds scare → it darts off-screen to hide,
- *    then sneaks back.
- * Speed varies with mood: gentle while orbiting, quick while fleeing. In
- * advanced mode it draws its target trail so the motion is easy to debug.
- *
- * Tuning constants + pickSpot live in `lib/outro/octopusTuning.ts`.
- */
 import {
   AVOID_FORCE,
   AVOID_R,
@@ -45,6 +29,25 @@ import {
   SPRING,
   TAU,
 } from "@/lib/outro/octopusTuning";
+import type { SceneFrame } from "@/lib/outro/sceneLoop";
+import { useAppStore } from "@/lib/store/useAppStore";
+
+import { useSceneLoop } from "./SceneLoopContext";
+
+import type { InkHandle } from "./InkCloud";
+
+/**
+ * Cursor-aware octopus (reacts to the real cursor — we never move it):
+ *  - cursor still → curious: it loops AROUND the cursor on a wobbly,
+ *    randomised orbit (radius + angular speed vary, re-seeded each session);
+ *  - cursor moving → afraid: it steers away (quicker the more scared it is),
+ *    and persistent close hunting builds scare → it darts off-screen to hide,
+ *    then sneaks back.
+ * Speed varies with mood: gentle while orbiting, quick while fleeing. In
+ * advanced mode it draws its target trail so the motion is easy to debug.
+ *
+ * Tuning constants + pickSpot live in `lib/outro/octopusTuning.ts`.
+ */
 
 export function Octopus({
   pointer,
@@ -57,7 +60,7 @@ export function Octopus({
 }) {
   const elRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const rafRef = useRef(0);
+  const loop = useSceneLoop();
   const [failed, setFailed] = useState(false);
   const advanced = useAppStore((s) => s.advanced);
   const s = useRef({
@@ -78,16 +81,12 @@ export function Octopus({
   useEffect(() => {
     const el = elRef.current;
     if (!el) return;
-    const scene = el.parentElement;
-    let last = performance.now();
 
-    const frame = (now: number) => {
-      const dt = Math.min((now - last) / 1000, 0.05);
-      last = now;
+    const frame = ({ now, dtMs, width, height }: SceneFrame) => {
+      const dt = dtMs / 1000; // seconds, clamped by the scene loop
       const st = s.current;
-      const rect = scene?.getBoundingClientRect();
-      const W = rect?.width || 800;
-      const H = rect?.height || 400;
+      const W = width || 800;
+      const H = height || 400;
 
       if (!st.init) {
         st.x = W * 0.5; st.y = H * 0.5; st.tx = st.x; st.ty = st.y;
@@ -385,11 +384,9 @@ export function Octopus({
         ctx.beginPath(); ctx.arc(st.x, st.y, 4.5, 0, TAU); ctx.fill();
       }
 
-      rafRef.current = requestAnimationFrame(frame);
     };
-    rafRef.current = requestAnimationFrame(frame);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [pointer]);
+    return loop.subscribe(frame);
+  }, [pointer, loop]);
 
   return (
     <>

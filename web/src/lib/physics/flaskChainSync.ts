@@ -53,7 +53,8 @@ export interface SyncContext {
   chainEls: (HTMLDivElement | null)[];
   flaskEl: HTMLDivElement | null;
   liquidRectEl: SVGRectElement | null;
-  iconEl: SVGGElement | null;
+  /** HTML overlay div (see FlaskSVG) — its transform-origin is the shape pivot. */
+  iconEl: HTMLElement | null;
   staticCount: number;
   scale: number;
   shape: FlaskShape;
@@ -141,9 +142,11 @@ function syncFlaskBody(ctx: SyncContext): { fb: Matter.Body; clampedDeg: number 
 /** Step the icon's delayed-overshoot spring toward the liquid angle and write
  *  its transform when the rendered angle has actually moved. The maths is
  *  cheap and always runs (keeps the spring live); only the DOM write is
- *  gated so the spring stops repainting once it damps out. */
+ *  gated. The icon is an HTML layer with `will-change: transform` and its
+ *  transform-origin set to the shape pivot, so this write is compositor-only
+ *  (it used to be an SVG attribute rewrite → full flask re-raster). */
 function stepIconSpring(ctx: SyncContext, target: number) {
-  const { iconEl, shape, deadband } = ctx;
+  const { iconEl, deadband } = ctx;
   const dt = 1 / 60;
   const stiffness = 4.5;
   const damping = 0.55;
@@ -153,11 +156,7 @@ function stepIconSpring(ctx: SyncContext, target: number) {
   deadband.iconAngle += deadband.iconVel * dt;
   if (Math.abs(deadband.iconAngle - deadband.lastIconDeg) >= ICON_WRITE_EPSILON) {
     deadband.lastIconDeg = deadband.iconAngle;
-    const pivot = FLASK_SHAPE_DEFS[shape].pivot;
-    iconEl?.setAttribute(
-      "transform",
-      `rotate(${deadband.iconAngle}, ${pivot.x}, ${pivot.y})`,
-    );
+    if (iconEl) iconEl.style.transform = `rotate(${deadband.iconAngle}deg)`;
   }
 }
 

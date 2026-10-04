@@ -348,6 +348,13 @@ html.vt-no-transition * {
 }
 
 /* Underwater outro: kelp sway (rotation about the strand base). */
+/* VinylDisk backspin (compositor-driven; play-state toggled off-screen). */
+@keyframes vinyl-spin {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
 @keyframes kelp-sway {
   0%,
   100% {

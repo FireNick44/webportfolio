@@ -2,8 +2,8 @@
 
 import { ReactNode, useEffect } from "react";
 
-import { applyTokenOverrides } from "@/lib/theme/applyTokenOverrides";
 import { useAppStore, STORAGE_KEY } from "@/lib/store/useAppStore";
+import { applyTokenOverrides } from "@/lib/theme/applyTokenOverrides";
 
 export default function AppStateProvider({
   children,
@@ -24,14 +24,23 @@ export default function AppStateProvider({
   }, [lang, setLanguage]);
 
   useEffect(() => {
+    // Mobile browsers fire `resize` on every URL-bar show/hide mid-scroll, and
+    // the store is persisted (each set = JSON.stringify + a synchronous
+    // localStorage write). Only push when the screen itself changed
+    // (orientation), never per resize event.
+    let last = "";
     const update = () => {
       if (typeof window === "undefined") return;
+      const screen = { width: window.screen.width, height: window.screen.height };
+      const key = `${screen.width}x${screen.height}`;
+      if (key === last) return;
+      last = key;
       setDeviceInfo({
         userAgent: navigator.userAgent,
         platform:
           (navigator as Navigator & { platform?: string }).platform || "unknown",
         language: navigator.language,
-        screen: { width: window.screen.width, height: window.screen.height },
+        screen,
       });
     };
     update();

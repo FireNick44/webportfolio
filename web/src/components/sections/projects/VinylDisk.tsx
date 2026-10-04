@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useInView } from "motion/react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 
 // Spinning vinyl disc ported from /Users/yannic/dev/beatloops (VinylDisk.tsx).
 // Renders a 15×15 grid clipped to a circle: a static groove layer below, a
@@ -100,10 +100,17 @@ export default function VinylDisk({
 }: VinylDiskProps) {
   const [frame, setFrame] = useState(0);
 
+  // Only animate while the disc is (nearly) on screen. Each tick re-renders
+  // 2×225 cells; unconditionally that's ~9 React commits/s for the whole visit,
+  // which shows up as periodic main-thread spikes while scrolling elsewhere.
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { margin: "120px" });
+
   useEffect(() => {
+    if (!inView) return;
     const id = setInterval(() => setFrame((f) => (f + 1) % FRAMES), speed);
     return () => clearInterval(id);
-  }, [speed]);
+  }, [speed, inView]);
 
   // ~2–3px between cells, scaled with the disc.
   const gap = Math.max(1, Math.round(size / 60));
@@ -128,6 +135,7 @@ export default function VinylDisk({
     // `size × size` so layout space matches the un-tilted disc; the visual
     // height after tilt is roughly `size * cos(tiltDeg)`.
     <div
+      ref={ref}
       aria-hidden
       style={{
         position: "relative",
@@ -163,19 +171,18 @@ export default function VinylDisk({
             border-radius:50% on a same-size container is far cheaper than
             clip-path on Safari (clip-path forces a raster pass per repaint;
             border-radius rounds the layer's bitmap edge once). */}
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{
-            duration: backspinSeconds,
-            repeat: Infinity,
-            ease: "linear",
-          }}
+        <div
           style={{
             position: "absolute",
             inset: 0,
             borderRadius: "50%",
             overflow: "hidden",
             willChange: "transform",
+            // CSS keyframes (globals.css) instead of motion's `rotate`: a
+            // transform animation on an HTML element runs on the compositor,
+            // while motion's rotate is a JS frame-loop write every frame.
+            animation: `vinyl-spin ${backspinSeconds}s linear infinite`,
+            animationPlayState: inView ? "running" : "paused",
           }}
         >
           {/* Layer 1 — static groove dots. border-radius beats clip-path on
@@ -206,7 +213,7 @@ export default function VinylDisk({
               />
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
     </div>
   );

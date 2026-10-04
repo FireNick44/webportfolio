@@ -2,6 +2,10 @@
 
 import { useEffect, useRef } from "react";
 
+import type { SceneFrame } from "@/lib/outro/sceneLoop";
+
+import { useSceneLoop } from "./SceneLoopContext";
+
 const SOLO_SIZE = 118;
 const SOLO_DUR = 16000; // avg ms for one crossing (loops continuously)
 
@@ -44,9 +48,8 @@ type DeadState = { hit: boolean; hitAt: number; x: number; dir: 1 | -1 };
 export function Crab() {
   const soloRef = useRef<HTMLImageElement>(null);
   const famRefs = useRef<(HTMLImageElement | null)[]>([]);
-  const rafRef = useRef(0);
+  const loop = useSceneLoop();
   const initRef = useRef(false);
-  const lastRef = useRef(0);
   const solo = useRef({
     prog: 0,
     dir: 1 as 1 | -1,
@@ -116,7 +119,6 @@ export function Crab() {
   useEffect(() => {
     const el = soloRef.current;
     if (!el) return;
-    const scene = el.parentElement;
     el.style.opacity = "1";
 
     // Tap/click to shoot. The crabs are `pointer-events-none` (the whole reef
@@ -142,10 +144,9 @@ export function Crab() {
     };
     document.addEventListener("pointerdown", onPointerDown, { passive: true });
 
-    const frame = (now: number) => {
+    const frame = ({ now, dtMs, width }: SceneFrame) => {
       if (!initRef.current) {
         initRef.current = true;
-        lastRef.current = now;
         solo.current.dir = randDir();
         solo.current.phase = Math.random() * TAU;
         fam.current.dir = randDir();
@@ -153,9 +154,8 @@ export function Crab() {
         fam.current.waiting = true;
         fam.current.until = now + FAM_START_DELAY;
       }
-      const dt = Math.min(now - lastRef.current, 50); // ms, clamped
-      lastRef.current = now;
-      const W = scene?.getBoundingClientRect().width || 1000;
+      const dt = dtMs; // ms, clamped by the scene loop
+      const W = width || 1000;
 
       // Solo: continuous loop, variable pace; new direction + pace each lap.
       // When shot it drops, then waits a gap and RE-ENTERS as a fresh crossing
@@ -222,14 +222,13 @@ export function Crab() {
         render(fe, i + 1, fx + m.dx * fd, Math.sin(now / 280 + m.phase) * 4, fd, visible, now);
       });
 
-      rafRef.current = requestAnimationFrame(frame);
     };
-    rafRef.current = requestAnimationFrame(frame);
+    const unsubscribe = loop.subscribe(frame);
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      unsubscribe();
       document.removeEventListener("pointerdown", onPointerDown);
     };
-  }, []);
+  }, [loop]);
 
   return (
     <>

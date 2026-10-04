@@ -39,7 +39,6 @@ interface Props {
    *  flasks stay one size but collide in desktop-style depth bands. */
   collisionLayer?: number;
   skillIcon?: string;
-  active?: boolean;
   noFlaskCollision?: boolean;
   scale?: number;
   /** Per-chain cap on simulated links — top `segmentCount - maxPhysicsSegments`
@@ -66,7 +65,6 @@ export default function FlaskChain({
   layer = 0,
   collisionLayer,
   skillIcon,
-  active = true,
   noFlaskCollision = false,
   scale = 1,
   isSkeleton = false,
@@ -79,7 +77,7 @@ export default function FlaskChain({
   const chainRefs = useRef<(HTMLDivElement | null)[]>([]);
   const flaskRef = useRef<HTMLDivElement | null>(null);
   const liquidRectRef = useRef<SVGRectElement | null>(null);
-  const iconRef = useRef<SVGGElement | null>(null);
+  const iconRef = useRef<HTMLDivElement | null>(null);
   const bodiesRef = useRef<{
     chain: ChainResult;
     flask: FlaskResult;
@@ -233,7 +231,27 @@ export default function FlaskChain({
     ) as SVGRectElement | null;
     iconRef.current = document.getElementById(
       `icon-${instanceId}`
-    ) as SVGGElement | null;
+    ) as HTMLDivElement | null;
+
+    // Write the spawn state NOW, not on the frame loop's first tick. The loop
+    // only starts once the rack scrolls into view; until then this flask and
+    // its swinging links had no transform at all (parked at 0,0). That first
+    // tick then moved ~190 compositor layers AND set every flask's liquid +
+    // icon transforms (each one a full flask-texture re-raster) in a single
+    // frame — the visible hitch on the first scroll into "Suspended in
+    // solution". Done here, that work lands during page load instead, and
+    // the first active tick is a no-op thanks to the deadband caches.
+    syncFlaskFrame({
+      bodies: bodiesRef.current,
+      chainEls: chainRefs.current,
+      flaskEl: flaskRef.current,
+      liquidRectEl: liquidRectRef.current,
+      iconEl: iconRef.current,
+      staticCount,
+      scale,
+      shape,
+      deadband: deadbandRef.current,
+    });
 
     return () => {
       if (bodiesRef.current) {
@@ -314,11 +332,16 @@ export default function FlaskChain({
     });
   }, [scale, staticCount, shape]);
 
-  // Subscribe to the shared frame loop only for physics layers while active
+  // Subscribe to the shared frame loop once, for physics layers. Whether the
+  // loop TICKS is the scene's business (useFrameLoop starts/stops it on
+  // visibility) — subscribers cost nothing while it's stopped. This used to
+  // take an `active` prop too, which meant every flask chain (~76 components,
+  // thousands of SVG nodes) re-rendered the instant the rack scrolled into
+  // view: a ~50ms script task in the exact frame the section appeared.
   useEffect(() => {
-    if (isStatic || !active || !loop) return;
+    if (isStatic || !loop) return;
     return loop.subscribe(instanceId, syncDom);
-  }, [loop, syncDom, isStatic, active, instanceId]);
+  }, [loop, syncDom, isStatic, instanceId]);
 
   const segmentHeights = Array.from({ length: segmentCount }, (_, i) =>
     getSegmentHeight(i, segmentCount)

@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform } from "motion/react";
 import { useRef, type CSSProperties } from "react";
 
+import { useSmilPause } from "@/lib/hooks/useSmilPause";
 import { cn } from "@/lib/utils";
 
 import { INTRO_BUBBLES_SVG } from "./introBubblesMarkup";
@@ -27,6 +28,8 @@ export function BubblesBackdrop({
   imgStyle?: CSSProperties;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  // 31 SMIL-animated circles: only tick while this backdrop is on screen.
+  useSmilPause(ref);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
   const y = useTransform(scrollYProgress, [0, 1], ["-22%", "22%"]);
   const op = intensity === "subtle" ? "opacity-70" : "opacity-100";

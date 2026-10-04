@@ -32,9 +32,12 @@ export default function ActivationOverlay({
           transition={{ duration: 0.25 }}
           aria-label="Activate the flask rack"
           // Full-rack overlay. Waves are bumped to z-50 (above overlay z-40) so
-          // their filled silhouette renders on top of the blur — wave bands look
-          // clean, blur only shows in the rack interior between them.
-          className="absolute inset-0 z-40 flex cursor-pointer items-center justify-center bg-black/55 backdrop-blur-[2px]"
+          // their filled silhouette renders on top of the tint. No backdrop
+          // blur here on purpose: a backdrop-filter is recomputed every frame
+          // the content beneath changes, and the rack beneath changes on every
+          // scroll frame (FlaskBackdrop parallax, waves) — so a 2px blur cost a
+          // full-rack re-blur per frame for every visitor, until first click.
+          className="absolute inset-0 z-40 flex cursor-pointer items-center justify-center bg-black/55"
         >
           <span className="rounded-full border border-white/30 bg-white/10 px-5 py-2 font-mono text-xs uppercase tracking-[0.2em] text-white/90 shadow-[0_0_24px_rgba(0,0,0,0.4)] backdrop-blur-sm">
             {label}
